@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>WolfSheep — Профиль</title>
+    <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+    <nav id="navbar">
+        <a class="nav-brand" href="/">🐺<span style="color:#ff3366">Wolf</span><span style="color:#33ff66">Sheep</span></a>
+        <a class="nav-link" href="/">🏠 Главная</a>
+        <a class="nav-link active" href="/profile.html">👤 Профиль</a>
+    </nav>
+
+    <div id="main-content">
+        <div class="profile-container">
+            <div class="profile-avatar">🐺</div>
+            <div class="profile-field">
+                <label>Имя игрока</label>
+                <input type="text" id="profileName" placeholder="Введите имя" />
+            </div>
+            <div class="profile-field">
+                <label>Любимый цвет</label>
+                <input type="text" id="profileColor" placeholder="Красный / Зелёный / Авто" />
+            </div>
+            <button class="profile-save" id="profileSaveBtn">💾 Сохранить</button>
+            <div class="profile-stats">
+                <div class="stat-card">
+                    <div class="stat-num" id="stat-rating">1000</div>
+                    <div class="stat-label">ELO</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-num" id="stat-games">0</div>
+                    <div class="stat-label">Игр</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-num" id="stat-wins">0</div>
+                    <div class="stat-label">Побед</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-num" id="stat-rate">—</div>
+                    <div class="stat-label">Винрейт</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/profile.js"></script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "Shutak",
+      "password": "$2b$10$jbPG3jfQDGOwLw.oJnlzd.M63yczKCdBZSgtz.QyNbho8NOu88Vpq",
+      "createdAt": "2026-06-22T23:11:37.085Z",
+      "stats": {
+        "games": 12,
+        "wins": 6,
+        "losses": 6
+      },
+      "nick": "Shutak0",
+      "rating": 956
+    },
+    {
+      "id": 2,
+      "username": "ZZZ",
+      "password": "$2b$10$AejyTOPue8Oj/EzgJlba.OazAI1z2.NFu2f/BJkwfcnDyllcgzh.O",
+      "createdAt": "2026-06-23T00:02:58.263Z",
+      "rating": 1044,
+      "stats": {
+        "games": 3,
+        "wins": 3,
+        "losses": 0
+      },
+      "nick": "ZZZ"
+    }
+  ],
+  "nextId": 3
+}

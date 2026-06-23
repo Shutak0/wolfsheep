@@ -1,0 +1,93 @@
+/* WolfSheep – общие стили */
+* { box-sizing: border-box; margin:0; padding:0; }
+body { background: #0a0a0f; font-family: 'Segoe UI', Tahoma, sans-serif; color:#e0e0f0; min-height:100vh; user-select:none; }
+a { color: #c084fc; text-decoration: none; }
+a:hover { text-shadow: 0 0 12px #8a2be2; }
+
+/* ---------- navbar ---------- */
+#navbar { display:flex; gap:0; background:#0d0d1a; border-bottom:1px solid #2a1a4a; padding:0 20px; align-items:stretch; box-shadow: 0 0 30px rgba(138,43,226,0.2); position:sticky; top:0; z-index:100; }
+.nav-brand { color:#00ffff; font-weight:700; font-size:22px; letter-spacing:3px; text-shadow:0 0 20px #00ffff; padding:14px 20px; display:flex; align-items:center; gap:8px; }
+.nav-link { color:#94a3b8; font-weight:600; font-size:15px; padding:14px 22px; display:flex; align-items:center; transition:all 0.2s; border-bottom:3px solid transparent; }
+.nav-link:hover, .nav-link.active { color:#c084fc; border-bottom-color:#8a2be2; background:rgba(138,43,226,0.08); text-shadow:0 0 10px #8a2be2; }
+.nav-right { margin-left:auto; display:flex; align-items:center; gap:8px; }
+
+/* ---------- main layout ---------- */
+#main-content { display:flex; flex-direction:column; align-items:center; padding:40px 20px; gap:20px; }
+
+/* ---------- homepage ---------- */
+.home-title { font-size:48px; font-weight:800; letter-spacing:4px; text-align:center; margin-bottom:8px; }
+.home-title .wolf { color:#ff3366; text-shadow:0 0 30px #ff3366, 0 0 60px #ff3366; }
+.home-title .sheep { color:#33ff66; text-shadow:0 0 30px #33ff66, 0 0 60px #33ff66; }
+.home-subtitle { color:#94a3b8; font-size:18px; letter-spacing:2px; margin-bottom:36px; text-align:center; }
+
+.mode-cards { display:flex; gap:24px; flex-wrap:wrap; justify-content:center; }
+.mode-card { background:#0d0d1a; border:2px solid #2a1a5a; border-radius:20px; padding:32px 28px; width:220px; cursor:pointer; transition:all 0.3s; text-align:center; display:flex; flex-direction:column; align-items:center; gap:12px; }
+.mode-card:hover { border-color:#8a2be2; box-shadow:0 0 40px rgba(138,43,226,0.4); transform:translateY(-4px); }
+.mode-card .tc-icon { font-size:42px; }
+.mode-card .tc-name { font-size:24px; font-weight:700; color:#c084fc; letter-spacing:2px; }
+.mode-card .tc-desc { color:#94a3b8; font-size:14px; line-height:1.6; }
+.mode-card .tc-btn { background:#2a1a5a; color:white; border:none; padding:10px 24px; border-radius:30px; font-size:16px; font-weight:600; cursor:pointer; transition:all 0.2s; margin-top:8px; }
+.mode-card .tc-btn:hover { background:#8a2be2; box-shadow:0 0 25px rgba(138,43,226,0.5); }
+
+/* ---------- game page ---------- */
+.game-layout { display:flex; gap:22px; align-items:flex-start; }
+.game-left { display:flex; flex-direction:column; align-items:center; gap:10px; }
+.game-title { color:#00ffff; font-weight:700; font-size:22px; letter-spacing:3px; text-shadow:0 0 15px #00ffff; }
+#board-wrapper { background:#0a0a12; padding:12px; border-radius:18px; box-shadow:inset 0 0 0 2px #1a0a3a, 0 0 30px rgba(138,43,226,0.4); }
+canvas { display:block; border-radius:10px; cursor:pointer; background:#0a0a0a; width:600px; height:600px; image-rendering:auto; }
+#turn-badge { color:#a855f7; font-weight:700; font-size:13px; letter-spacing:1px; background:rgba(20,10,40,0.7); padding:6px 18px; border-radius:40px; border:1px solid #4a2a8a; text-shadow:0 0 15px #8a2be2; }
+#status-msg { color:#94a3b8; font-size:13px; text-align:center; min-height:20px; }
+#status-msg.win { color:#00ffff; font-weight:700; font-size:16px; text-shadow:0 0 30px #00ffff; }
+.game-controls { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+.game-btn { background:transparent; border:1px solid #2a1a5a; color:#94a3b8; padding:5px 14px; border-radius:30px; font-size:13px; font-weight:600; cursor:pointer; transition:0.2s; font-family:inherit; }
+.game-btn:hover { background:rgba(168,85,247,0.15); color:#c084fc; border-color:#8a2be2; box-shadow:0 0 20px rgba(138,43,226,0.2); }
+.game-btn.danger { color:#ff6b8a; border-color:#4a1a2a; }
+.game-btn.danger:hover { background:rgba(255,50,80,0.15); border-color:#ff3366; }
+
+.game-right { display:flex; flex-direction:column; justify-content:space-between; min-height:600px; gap:16px; min-width:200px; }
+.player-block { display:flex; flex-direction:column; align-items:center; gap:8px; padding:16px 20px; border-radius:18px; background:rgba(20,10,40,0.5); border:2px solid #2a1a5a; transition:0.25s; }
+.player-block.active { border-color:#a855f7; box-shadow:0 0 25px rgba(168,85,247,0.3); }
+.player-block .dot { width:60px; height:60px; border-radius:50%; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#111; border:3px solid rgba(255,255,255,0.15); }
+.player-block .dot img { width:100%; height:100%; object-fit:cover; }
+.player-block .dot.p1 { border-color:#ff3366; box-shadow:0 0 25px rgba(255,51,102,0.4); }
+.player-block .dot.p2 { border-color:#33ff66; box-shadow:0 0 25px rgba(51,255,102,0.4); }
+.player-block .pname { color:#c084fc; font-weight:600; font-size:16px; }
+.player-block .pwalls { color:#94a3b8; font-size:14px; background:rgba(0,0,0,0.5); padding:4px 16px; border-radius:30px; }
+.player-block .pwalls span { color:#00ffff; font-weight:700; }
+.time-box { width:100%; text-align:center; padding:6px 10px; border-radius:12px; border:2px solid #2a1a5a; background:rgba(10,5,25,0.8); font-size:24px; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:2px; color:#c084fc; text-shadow:0 0 12px #8a2be2; transition:0.3s; }
+.time-box.warning { color:#ffaa00; border-color:#ffaa00; animation:pulse 0.6s infinite alternate; }
+.time-box.danger { color:#ff3366; border-color:#ff3366; animation:pulse 0.3s infinite alternate; }
+.time-label { color:#94a3b8; font-size:10px; text-transform:uppercase; letter-spacing:2px; }
+@keyframes pulse { from{opacity:1} to{opacity:0.4} }
+
+.tc-badge { color:#94a3b8; font-size:11px; background:rgba(20,10,40,0.5); padding:3px 10px; border-radius:20px; border:1px solid #2a1a5a; }
+#waiting-overlay { display:none; position:fixed; top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7); z-index:200; justify-content:center; align-items:center; flex-direction:column; gap:16px; }
+#waiting-overlay.show { display:flex; }
+.wait-text { color:#c084fc; font-size:20px; font-weight:600; text-shadow:0 0 20px #8a2be2; }
+.wait-room { color:#00ffff; font-size:18px; font-weight:700; }
+
+/* ---------- profile page ---------- */
+.profile-container { max-width:500px; width:100%; background:#0d0d1a; border:2px solid #2a1a5a; border-radius:20px; padding:36px 32px; box-shadow:0 0 40px rgba(138,43,226,0.2); }
+.profile-avatar { width:100px; height:100px; border-radius:50%; background:#1a1a30; border:3px solid #8a2be2; margin:0 auto 20px; display:flex; align-items:center; justify-content:center; font-size:48px; box-shadow:0 0 30px rgba(138,43,226,0.3); }
+.profile-field { margin-bottom:18px; }
+.profile-field label { display:block; color:#94a3b8; font-size:13px; margin-bottom:4px; letter-spacing:1px; text-transform:uppercase; }
+.profile-field input { width:100%; padding:10px 14px; border-radius:12px; background:#1a1a30; border:2px solid #2a1a5a; color:#e0e0f0; font-size:16px; font-family:inherit; outline:none; transition:0.2s; }
+.profile-field input:focus { border-color:#8a2be2; box-shadow:0 0 15px rgba(138,43,226,0.3); }
+.profile-save { background:#8a2be2; color:white; border:none; padding:10px 30px; border-radius:30px; font-size:16px; font-weight:600; cursor:pointer; transition:0.2s; font-family:inherit; width:100%; }
+.profile-save:hover { background:#a855f7; box-shadow:0 0 25px rgba(138,43,226,0.5); }
+.profile-stats { display:flex; gap:16px; margin-top:24px; }
+.stat-card { flex:1; background:rgba(20,10,40,0.5); border:1px solid #2a1a5a; border-radius:14px; padding:16px; text-align:center; }
+.stat-card .stat-num { font-size:28px; font-weight:700; color:#00ffff; text-shadow:0 0 15px #00ffff; }
+.stat-card .stat-label { font-size:12px; color:#94a3b8; margin-top:4px; text-transform:uppercase; letter-spacing:1px; }
+
+/* ---------- responsive ---------- */
+@media (max-width:900px) {
+    .game-layout { flex-direction:column; align-items:center; }
+    .game-right { flex-direction:row; min-height:auto; width:100%; gap:12px; }
+    .player-block { flex:1; padding:12px; }
+    canvas { width:100%; height:auto; max-width:400px; }
+    .time-box { font-size:18px; }
+}
+@media (max-width:460px) {
+    canvas { max-width:300px; }
+}
