@@ -1,6 +1,305 @@
 {
   "users": [
     {
+      "id": 30,
+      "username": "InfernoX",
+      "password": "$2b$10$e1ou97HqNZB6ojbgFnj1POMBVUt5jQmF0mcn2krmJRkBnktNCTQN2",
+      "createdAt": "2026-05-31T11:14:22.329Z",
+      "rating": 1100,
+      "stats": {
+        "games": 191,
+        "wins": 137,
+        "losses": 54
+      },
+      "nick": "InfernoX"
+    },
+    {
+      "id": 21,
+      "username": "QuickSilver",
+      "password": "$2b$10$MthA3RS06hwUnPs7p/NiP.pWlFpKx.Jq/21nyua/glzVK47I5mp.2",
+      "createdAt": "2026-06-11T10:44:58.251Z",
+      "rating": 1070,
+      "stats": {
+        "games": 185,
+        "wins": 122,
+        "losses": 63
+      },
+      "nick": "QuickSilver"
+    },
+    {
+      "id": 16,
+      "username": "GoldTiger",
+      "password": "$2b$10$YXBciz0A3WDefV2Mggo1HeO2QC.H2PEqj/.I/J6urGGpI5ie4h.Fm",
+      "createdAt": "2026-05-29T06:51:23.707Z",
+      "rating": 1030,
+      "stats": {
+        "games": 121,
+        "wins": 81,
+        "losses": 40
+      },
+      "nick": "GoldTiger"
+    },
+    {
+      "id": 15,
+      "username": "BlueWhale",
+      "password": "$2b$10$OP92nxUm.MEtdkWLYPDCau8omTLfqYyU8l7P4ixSqagMSl3BgQ1lG",
+      "createdAt": "2026-06-10T22:17:03.043Z",
+      "rating": 1029,
+      "stats": {
+        "games": 89,
+        "wins": 59,
+        "losses": 30
+      },
+      "nick": "BlueWhale"
+    },
+    {
+      "id": 28,
+      "username": "BoltStorm",
+      "password": "$2b$10$svJNxfAyAalEZiVO8pqlueHzEzl0fmdipEbV8KXRbDS3K.fGHtKtW",
+      "createdAt": "2026-06-03T03:00:36.655Z",
+      "rating": 1010,
+      "stats": {
+        "games": 175,
+        "wins": 127,
+        "losses": 48
+      },
+      "nick": "BoltStorm"
+    },
+    {
+      "id": 24,
+      "username": "EmberLord",
+      "password": "$2b$10$NqDB0Al8EXyefPHQzCuZVem3Ue0YiwCc0kB/c3D8cfkONHcwEE4Ta",
+      "createdAt": "2026-06-20T12:37:41.054Z",
+      "rating": 886,
+      "stats": {
+        "games": 60,
+        "wins": 28,
+        "losses": 32
+      },
+      "nick": "EmberLord"
+    },
+    {
+      "id": 8,
+      "username": "StormRider",
+      "password": "$2b$10$NLvhN8VomzebeX5y/KJrNupZD7yZlXzWTFxF5.6mYH/9rvTSFunM.",
+      "createdAt": "2026-06-11T09:19:50.878Z",
+      "rating": 859,
+      "stats": {
+        "games": 69,
+        "wins": 38,
+        "losses": 31
+      },
+      "nick": "StormRider"
+    },
+    {
+      "id": 26,
+      "username": "Sapphire",
+      "password": "$2b$10$mFD.CAI2VvvmQLzVh0Ki0e9glLVnsavVEhMlhZZXnMIoQHXWj3I6.",
+      "createdAt": "2026-05-29T07:58:15.750Z",
+      "rating": 848,
+      "stats": {
+        "games": 108,
+        "wins": 51,
+        "losses": 57
+      },
+      "nick": "Sapphire"
+    },
+    {
+      "id": 20,
+      "username": "ZenMaster",
+      "password": "$2b$10$e.Oy7YQYc/eglAGKCDqyEOlVCNYtzZXxXw2.Xme8/Wgw14caZeAlG",
+      "createdAt": "2026-06-09T02:53:16.538Z",
+      "rating": 834,
+      "stats": {
+        "games": 75,
+        "wins": 43,
+        "losses": 32
+      },
+      "nick": "ZenMaster"
+    },
+    {
+      "id": 10,
+      "username": "CyberPunk",
+      "password": "$2b$10$0f2M946Y26aFkjglix5KZOqZAPi624wtNY9xF8fVcXnjH9GNgv0F2",
+      "createdAt": "2026-06-13T01:15:37.562Z",
+      "rating": 799,
+      "stats": {
+        "games": 119,
+        "wins": 62,
+        "losses": 57
+      },
+      "nick": "CyberPunk"
+    },
+    {
+      "id": 5,
+      "username": "BlitzMaster",
+      "password": "$2b$10$HMdmNiMLVfvTT7xi5gE2OeOnMfqdeRO/k0oqrvAKtR1SuZXskOoZm",
+      "createdAt": "2026-06-27T15:04:18.802Z",
+      "rating": 779,
+      "stats": {
+        "games": 108,
+        "wins": 52,
+        "losses": 56
+      },
+      "nick": "BlitzMaster"
+    },
+    {
+      "id": 13,
+      "username": "SilverHawk",
+      "password": "$2b$10$UJ0GwttJCfRivuVWYKFWCOoweA8O7DHvPyCYXz.rcTOYx7HSaHjjy",
+      "createdAt": "2026-06-09T20:12:58.636Z",
+      "rating": 765,
+      "stats": {
+        "games": 13,
+        "wins": 6,
+        "losses": 7
+      },
+      "nick": "SilverHawk"
+    },
+    {
+      "id": 19,
+      "username": "VoidWalker",
+      "password": "$2b$10$cfUhMmLB2XCGaGcp2XjR3e1UX3fL5E.Y/z60pWkfTDRWxx4X3Nnoe",
+      "createdAt": "2026-06-18T07:09:58.847Z",
+      "rating": 734,
+      "stats": {
+        "games": 44,
+        "wins": 20,
+        "losses": 24
+      },
+      "nick": "VoidWalker"
+    },
+    {
+      "id": 22,
+      "username": "ThunderWolf",
+      "password": "$2b$10$yn10ghKLrJJEkk/tPGWN7u8I8.aVh1wJrY8xHaiTjHhr4FCNb7k4W",
+      "createdAt": "2026-06-07T00:55:47.765Z",
+      "rating": 697,
+      "stats": {
+        "games": 51,
+        "wins": 28,
+        "losses": 23
+      },
+      "nick": "ThunderWolf"
+    },
+    {
+      "id": 12,
+      "username": "IronEagle",
+      "password": "$2b$10$h4YzDJpvxGPFhJytpa6GFeo1g/68d8fer2CHsRpNshjVMrqkmXjx.",
+      "createdAt": "2026-06-20T19:12:30.509Z",
+      "rating": 646,
+      "stats": {
+        "games": 31,
+        "wins": 17,
+        "losses": 14
+      },
+      "nick": "IronEagle"
+    },
+    {
+      "id": 18,
+      "username": "PixelKing",
+      "password": "$2b$10$R9fHD93dowGccA7VELxO5OIzt3E4hRM7pBMZRT3suJYrmmhdm2e/2",
+      "createdAt": "2026-06-07T21:49:55.007Z",
+      "rating": 623,
+      "stats": {
+        "games": 59,
+        "wins": 34,
+        "losses": 25
+      },
+      "nick": "PixelKing"
+    },
+    {
+      "id": 17,
+      "username": "NeonGhost",
+      "password": "$2b$10$RILfw14QQoxcEY/RuiRVruEICiNKaq34MYZZPTQzLBMR3dgPPUAj6",
+      "createdAt": "2026-06-08T09:43:48.995Z",
+      "rating": 613,
+      "stats": {
+        "games": 48,
+        "wins": 24,
+        "losses": 24
+      },
+      "nick": "NeonGhost"
+    },
+    {
+      "id": 32,
+      "username": "TerraForce",
+      "password": "$2b$10$j4wD24gF9gSiUHdVqzZwgOA0xbvVnDFjo5KXV9OHT2/S05XIwlVDm",
+      "createdAt": "2026-06-14T13:46:16.372Z",
+      "rating": 610,
+      "stats": {
+        "games": 54,
+        "wins": 30,
+        "losses": 24
+      },
+      "nick": "TerraForce"
+    },
+    {
+      "id": 29,
+      "username": "LunarWolf",
+      "password": "$2b$10$5TN749k5gtiNRcDdF4S3mOAxVtPUB4TQjb5K5cBWykjhSNgzoTU8G",
+      "createdAt": "2026-06-03T20:13:54.626Z",
+      "rating": 601,
+      "stats": {
+        "games": 51,
+        "wins": 30,
+        "losses": 21
+      },
+      "nick": "LunarWolf"
+    },
+    {
+      "id": 9,
+      "username": "FrostByte",
+      "password": "$2b$10$Egl1EYljv/ODDhUo0I3iTuFlpEHzJv9cztdDXoabBXLGF2EyPu4ti",
+      "createdAt": "2026-06-17T14:33:29.029Z",
+      "rating": 588,
+      "stats": {
+        "games": 21,
+        "wins": 10,
+        "losses": 11
+      },
+      "nick": "FrostByte"
+    },
+    {
+      "id": 31,
+      "username": "AquaKnight",
+      "password": "$2b$10$dJwbtEjwL7wbT18wVz5D6OscdpkwM7CVfz.uZcoFaQz1vLLY3uhka",
+      "createdAt": "2026-06-15T04:24:48.295Z",
+      "rating": 576,
+      "stats": {
+        "games": 50,
+        "wins": 25,
+        "losses": 25
+      },
+      "nick": "AquaKnight"
+    },
+    {
+      "id": 4,
+      "username": "ShadowQueen",
+      "password": "$2b$10$6BldD5Xrb6cfkz5MiYtPNOY4ZG4WVsdo1M4oxULBqbkhfOTyE2ZYi",
+      "createdAt": "2026-06-12T20:20:07.614Z",
+      "rating": 567,
+      "stats": {
+        "games": 6,
+        "wins": 2,
+        "losses": 4
+      },
+      "nick": "ShadowQueen"
+    },
+    {
+      "id": 2,
+      "username": "ZZZ",
+      "password": "$2b$10$AejyTOPue8Oj/EzgJlba.OazAI1z2.NFu2f/BJkwfcnDyllcgzh.O",
+      "createdAt": "2026-06-23T00:02:58.263Z",
+      "rating": 550,
+      "stats": {
+        "games": 3,
+        "wins": 3,
+        "losses": 0
+      },
+      "nick": "ZZZ"
+    },
+    {
       "id": 1,
       "username": "Shutak",
       "password": "$2b$10$jbPG3jfQDGOwLw.oJnlzd.M63yczKCdBZSgtz.QyNbho8NOu88Vpq",
@@ -11,21 +310,112 @@
         "losses": 9
       },
       "nick": "Shutak0",
-      "rating": 956
+      "rating": 511
     },
     {
-      "id": 2,
-      "username": "ZZZ",
-      "password": "$2b$10$AejyTOPue8Oj/EzgJlba.OazAI1z2.NFu2f/BJkwfcnDyllcgzh.O",
-      "createdAt": "2026-06-23T00:02:58.263Z",
-      "rating": 1044,
+      "id": 14,
+      "username": "RedDragon",
+      "password": "$2b$10$2HaF9V5l/94roX/tjMacje7BvBKVZud3u0TcYblOgUnbiagssD9x.",
+      "createdAt": "2026-06-19T08:24:06.610Z",
+      "rating": 482,
       "stats": {
-        "games": 3,
-        "wins": 3,
-        "losses": 0
+        "games": 16,
+        "wins": 4,
+        "losses": 12
       },
-      "nick": "ZZZ"
+      "nick": "RedDragon"
+    },
+    {
+      "id": 11,
+      "username": "WildFox",
+      "password": "$2b$10$qpsS908MioeSOHWKdyPJs.xJ7ue9Aa1Ehx/l8ioXnjXDF//q9dmU6",
+      "createdAt": "2026-06-19T04:57:06.801Z",
+      "rating": 461,
+      "stats": {
+        "games": 4,
+        "wins": 1,
+        "losses": 3
+      },
+      "nick": "WildFox"
+    },
+    {
+      "id": 23,
+      "username": "CrystalMage",
+      "password": "$2b$10$a1tM8Kg0Ek5ML1V1x6AZ3uwaP4oiXfvzkBFJXNychrVxJ7/VkyYg.",
+      "createdAt": "2026-05-30T17:03:23.481Z",
+      "rating": 460,
+      "stats": {
+        "games": 2,
+        "wins": 0,
+        "losses": 2
+      },
+      "nick": "CrystalMage"
+    },
+    {
+      "id": 25,
+      "username": "RavenQueen",
+      "password": "$2b$10$uEDJGjIpLfcTKIdeL9LhEOwTNDi3cJcT6ki9a9D5gyfG6qiuN5MYa",
+      "createdAt": "2026-06-13T04:57:51.680Z",
+      "rating": 459,
+      "stats": {
+        "games": 13,
+        "wins": 5,
+        "losses": 8
+      },
+      "nick": "RavenQueen"
+    },
+    {
+      "id": 6,
+      "username": "IcePhoenix",
+      "password": "$2b$10$J8NTOdv1OVCY60NNuAJXIOLLNA1mQoW.wDgp7udVRWDbULcSZobl.",
+      "createdAt": "2026-06-24T11:54:43.161Z",
+      "rating": 458,
+      "stats": {
+        "games": 19,
+        "wins": 7,
+        "losses": 12
+      },
+      "nick": "IcePhoenix"
+    },
+    {
+      "id": 27,
+      "username": "CosmicWind",
+      "password": "$2b$10$CoMixbikJDPWubSz/FIXFeCI7TIi81gKLZYS/xdDLXR0jzbfZPC/m",
+      "createdAt": "2026-06-27T22:40:54.778Z",
+      "rating": 429,
+      "stats": {
+        "games": 10,
+        "wins": 3,
+        "losses": 7
+      },
+      "nick": "CosmicWind"
+    },
+    {
+      "id": 7,
+      "username": "DarkKnight",
+      "password": "$2b$10$VFoOIXk8Txse5fGxgl/QN.MW0/UiCrPbJ73JMgWGfZ8sNuwPnAY8C",
+      "createdAt": "2026-05-30T18:44:30.936Z",
+      "rating": 424,
+      "stats": {
+        "games": 4,
+        "wins": 1,
+        "losses": 3
+      },
+      "nick": "DarkKnight"
+    },
+    {
+      "id": 3,
+      "username": "NightWolf",
+      "password": "$2b$10$Iy9.i3/YWb6QMRvBdrBXduwEw/r9ud9zs566Mw9UyqHjUZ6OhflYq",
+      "createdAt": "2026-06-15T20:06:35.648Z",
+      "rating": 400,
+      "stats": {
+        "games": 7,
+        "wins": 2,
+        "losses": 5
+      },
+      "nick": "NightWolf"
     }
   ],
-  "nextId": 3
+  "nextId": 33
 }

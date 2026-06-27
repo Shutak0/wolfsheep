@@ -1,13 +1,23 @@
-// bot-engine.js — Negamax depth 3 с ходами фишкой + стенами
+// bot-engine.js — Negamax с улучшенной логикой для овцы
+//  1. Position history для детекта циклов (овца не топчется на месте)
+//  2. Сильный forward-bias в evaluate и генерации ходов
+//  3. Anti-stall: если нет прогресса 3+ хода — глубина ↑, случайность ↓
+//  4. Умные стены для овцы: блокируем волка на пути к овце
+//  5. Сортировка ходов для лучшего alpha-beta отсечения
 const Engine = require('./engine/quoridor-engine');
 
 const BOARD_SIZE = 9;
 const GOAL_ROW_SHEEP = 8;
-const MAX_WALL_CANDIDATES = 8;
+const MAX_WALL_CANDIDATES = 10;
 const BASE_DEPTH = 3;
-const CRITICAL_DEPTH = 4;
-const RANDOM_MOVE_CHANCE = 0.20;
+const CRITICAL_DEPTH = 5;
+const RANDOM_MOVE_CHANCE = 0.01;
 const MAX_WALL_DIST = 6;
+
+// ---- Глобальное состояние овцы (одна игра за раз в Node.js) ----
+let sheepHistory = [];
+let sheepStallCount = 0;
+let sheepBestRow = -1;
 
 let distCache = null;
 
@@ -69,23 +79,33 @@ function evaluate(state, playerIndex) {
     const wolf = state.players[0], sheep = state.players[1];
     const w2s = bfsDist(state, wolf.row, wolf.col, sheep.row, sheep.col);
     const s2g = shortestToRow(state, sheep.row, sheep.col, GOAL_ROW_SHEEP);
+
     if (w2s === 0) return playerIndex === 0 ? 1e8 : -1e8;
     if (s2g === 0) return playerIndex === 1 ? 1e8 : -1e8;
     if (w2s === Infinity) return playerIndex === 1 ? 1e8 : -1e8;
     if (s2g === Infinity) return playerIndex === 0 ? 1e8 : -1e8;
-    const wallDiff = state.players[playerIndex].walls - state.players[1 - playerIndex].walls;
+
+    const wallDiff = sheep.walls - wolf.walls;
     const myP = state.players[playerIndex];
     const centerBonus = (8 - (Math.abs(myP.row - 4) + Math.abs(myP.col - 4))) * 0.3;
-    if (playerIndex === 0) return -w2s * 130 + s2g * 65 + wallDiff * 30 - sheep.row * 18 + centerBonus;
-    else return -s2g * 110 + w2s * 55 + wallDiff * 25 + sheep.row * 18 + centerBonus;
+
+    if (playerIndex === 0) {
+        // Волк: хочет быть ближе к овце (w2s ↓), овца дальше от цели (s2g ↑)
+        return -w2s * 130 + s2g * 65 + wallDiff * 30 - sheep.row * 18 + centerBonus;
+    } else {
+        // ОВЦА (переработанные веса):
+        //   Главная цель: кратчайший путь к ряду 8 (s2g*150),
+        //   держаться подальше от волка (w2s*65),
+        //   сильный forward-bias: ряд овцы * 50 (было 18!)
+        return -s2g * 150 + w2s * 65 + sheep.row * 50 + wallDiff * 20 + centerBonus;
+    }
 }
 
-// Генерация ходов: фишки + отфильтрованные стены (без isWallValid)
+// Генерация ходов: фишки + отфильтрованные стены с улучшенной сортировкой
 function generateMoves(state, playerIndex) {
     const moves = [];
     const vm = Engine.computeValidMoves(clone(state));
     for (const m of vm) {
-        if (playerIndex === 1 && m.row < state.players[1].row) continue; // овца не назад
         if (playerIndex === 0) {
             const curD = Math.abs(state.players[0].row - state.players[1].row) + Math.abs(state.players[0].col - state.players[1].col);
             const newD = Math.abs(m.row - state.players[1].row) + Math.abs(m.col - state.players[1].col);
@@ -94,33 +114,60 @@ function generateMoves(state, playerIndex) {
         moves.push({ type: 'move', row: m.row, col: m.col });
     }
 
+    // ---- ОВЦА: жёсткая фильтрация ходов ----
+    if (playerIndex === 1 && moves.length > 0) {
+        const curRow = state.players[1].row;
+        const forward = moves.filter(mv => mv.row > curRow);   // строго вперёд
+        const side = moves.filter(mv => mv.row === curRow);     // вбок
+
+        if (forward.length > 0) {
+            // Есть ходы вперёд — только они (боковые = пустая трата хода!)
+            moves.length = 0;
+            moves.push(...forward);
+        } else if (side.length > 0) {
+            // Вперёд нельзя, но можно вбок — разрешаем (обход препятствий)
+            moves.length = 0;
+            moves.push(...side);
+        }
+        // Только назад — разрешаем всё (тупик)
+    }
+
+    // ---- СОРТИРОВКА ХОДОВ-ФИШЕК для лучшего alpha-beta ----
+    if (playerIndex === 1) {
+        moves.sort((a, b) => b.row - a.row); // овца: самые «вперёд» первыми
+    } else {
+        const s = state.players[1];
+        moves.sort((a, b) => {
+            const da = Math.abs(a.row - s.row) + Math.abs(a.col - s.col);
+            const db = Math.abs(b.row - s.row) + Math.abs(b.col - s.col);
+            return da - db; // волк: ближе к овце первыми
+        });
+    }
+
+    // ---- СТЕНЫ ----
     if (state.players[playerIndex].walls > 0) {
         const walls = [];
+        const opp = 1 - playerIndex;
         for (let r = 0; r < 8; r++) {
             for (let c = 0; c < 8; c++) {
-                const d0 = Math.abs(r - state.players[0].row) + Math.abs(c - state.players[0].col);
-                const d1 = Math.abs(r - state.players[1].row) + Math.abs(c - state.players[1].col);
-                if (d0 > MAX_WALL_DIST && d1 > MAX_WALL_DIST) continue;
+                const distToOpp = Math.abs(r - state.players[opp].row) + Math.abs(c - state.players[opp].col);
+                if (distToOpp > MAX_WALL_DIST) continue;
 
                 if (!state.vEdge[r][c] && !state.vEdge[r][c + 1] && !Engine.hasIllegalIntersection(r, c, 'horizontal', state)) {
-                    walls.push({ type: 'wall', row: r, col: c, orient: 'horizontal' });
+                    walls.push({ type: 'wall', row: r, col: c, orient: 'horizontal', distToOpp });
                 }
                 if (!state.hEdge[r][c] && !state.hEdge[r + 1][c] && !Engine.hasIllegalIntersection(r, c, 'vertical', state)) {
-                    walls.push({ type: 'wall', row: r, col: c, orient: 'vertical' });
+                    walls.push({ type: 'wall', row: r, col: c, orient: 'vertical', distToOpp });
                 }
             }
         }
-        // Сортируем стены по манхэттену до противника (ближе = лучше)
-        walls.sort((a, b) => {
-            const opp = state.players[1 - playerIndex];
-            const da = Math.abs(a.row - opp.row) + Math.abs(a.col - opp.col);
-            const db = Math.abs(b.row - opp.row) + Math.abs(b.col - opp.col);
-            return da - db;
-        });
-        for (const w of walls.slice(0, MAX_WALL_CANDIDATES)) moves.push(w);
+        walls.sort((a, b) => a.distToOpp - b.distToOpp);
+        for (const w of walls.slice(0, MAX_WALL_CANDIDATES)) {
+            moves.push({ type: 'wall', row: w.row, col: w.col, orient: w.orient });
+        }
     }
 
-    // Сортировка: выигрышные ходы первыми
+    // Выигрышные ходы — в начало
     moves.sort((a, b) => {
         if (a.type === 'move' && playerIndex === 0 && a.row === state.players[1].row && a.col === state.players[1].col) return -1;
         if (b.type === 'move' && playerIndex === 0 && b.row === state.players[1].row && b.col === state.players[1].col) return 1;
@@ -228,26 +275,72 @@ function makeMove(state, botIndex) {
     const vm = Engine.computeValidMoves(clone(state));
     if (vm.length === 0) return { type: 'move', row: state.players[botIndex].row, col: state.players[botIndex].col };
 
+    // ---- Немедленная победа ----
     if (botIndex === 0) {
         const win = vm.find(m => m.row === state.players[1].row && m.col === state.players[1].col);
-        if (win) return { type: 'move', row: win.row, col: win.col };
+        if (win) { resetSheepState(); return { type: 'move', row: win.row, col: win.col }; }
     } else {
         const win = vm.find(m => m.row === GOAL_ROW_SHEEP);
-        if (win) return { type: 'move', row: win.row, col: win.col };
+        if (win) { resetSheepState(); return { type: 'move', row: win.row, col: win.col }; }
     }
 
+    // ---- ОПРЕДЕЛЕНИЕ ГЛУБИНЫ ----
     const wolf = state.players[0], sheep = state.players[1];
     const manh = Math.abs(wolf.row - sheep.row) + Math.abs(wolf.col - sheep.col);
     const s2g = GOAL_ROW_SHEEP - sheep.row;
     let depth = BASE_DEPTH;
-    if (botIndex === 0 && manh <= 3) depth = CRITICAL_DEPTH;
-    else if (botIndex === 1 && s2g <= 3) depth = CRITICAL_DEPTH;
+
+    if (botIndex === 0) {
+        if (manh <= 3) depth = CRITICAL_DEPTH;
+    } else {
+        // ОВЦА: умная глубина
+        if (s2g <= 2) depth = CRITICAL_DEPTH;           // почти у цели
+        else if (sheepStallCount >= 2) depth = CRITICAL_DEPTH; // стагнация
+        else if (manh <= 3) depth = CRITICAL_DEPTH;      // волк близко
+    }
+
+    // ---- ANTI-STALL: отслеживание прогресса овцы ----
+    if (botIndex === 1) {
+        // Сброс при новой игре (овца на старте или аномальный скачок)
+        if (sheepBestRow > sheep.row + 2 || (sheep.row <= 1 && sheepStallCount > 10)) {
+            resetSheepState();
+        }
+        sheepHistory.push({ row: sheep.row, col: sheep.col });
+        if (sheepHistory.length > 6) sheepHistory.shift();
+
+        if (sheep.row > sheepBestRow) {
+            sheepBestRow = sheep.row;
+            sheepStallCount = 0;
+        } else {
+            sheepStallCount++;
+        }
+    }
 
     distCache = new Map();
     const bestMove = searchBestMove(state, botIndex, depth);
 
+    // ---- ВЫБОР ФИНАЛЬНОГО ХОДА ----
     let chosen = bestMove;
-    if (Math.random() < RANDOM_MOVE_CHANCE && bestMove) {
+
+    // ---- ДЕТЕКТОР ЦИКЛОВ ДЛЯ ОВЦЫ ----
+    if (botIndex === 1 && chosen && chosen.type === 'move') {
+        const isCycle = sheepHistory.some(h => h.row === chosen.row && h.col === chosen.col);
+        if (isCycle && sheepStallCount >= 2) {
+            // Ищем альтернативный НЕ-циклический ход
+            const allMoves = generateMoves(state, botIndex).filter(m => m.type === 'move');
+            const nonCycle = allMoves.filter(m =>
+                !sheepHistory.some(h => h.row === m.row && h.col === m.col)
+            );
+            if (nonCycle.length > 0) {
+                nonCycle.sort((a, b) => b.row - a.row); // самые «вперёд»
+                chosen = nonCycle[0];
+            }
+        }
+    }
+
+    // Случайный ход — ТОЛЬКО если нет стагнации
+    const effectiveChance = (botIndex === 1 && sheepStallCount >= 2) ? 0 : RANDOM_MOVE_CHANCE;
+    if (Math.random() < effectiveChance && bestMove) {
         const allPieceMoves = generateMoves(state, botIndex).filter(m => m.type === 'move');
         if (allPieceMoves.length > 0) chosen = allPieceMoves[Math.floor(Math.random() * allPieceMoves.length)];
     }
@@ -257,7 +350,21 @@ function makeMove(state, botIndex) {
         if (chosen.type === 'wall') clean.orient = chosen.orient;
         return clean;
     }
+
+    // Fallback: для овцы — предпочитаем ходы вперёд
+    if (botIndex === 1 && vm.length > 0) {
+        const fwd = vm.filter(m => m.row >= sheep.row).sort((a, b) => b.row - a.row);
+        const fallback = fwd.length > 0 ? fwd[0] : vm[0];
+        return { type: 'move', row: fallback.row, col: fallback.col };
+    }
+
     return vm.length > 0 ? { type: 'move', row: vm[0].row, col: vm[0].col } : null;
+}
+
+function resetSheepState() {
+    sheepHistory = [];
+    sheepStallCount = 0;
+    sheepBestRow = -1;
 }
 
 module.exports = { makeMove };

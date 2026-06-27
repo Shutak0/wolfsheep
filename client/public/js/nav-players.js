@@ -9,7 +9,7 @@
     }
 
     function update() {
-        el.textContent = '🟢 ' + randomPlayers();
+        el.textContent =  randomPlayers() + ' online';
     }
 
     update();

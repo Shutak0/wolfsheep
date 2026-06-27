@@ -160,7 +160,13 @@ class RoomManager {
 
             // Время тикает для текущего игрока (включая бота)
             const timedOut = Engine.tickTime(room.state, 1000);
-            if (timedOut) { room.status = 'finished'; room.winner = room.state.winner; self.stopTimer(roomId); return; }
+            if (timedOut) {
+                room.status = 'finished';
+                room.winner = room.state.winner;
+                self.stopTimer(roomId);
+                if (self.onTick) self.onTick(roomId, room); // отправить game_state + game_over клиентам
+                return;
+            }
 
             if (self.onTick) self.onTick(roomId, room);
         }, 1000);

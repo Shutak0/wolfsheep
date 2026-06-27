@@ -18,11 +18,11 @@ function handleGameEnd(roomId) {
     if (elo) auth.updateElo(elo.winnerId, elo.loserId);
 }
 
-// Человеческая задержка хода бота: первые ходы быстро, потом вариативно
+// Человеческая задержка хода бота (2-3× быстрее, миттельшпиль — шире рандом)
 function getHumanDelay(moveCount) {
-    if (moveCount <= 3) return 800 + Math.floor(Math.random() * 1200);       // 0.8-2.0s
-    if (moveCount <= 8) return 1500 + Math.floor(Math.random() * 3500);      // 1.5-5.0s
-    return 1000 + Math.floor(Math.random() * 5000);                           // 1.0-6.0s
+    if (moveCount <= 3) return 200 + Math.floor(Math.random() * 400);        // 0.2-0.6s  (~3× быстрее)
+    if (moveCount <= 8) return 250 + Math.floor(Math.random() * 4000);       // 0.25-4.25s (миттельшпиль: широчайший рандом)
+    return 300 + Math.floor(Math.random() * 2000);                            // 0.3-2.3s  (~2× быстрее)
 }
 
 roomManager = new RoomManager((roomId, room) => {

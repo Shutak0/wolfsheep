@@ -19,7 +19,7 @@
     const GAP = 6;
     const CORNER_RADIUS = 7;
     const OFFSET = (CANVAS_SIZE - (SIZE * CELL_SIZE + (SIZE - 1) * GAP)) / 2;
-    const WALL_THICK = 11;
+    const WALL_THICK = 10;               // −10% ширины (было 11)
     const HIT_THRESHOLD = 14;
     const PIECE_RADIUS = 26;
 
@@ -180,29 +180,49 @@
             }
         }
 
-        // ---- стены ----
+        // ---- стены (группировка половинок → целые блоки, −20% длины) ----
+        const WS = 0.10; // 10% each end = 20% total
         ctx.shadowBlur = 14;
+        // Горизонтальные (vEdge)
         for (let r = 0; r < 8; r++) {
             for (let c = 0; c < 9; c++) {
-                if (state.vEdge[r][c]) {
-                    const owner = state.vOwner[r][c];
-                    const color = (owner === 0) ? '#ff3366' : '#33ff66';
-                    const x1 = cellX(c);
-                    const x2 = cellX(c + 1);
-                    const y = cellY(r + 1);
-                    drawWallBar(ctx, x1, y, x2, y, color);
+                if (!state.vEdge[r][c]) continue;
+                const owner = state.vOwner[r][c];
+                const color = (owner === 0) ? '#ff3366' : '#33ff66';
+                const y = cellY(r + 1);
+                if (c < 8 && state.vEdge[r][c + 1] && state.vOwner[r][c + 1] === owner) {
+                    // Полная стена из двух половинок — укорачиваем целое, затем бьём
+                    const fx1 = cellX(c), fx2 = cellX(c + 2);
+                    const pad = (fx2 - fx1) * WS;
+                    const mid = cellX(c + 1);
+                    drawWallBar(ctx, fx1 + pad, y, mid, y, color);
+                    drawWallBar(ctx, mid, y, fx2 - pad, y, color);
+                    c++;
+                } else {
+                    const x1 = cellX(c), x2 = cellX(c + 1);
+                    const pad = (x2 - x1) * WS;
+                    drawWallBar(ctx, x1 + pad, y, x2 - pad, y, color);
                 }
             }
         }
-        for (let r = 0; r < 9; r++) {
-            for (let c = 0; c < 8; c++) {
-                if (state.hEdge[r][c]) {
-                    const owner = state.hOwner[r][c];
-                    const color = (owner === 0) ? '#ff3366' : '#33ff66';
-                    const y1 = cellY(r);
-                    const y2 = cellY(r + 1);
-                    const x = cellX(c + 1);
-                    drawWallBar(ctx, x, y1, x, y2, color);
+        // Вертикальные (hEdge)
+        for (let c = 0; c < 8; c++) {
+            for (let r = 0; r < 9; r++) {
+                if (!state.hEdge[r][c]) continue;
+                const owner = state.hOwner[r][c];
+                const color = (owner === 0) ? '#ff3366' : '#33ff66';
+                const x = cellX(c + 1);
+                if (r < 8 && state.hEdge[r + 1][c] && state.hOwner[r + 1][c] === owner) {
+                    const fy1 = cellY(r), fy2 = cellY(r + 2);
+                    const pad = (fy2 - fy1) * WS;
+                    const mid = cellY(r + 1);
+                    drawWallBar(ctx, x, fy1 + pad, x, mid, color);
+                    drawWallBar(ctx, x, mid, x, fy2 - pad, color);
+                    r++;
+                } else {
+                    const y1 = cellY(r), y2 = cellY(r + 1);
+                    const pad = (y2 - y1) * WS;
+                    drawWallBar(ctx, x, y1 + pad, x, y2 - pad, color);
                 }
             }
         }
@@ -522,4 +542,4 @@
         COLORS, COLOR_NAMES,
         SIZE, CANVAS_SIZE, CELL_SIZE, GAP, CORNER_RADIUS, OFFSET, WALL_THICK, HIT_THRESHOLD, PIECE_RADIUS,
     };
-}));
+}))
