@@ -3,41 +3,103 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>WolfSheep — Quoridor Online</title>
+    <title>WolfSheep — Strategy Game</title>
     <link rel="stylesheet" href="css/style.css"/>
 </head>
 <body>
     <nav id="navbar">
-        <a class="nav-brand" href="/">🐺<span style="color:#ff3366">Wolf</span><span style="color:#33ff66">Sheep</span></a>
-        <a class="nav-link active" href="/">🏠 Главная</a>
-        <a class="nav-link" href="/profile.html">👤 Профиль</a>
+        <div class="nav-left">
+            <a class="nav-brand" href="/">🐺<span style="color:#ff3366">Wolf</span><span style="color:#33ff66">Sheep</span></a>
+            <a class="nav-link active" href="/" data-i18n="nav_home">🏠 Home</a>
+            <a class="nav-link" href="/profile.html" data-i18n="nav_profile">👤 Profile</a>
+        </div>
+        <div class="nav-center">
+            <span class="nav-players" id="nav-players">🟢 0</span>
+        </div>
+        <div class="nav-right" id="nav-right"></div>
     </nav>
 
     <div id="main-content">
-        <h1 class="home-title"><span class="wolf">WOLF</span><span class="sheep">SHEEP</span></h1>
-        <p class="home-subtitle">Quoridor · стратегическая настольная игра</p>
-        <div class="mode-cards">
-            <div class="mode-card" data-tc="1+5">
-                <div class="tc-icon">⚡</div>
-                <div class="tc-name">1 + 5</div>
-                <div class="tc-desc">1 минута<br>+ 5 секунд за ход</div>
-                <button class="tc-btn">Играть</button>
+        <div class="hero-section">
+            <h1 class="home-title"><span class="wolf">WOLF</span><span class="sheep">SHEEP</span></h1>
+            <p class="hero-tagline" data-i18n="hero_tagline">Strategic duel on a grid board</p>
+            <p class="hero-desc" data-i18n="hero_desc">Chase your opponent or break through to the goal – the choice is yours</p>
+        </div>
+
+        <div class="play-zone">
+            <div class="play-zone-left">
+                <h2 class="section-title" data-i18n="section_choose">🎮 Choose a mode</h2>
+                <div class="mode-cards">
+                    <div class="mode-card" data-tc="1+5">
+                        <div class="tc-icon">⚡</div>
+                        <div class="tc-name">1 + 5</div>
+                        <div class="tc-desc">1 minute<br>+ 5 seconds per move</div>
+                        <button class="tc-btn" data-i18n="mode_btn">Play</button>
+                    </div>
+                    <div class="mode-card" data-tc="3+2">
+                        <div class="tc-icon">🔥</div>
+                        <div class="tc-name">3 + 2</div>
+                        <div class="tc-desc">3 minutes<br>+ 2 seconds per move</div>
+                        <button class="tc-btn" data-i18n="mode_btn">Play</button>
+                    </div>
+                    <div class="mode-card" data-tc="5">
+                        <div class="tc-icon">💎</div>
+                        <div class="tc-name">5 min</div>
+                        <div class="tc-desc">5 minutes<br>no increment</div>
+                        <button class="tc-btn" data-i18n="mode_btn">Play</button>
+                    </div>
+                    <div class="mode-card mode-card-bot" data-tc="1+5" data-bot="true">
+                        <div class="tc-icon">🤖</div>
+                        <div class="tc-name">vs Bot</div>
+                        <div class="tc-desc">Train against AI<br>1 min + 5 sec</div>
+                        <button class="tc-btn bot-btn">⚔️ Fight Bot</button>
+                    </div>
+                </div>
             </div>
-            <div class="mode-card" data-tc="3+2">
-                <div class="tc-icon">🔥</div>
-                <div class="tc-name">3 + 2</div>
-                <div class="tc-desc">3 минуты<br>+ 2 секунды за ход</div>
-                <button class="tc-btn">Играть</button>
+            <div class="play-zone-right">
+                <h2 class="section-title" data-i18n="section_leaderboard">🏆 Leaderboard</h2>
+                <div class="leaderboard-table" id="leaderboard">
+                    <div class="lb-row lb-header">
+                        <span class="lb-rank" data-i18n="leaderboard_rank">#</span>
+                        <span class="lb-name" data-i18n="leaderboard_player">Player</span>
+                        <span class="lb-rating" data-i18n="leaderboard_elo">ELO</span>
+                        <span class="lb-games" data-i18n="leaderboard_games">Games</span>
+                    </div>
+                    <div class="lb-row"><span class="lb-loading" data-i18n="leaderboard_loading">Loading...</span></div>
+                </div>
             </div>
-            <div class="mode-card" data-tc="5">
-                <div class="tc-icon">💎</div>
-                <div class="tc-name">5 мин</div>
-                <div class="tc-desc">5 минут<br>без добавления</div>
-                <button class="tc-btn">Играть</button>
+        </div>
+
+        <div class="howto-section">
+            <h2 class="section-title" data-i18n="section_howto">🎯 How to play</h2>
+            <div class="howto-steps">
+                <div class="step"><div class="step-num">1</div><div class="step-text" data-i18n="step1">Register or play as guest</div></div>
+                <div class="step-arrow">→</div>
+                <div class="step"><div class="step-num">2</div><div class="step-text" data-i18n="step2">Choose time control</div></div>
+                <div class="step-arrow">→</div>
+                <div class="step"><div class="step-num">3</div><div class="step-text" data-i18n="step3">Wait for an opponent or invite a friend</div></div>
+                <div class="step-arrow">→</div>
+                <div class="step"><div class="step-num">4</div><div class="step-text" data-i18n="step4">Move your piece or place walls</div></div>
+                <div class="step-arrow">→</div>
+                <div class="step"><div class="step-num">5</div><div class="step-text" data-i18n="step5">Catch the opponent or reach the goal!</div></div>
+            </div>
+        </div>
+
+        <div class="about-section">
+            <h2 class="section-title" data-i18n="section_about">📜 About the game</h2>
+            <div class="about-grid">
+                <div class="about-card"><div class="about-icon">🐺</div><div class="about-card-title" data-i18n="about_title1">Two players – two goals</div><p class="about-text" data-i18n="about_text1"></p></div>
+                <div class="about-card"><div class="about-icon">🧱</div><div class="about-card-title" data-i18n="about_title2">Walls – your defense</div><p class="about-text" data-i18n="about_text2"></p></div>
+                <div class="about-card"><div class="about-icon">🦶</div><div class="about-card-title" data-i18n="about_title3">Moves and jumps</div><p class="about-text" data-i18n="about_text3"></p></div>
+                <div class="about-card"><div class="about-icon">⏱</div><div class="about-card-title" data-i18n="about_title4">Time control</div><p class="about-text" data-i18n="about_text4"></p></div>
+                <div class="about-card"><div class="about-icon">🏆</div><div class="about-card-title" data-i18n="about_title5">Rating and statistics</div><p class="about-text" data-i18n="about_text5"></p></div>
+                <div class="about-card"><div class="about-icon">🎨</div><div class="about-card-title" data-i18n="about_title6">Unique style</div><p class="about-text" data-i18n="about_text6"></p></div>
             </div>
         </div>
     </div>
 
+    <script src="js/i18n.js"></script>
+    <script src="js/nav-players.js"></script>
     <script src="js/home.js"></script>
 </body>
 </html>

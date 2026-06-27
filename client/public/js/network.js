@@ -34,6 +34,7 @@ class QuoridorNetwork {
     createRoom(playerName, color, timeControl, userId) { this.socket.emit('create_room', { playerName, color, timeControl, userId }); }
     joinRoom(roomId, playerName, color, userId) { this.socket.emit('join_room', { roomId, playerName, color, userId }); }
     autoMatch(playerName, color, timeControl, userId) { this.socket.emit('auto_match', { playerName, color, timeControl, userId }); }
+    botMatch(playerName, color, timeControl, userId) { this.socket.emit('bot_match', { playerName, color, timeControl, userId }); }
     sendMove(move) { this.socket.emit('make_move', move); }
     surrender() { this.socket.emit('surrender'); }
     disconnect() { if (this.socket) this.socket.disconnect(); }

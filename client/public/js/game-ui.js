@@ -24,7 +24,7 @@
     const PIECE_RADIUS = 26;
 
     const COLORS = ['#ff3366', '#33ff66'];
-    const COLOR_NAMES = ['Красный', 'Зелёный'];
+    const COLOR_NAMES = ['Red', 'Green'];
 
     function cellX(col) { return OFFSET + col * (CELL_SIZE + GAP); }
     function cellY(row) { return OFFSET + row * (CELL_SIZE + GAP); }
@@ -213,15 +213,39 @@
             const { row, col, orient } = hoverWall;
             const p = state.turn;
             if (state.players[p].walls > 0) {
+                // Полная валидация через QuoridorEngine
                 let valid = true;
+                
+                // Проверка: клетки не заняты
                 if (orient === 'horizontal') {
                     if (state.vEdge[row][col] || state.vEdge[row][col + 1]) valid = false;
                 } else {
                     if (state.hEdge[row][col] || state.hEdge[row + 1][col]) valid = false;
                 }
-                const color = valid ? 'rgba(0, 255, 200, 0.85)' : 'rgba(255, 50, 80, 0.85)';
-                ctx.shadowColor = valid ? '#00ffc8' : '#ff3366';
-                ctx.shadowBlur = 30;
+
+                // Проверка пересечения стен (через window, т.к. мы внутри UMD-модуля)
+                var Eng = (typeof window !== 'undefined' && window.QuoridorEngine) ? window.QuoridorEngine : null;
+                if (valid && Eng && Eng.hasIllegalIntersection) {
+                    if (Eng.hasIllegalIntersection(row, col, orient, state)) valid = false;
+                }
+
+                // Проверка блокировки путей
+                if (valid && Eng && Eng.isWallValid) {
+                    const testV = state.vEdge.map(rr => [...rr]);
+                    const testH = state.hEdge.map(rr => [...rr]);
+                    if (orient === 'horizontal') {
+                        testV[row][col] = true;
+                        testV[row][col + 1] = true;
+                    } else {
+                        testH[row][col] = true;
+                        testH[row + 1][col] = true;
+                    }
+                    if (!Eng.isWallValid(testV, testH, state)) valid = false;
+                }
+
+                ctx.shadowBlur = valid ? 30 : 0;
+                const color = valid ? 'rgba(0, 255, 200, 0.85)' : 'rgba(30, 30, 40, 0.9)';
+                ctx.shadowColor = valid ? '#00ffc8' : 'rgba(0,0,0,0)';
                 if (orient === 'horizontal') {
                     const x1 = cellX(col);
                     const x2 = cellX(col + 2);
@@ -261,7 +285,8 @@
         }
 
         // ---- фишки + индикатор стен (с обратным поворотом для игрока 1) ----
-        for (let i = 0; i < 2; i++) {
+        // Рисуем овцу первой (индекс 1), затем волка (индекс 0) — чтобы волк был сверху при захвате
+        for (const i of [1, 0]) {
             const p = state.players[i];
             const cx = cellCenterX(p.col);
             const cy = cellCenterY(p.row);
@@ -419,7 +444,7 @@
             ctx.shadowColor = '#00ffff';
             ctx.shadowBlur = 50;
             const name = COLOR_NAMES[state.winner];
-            ctx.fillText(`🏆 ${name} победил!`, W / 2, H / 2 - 6);
+            ctx.fillText(`🏆 ${name} won!`, W / 2, H / 2 - 6);
             ctx.shadowBlur = 0;
             ctx.restore();
         }

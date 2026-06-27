@@ -3,49 +3,79 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>WolfSheep — Профиль</title>
+    <title>WolfSheep — Profile</title>
     <link rel="stylesheet" href="css/style.css"/>
+    <style>
+        .auth-tabs { display:flex; gap:0; margin-bottom:20px; }
+        .auth-tab { flex:1; text-align:center; padding:10px; background:transparent; border:2px solid #2a1a5a; color:#94a3b8; font-weight:600; cursor:pointer; font-family:inherit; font-size:14px; transition:0.2s; }
+        .auth-tab:first-child { border-radius:12px 0 0 12px; }
+        .auth-tab:last-child { border-radius:0 12px 12px 0; }
+        .auth-tab.active { background:#2a1a5a; color:#c084fc; border-color:#8a2be2; }
+        .auth-form { display:none; flex-direction:column; gap:12px; }
+        .auth-form.active { display:flex; }
+        .auth-form input { width:100%; padding:10px 14px; border-radius:12px; background:#1a1a30; border:2px solid #2a1a5a; color:#e0e0f0; font-size:16px; font-family:inherit; outline:none; transition:0.2s; }
+        .auth-form input:focus { border-color:#8a2be2; }
+        .auth-btn { background:#8a2be2; color:white; border:none; padding:12px; border-radius:30px; font-size:16px; font-weight:600; cursor:pointer; transition:0.2s; font-family:inherit; width:100%; }
+        .auth-btn:hover { background:#a855f7; }
+        .auth-error { color:#ff3366; font-size:13px; text-align:center; min-height:20px; }
+    </style>
 </head>
 <body>
     <nav id="navbar">
-        <a class="nav-brand" href="/">🐺<span style="color:#ff3366">Wolf</span><span style="color:#33ff66">Sheep</span></a>
-        <a class="nav-link" href="/">🏠 Главная</a>
-        <a class="nav-link active" href="/profile.html">👤 Профиль</a>
+        <div class="nav-left">
+            <a class="nav-brand" href="/">🐺<span style="color:#ff3366">Wolf</span><span style="color:#33ff66">Sheep</span></a>
+            <a class="nav-link" href="/" data-i18n="nav_home">🏠 Home</a>
+            <a class="nav-link active" href="/profile.html" data-i18n="nav_profile">👤 Profile</a>
+        </div>
+        <div class="nav-center">
+            <span class="nav-players" id="nav-players">🟢 0</span>
+        </div>
+        <div class="nav-right" id="nav-right"></div>
     </nav>
 
     <div id="main-content">
-        <div class="profile-container">
+        <div class="profile-container" id="profile-view" style="display:none">
             <div class="profile-avatar">🐺</div>
             <div class="profile-field">
-                <label>Имя игрока</label>
-                <input type="text" id="profileName" placeholder="Введите имя" />
+                <label data-i18n="profile_name_label">Nickname</label>
+                <input type="text" id="profileName" placeholder="Enter nickname" />
             </div>
             <div class="profile-field">
-                <label>Любимый цвет</label>
-                <input type="text" id="profileColor" placeholder="Красный / Зелёный / Авто" />
+                <label data-i18n="profile_color_label">Favorite color</label>
+                <input type="text" id="profileColor" placeholder="Red / Green / Auto" />
             </div>
-            <button class="profile-save" id="profileSaveBtn">💾 Сохранить</button>
+            <div id="profile-msg" style="min-height:22px; font-size:13px; text-align:center; margin-bottom:12px; color:#94a3b8;"></div>
+            <button class="profile-save" id="profileSaveBtn" data-i18n="profile_save">💾 Save</button>
             <div class="profile-stats">
-                <div class="stat-card">
-                    <div class="stat-num" id="stat-rating">1000</div>
-                    <div class="stat-label">ELO</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-num" id="stat-games">0</div>
-                    <div class="stat-label">Игр</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-num" id="stat-wins">0</div>
-                    <div class="stat-label">Побед</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-num" id="stat-rate">—</div>
-                    <div class="stat-label">Винрейт</div>
-                </div>
+                <div class="stat-card"><div class="stat-num" id="stat-rating">1000</div><div class="stat-label" data-i18n="stat_elo">ELO</div></div>
+                <div class="stat-card"><div class="stat-num" id="stat-games">0</div><div class="stat-label" data-i18n="stat_games">Games</div></div>
+                <div class="stat-card"><div class="stat-num" id="stat-wins">0</div><div class="stat-label" data-i18n="stat_wins">Wins</div></div>
+                <div class="stat-card"><div class="stat-num" id="stat-rate">—</div><div class="stat-label" data-i18n="stat_winrate">Winrate</div></div>
             </div>
+        </div>
+
+        <div class="profile-container" id="auth-view" style="display:none">
+            <div class="profile-avatar">🐺</div>
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login" data-i18n="auth_tab_login">Login</button>
+                <button class="auth-tab" data-tab="register" data-i18n="auth_tab_register">Register</button>
+            </div>
+            <div class="auth-form active" id="form-login">
+                <input type="text" id="loginUser" data-i18n-placeholder="login_user_placeholder" placeholder="Username" />
+                <input type="password" id="loginPass" data-i18n-placeholder="login_pass_placeholder" placeholder="Password" />
+                <button class="auth-btn" id="loginBtn" data-i18n="login_btn">Login</button>
+            </div>
+            <div class="auth-form" id="form-register">
+                <input type="text" id="regUser" data-i18n-placeholder="reg_user_placeholder" placeholder="Username (min 2 chars)" />
+                <input type="password" id="regPass" data-i18n-placeholder="reg_pass_placeholder" placeholder="Password (min 4 chars)" />
+                <button class="auth-btn" id="regBtn" data-i18n="reg_btn">Register</button>
+            </div>
+            <div class="auth-error" id="auth-error"></div>
         </div>
     </div>
 
+    <script src="js/i18n.js"></script>
+    <script src="js/nav-players.js"></script>
     <script src="js/profile.js"></script>
 </body>
 </html>

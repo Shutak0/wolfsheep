@@ -106,4 +106,15 @@ function updateElo(winnerId, loserId) {
     saveDb(db);
 }
 
-module.exports = { register, login, getProfile, setNick, updateStats, updateElo };
+// Получить топ-N игроков по ELO
+function getLeaderboard(limit) {
+    const db = loadDb();
+    const sorted = db.users
+        .filter(u => u.stats && u.stats.games > 0)
+        .sort((a, b) => (b.rating || 1000) - (a.rating || 1000))
+        .slice(0, limit || 20)
+        .map(u => ({ nick: u.nick || u.username, rating: u.rating || 1000, games: u.stats.games }));
+    return sorted;
+}
+
+module.exports = { register, login, getProfile, setNick, updateStats, updateElo, getLeaderboard };

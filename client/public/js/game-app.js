@@ -1,5 +1,6 @@
 // game-app.js — игровая страница WolfSheep
 (function () {
+    var __ = window.__ || function(k){return k;};
     const canvas = document.getElementById('board');
     const turnBadge = document.getElementById('turn-badge');
     const statusMsg = document.getElementById('status-msg');
@@ -10,6 +11,7 @@
     const tcBadge = document.getElementById('tc-badge');
 
     const myBlock = document.getElementById('my-block'), opBlock = document.getElementById('op-block');
+    const playAgainBtn = document.getElementById('playAgainBtn');
     const myDot = document.getElementById('my-dot'), opDot = document.getElementById('op-dot');
     const myName = document.getElementById('my-name'), opName = document.getElementById('op-name');
     const myWalls = document.getElementById('my-walls'), opWalls = document.getElementById('op-walls');
@@ -22,9 +24,17 @@
     let myIndex = null, gameStarted = false;
     const DOT_CLASSES = ['p1', 'p2'];
 
-    // Параметры из sessionStorage (с главной)
+    function preloadDefaultImages() {
+        var wolfImg = new Image();
+        wolfImg.onload = function () { playerImages[0] = wolfImg; render(); };
+        wolfImg.src = '/imgs/Wolf.png';
+        var sheepImg = new Image();
+        sheepImg.onload = function () { playerImages[1] = sheepImg; render(); };
+        sheepImg.src = '/imgs/Sheep.png';
+    }
+
     const tcName = sessionStorage.getItem('ws_tc') || '1+5';
-    const playerName = sessionStorage.getItem('ws_name') || 'Игрок';
+    const playerName = sessionStorage.getItem('ws_name') || 'Player';
     const playerColor = sessionStorage.getItem('ws_color') || 'auto';
     const userId = sessionStorage.getItem('ws_userId') || null;
     const tc = Engine.TIME_PRESETS[tcName] || Engine.TIME_PRESETS['1+5'];
@@ -52,14 +62,17 @@
         opBlock.classList.toggle('active', state.turn === (1-myIndex) && !state.gameOver && gameStarted);
         if (state.gameOver) {
             var rt = getReason(state.winReason);
-            turnBadge.textContent = state.winner !== null ? `🏆 ${UI.COLOR_NAMES[state.winner]} победил! ${rt}` : 'Игра окончена';
+            turnBadge.textContent = '🏆 ' + UI.COLOR_NAMES[state.winner] + ' ' + __('game_win_target');
+            if (rt) turnBadge.textContent = '🏆 ' + UI.COLOR_NAMES[state.winner] + ' ' + __('game_win_target') + ' ' + rt;
+            surrenderBtn.style.display = 'none';
+            playAgainBtn.style.display = 'inline-block';
         } else {
-            turnBadge.textContent = `⬤ ${UI.COLOR_NAMES[state.turn]}`;
-            turnBadge.style.color = UI.COLORS[state.turn]; turnBadge.style.textShadow = `0 0 20px ${UI.COLORS[state.turn]}`;
+            turnBadge.textContent = '⬤ ' + UI.COLOR_NAMES[state.turn] + '\'s turn';
+            turnBadge.style.color = UI.COLORS[state.turn]; turnBadge.style.textShadow = '0 0 20px ' + UI.COLORS[state.turn];
         }
         updateTimeDisplay();
     }
-    function getReason(r) { switch(r){ case 'timeout':return '(по времени)'; case 'surrender':return '(сдача)'; case 'disconnect':return '(отключение)'; default:return ''; } }
+    function getReason(r) { switch(r){ case 'timeout':return __('game_win_timeout'); case 'surrender':return __('game_win_surrender'); case 'disconnect':return __('game_win_disconnect'); default:return ''; } }
 
     function render() { UI.render(canvas, state, playerImages, hoverWall, { playerIndex: myIndex != null ? myIndex : 0 }); updateUI(); }
     function setStatus(msg, isWin) { statusMsg.textContent = msg; statusMsg.className = isWin ? 'win' : ''; }
@@ -85,31 +98,49 @@
     network.onRoomCreated = (d) => {
         waitingOverlay.classList.add('show');
         waitRoomId.textContent = 'ID: ' + d.roomId;
-        setStatus('Комната создана! Ждём соперника...', false);
+        setStatus(__('game_room_created'), false);
     };
-    network.onRoomJoined = (d) => setStatus('Присоединились!', false);
+    network.onRoomJoined = (d) => setStatus(__('game_joined'), false);
     network.onPlayerAssigned = (d) => {
         myIndex = d.playerIndex;
         var mc = d.color === 'red' ? 0 : 1, oc = 1 - mc;
         myName.textContent = UI.COLOR_NAMES[mc]; opName.textContent = UI.COLOR_NAMES[oc];
         myDot.className = 'dot ' + DOT_CLASSES[mc]; opDot.className = 'dot ' + DOT_CLASSES[oc];
+        var myAnimal = d.color === 'red' ? 'Wolf' : 'Sheep', opAnimal = d.color === 'red' ? 'Sheep' : 'Wolf';
+        myDot.innerHTML = '<img src="/imgs/' + myAnimal + '.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+        opDot.innerHTML = '<img src="/imgs/' + opAnimal + '.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
         if (d.timeControl) { tcBadge.textContent = d.timeControl; }
     };
-    network.onGameStarted = () => { gameStarted = true; waitingOverlay.classList.remove('show'); setStatus('Игра началась!', false); hoverWall = null; render(); };
+    network.onGameStarted = () => { gameStarted = true; waitingOverlay.classList.remove('show'); setStatus(__('game_started'), false); hoverWall = null; render(); };
     network.onGameState = (newState) => { state = newState; render(); };
-    network.onGameOver = (data) => { state.gameOver = true; state.winner = data.winner; state.winReason = data.winReason || 'target'; render(); setStatus(`🏆 ${data.winnerName} победил! ${getReason(state.winReason)}`, true); };
-    network.onError = (msg) => setStatus('Ошибка: ' + msg, false);
-    network.onOpponentDisconnected = () => { setStatus('Соперник отключился. Вы победили!', true); state.gameOver = true; render(); };
+    network.onGameOver = (data) => { state.gameOver = true; state.winner = data.winner; state.winReason = data.winReason || 'target'; render(); setStatus('🏆 ' + data.winnerName + ' ' + __('game_win_target') + ' ' + getReason(state.winReason), true); };
+    network.onError = (msg) => setStatus(__('game_error') + msg, false);
+    network.onOpponentDisconnected = () => { setStatus(__('game_opponent_left'), true); state.gameOver = true; render(); };
 
-    surrenderBtn.addEventListener('click', () => { if (gameStarted && !state.gameOver && confirm('Сдаться?')) network.surrender(); });
+    surrenderBtn.addEventListener('click', () => { if (gameStarted && !state.gameOver) network.surrender(); });
+    surrenderBtn.textContent = __('game_surrender');
+    resetBtn.textContent = __('game_leave');
     resetBtn.addEventListener('click', () => { window.location.href = '/'; });
-    window.addEventListener('beforeunload', () => { if (gameStarted && !state.gameOver) network.disconnect(); });
+    playAgainBtn.textContent = '🔄 ' + __('play_again');
+    playAgainBtn.addEventListener('click', () => { window.location.reload(); });
+    document.querySelector('.wait-text').textContent = __('game_searching');
 
+    window.addEventListener('beforeunload', () => { if (gameStarted && !state.gameOver) network.disconnect(); });
     canvas.addEventListener('click', handleCanvasClick);
     canvas.addEventListener('mousemove', handleMouseMove);
     canvas.addEventListener('mouseleave', () => { hoverWall = null; render(); });
 
     network.connect();
-    network.autoMatch(playerName, playerColor, tcName, userId ? parseInt(userId) : null);
+    var isBot = sessionStorage.getItem('ws_bot') === '1';
+    if (isBot) {
+        network.botMatch(playerName, playerColor, tcName, userId ? parseInt(userId) : null);
+    } else {
+        network.autoMatch(playerName, playerColor, tcName, userId ? parseInt(userId) : null);
+    }
+    preloadDefaultImages();
+    document.querySelector('.time-label') && (document.querySelectorAll('.time-label')[0].textContent = __('game_opponent'));
+    document.querySelectorAll('.time-label')[1] && (document.querySelectorAll('.time-label')[1].textContent = __('game_you'));
+    setStatus(__('game_status'), false);
+    turnBadge.textContent = __('game_turn');
     render();
 })();

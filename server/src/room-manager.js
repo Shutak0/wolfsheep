@@ -1,5 +1,6 @@
 // room-manager.js
 const Engine = require('./engine/quoridor-engine');
+const BotEngine = require('./bot-engine');
 
 class RoomManager {
     constructor(onTick) {
@@ -22,6 +23,8 @@ class RoomManager {
             colorPreference: [colorPreference || 'auto', null],
             socketToPlayer: new Map(),
             timeControlName: timeControlName || '1+5',
+            eloApplied: false,
+            isGuestRoom: !userId, // комната создана гостем
         };
         room.socketToPlayer.set(hostSocketId, 0);
         this.rooms.set(roomId, room);
@@ -32,6 +35,11 @@ class RoomManager {
         const room = this.rooms.get(roomId);
         if (!room) return { success: false, error: 'Комната не найдена' };
         if (room.players[1] !== null) return { success: false, error: 'Комната уже заполнена' };
+        // Гости не могут заходить в комнаты авторизованных и наоборот
+        const isGuest = !userId;
+        if (room.isGuestRoom !== isGuest) {
+            return { success: false, error: 'Нельзя смешивать гостевые и авторизованные комнаты.' };
+        }
         room.players[1] = socketId;
         room.playerNames[1] = playerName;
         room.userIds[1] = userId || null;
@@ -67,10 +75,14 @@ class RoomManager {
 
     autoMatch(socketId, playerName, colorPreference, timeControlName, userId) {
         const targetTC = timeControlName || '1+5';
+        const isGuest = !userId;
         for (let [roomId, room] of this.rooms) {
             if (room.status === 'waiting' && room.players[1] === null && room.timeControlName === targetTC) {
-                const result = this.joinRoom(roomId, socketId, playerName, colorPreference, userId);
-                if (result.success) return { roomId, isNew: false };
+                // Гости матчатся только с комнатами гостей
+                if (room.isGuestRoom === isGuest) {
+                    const result = this.joinRoom(roomId, socketId, playerName, colorPreference, userId);
+                    if (result.success) return { roomId, isNew: false };
+                }
             }
         }
         const roomId = this.createRoom(socketId, playerName, colorPreference, targetTC, userId);
@@ -120,16 +132,122 @@ class RoomManager {
         return { success: true, newState: room.state };
     }
 
+    // Проверка: можно ли применить ELO. Возвращает { winnerId, loserId } или null.
+    tryApplyElo(roomId) {
+        const room = this.rooms.get(roomId);
+        if (!room) return null;
+        // Только если оба авторизованы и ELO ещё не применялось
+        if (room.eloApplied) return null;
+        if (!room.userIds[0] || !room.userIds[1]) return null;
+        if (room.winner === null || room.winner === undefined) return null;
+        room.eloApplied = true;
+        return {
+            winnerId: room.userIds[room.winner],
+            loserId: room.userIds[1 - room.winner],
+        };
+    }
+
     startTimer(roomId) {
         this.stopTimer(roomId);
+        const self = this;
         const interval = setInterval(() => {
-            const room = this.rooms.get(roomId);
-            if (!room || room.status !== 'playing') { this.stopTimer(roomId); return; }
+            const room = self.rooms.get(roomId);
+            if (!room || room.status !== 'playing') { self.stopTimer(roomId); return; }
+
+            // Время тикает для текущего игрока (включая бота)
             const timedOut = Engine.tickTime(room.state, 1000);
-            if (timedOut) { room.status = 'finished'; room.winner = room.state.winner; this.stopTimer(roomId); }
-            if (this.onTick) this.onTick(roomId, room);
+            if (timedOut) { room.status = 'finished'; room.winner = room.state.winner; self.stopTimer(roomId); return; }
+
+            if (self.onTick) self.onTick(roomId, room);
         }, 1000);
         this.timers.set(roomId, interval);
+    }
+
+    // ---------- бот ----------
+    createBotRoom(socketId, playerName, colorPreference, timeControlName, userId) {
+        const roomId = this.generateRoomId();
+        const tc = Engine.TIME_PRESETS[timeControlName] || Engine.TIME_PRESETS['1+5'];
+        const state = Engine.initState(tc);
+        const room = {
+            players: [socketId, 'bot'],
+            playerNames: [playerName, '🤖 Bot'],
+            userIds: [userId || null, null],
+            state: state,
+            status: 'waiting', // сразу начнём
+            winner: null,
+            colorPreference: [colorPreference || 'auto', 'auto'],
+            socketToPlayer: new Map(),
+            timeControlName: timeControlName || '1+5',
+            eloApplied: false,
+            isGuestRoom: false,
+            isBotRoom: true,
+        };
+        room.socketToPlayer.set(socketId, 0);
+        // Рандомный выбор стороны бота (50/50)
+        // Если выпало — бот волк (индекс 0), игрок овца (индекс 1)
+        if (Math.random() < 0.5) {
+            room.players = ['bot', socketId];
+            room.playerNames = ['🤖 Bot', playerName];
+            room.userIds = [null, userId || null];
+            room.socketToPlayer.clear();
+            room.socketToPlayer.set(socketId, 1);
+        }
+        room.status = 'playing';
+        this.rooms.set(roomId, room);
+        // Запускаем таймер для бот-комнаты (тики нужны для времени игрока)
+        this.startTimer(roomId);
+        return roomId;
+    }
+
+    // Бот делает ход
+    applyBotMove(roomId) {
+        const room = this.rooms.get(roomId);
+        if (!room || room.status !== 'playing' || !room.isBotRoom) return null;
+        const botIndex = room.players[0] === 'bot' ? 0 : 1;
+        if (room.state.turn !== botIndex) return null; // не ход бота
+        const move = BotEngine.makeMove(room.state, botIndex);
+        if (!move) return null;
+
+        const stateCopy = Engine.deepClone(room.state);
+        let result;
+        if (move.type === 'move') result = Engine.tryMove(stateCopy, move.row, move.col);
+        else if (move.type === 'wall') { result = Engine.tryPlaceWall(stateCopy, move.row, move.col, move.orient); if (result.success) Engine.endTurn(stateCopy); }
+        if (!result.success) return null;
+        room.state = stateCopy;
+        if (room.state.gameOver) { room.status = 'finished'; room.winner = room.state.winner; this.stopTimer(roomId); }
+        return { newState: room.state, move: move, success: true };
+    }
+
+    // Конвертировать ожидающую комнату в бот-комнату (fallback)
+    convertToBotRoom(roomId) {
+        const room = this.rooms.get(roomId);
+        if (!room || room.status !== 'waiting') return false;
+        const playerName = room.playerNames[0] || 'Player';
+        const userId = room.userIds[0];
+        const tcName = room.timeControlName;
+        const tc = Engine.TIME_PRESETS[tcName] || Engine.TIME_PRESETS['1+5'];
+        const state = Engine.initState(tc);
+
+        // Случайная сторона для бота
+        const botIsWolf = Math.random() < 0.5;
+        if (botIsWolf) {
+            room.players = ['bot', room.players[0]];
+            room.playerNames = ['🤖 Bot', playerName];
+            room.userIds = [null, userId || null];
+        } else {
+            room.players = [room.players[0], 'bot'];
+            room.playerNames = [playerName, '🤖 Bot'];
+            room.userIds = [userId || null, null];
+        }
+        room.socketToPlayer.clear();
+        const humanIdx = botIsWolf ? 1 : 0;
+        room.socketToPlayer.set(room.players[humanIdx], humanIdx);
+        room.state = state;
+        room.status = 'playing';
+        room.isBotRoom = true;
+        room._botMoveCount = 0; // счётчик ходов бота для "человеческого" поведения
+        this.startTimer(roomId);
+        return { humanIndex: humanIdx, botIsWolf };
     }
 
     stopTimer(roomId) { const i = this.timers.get(roomId); if (i) { clearInterval(i); this.timers.delete(roomId); } }

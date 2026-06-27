@@ -3,42 +3,51 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>WolfSheep — Игра</title>
+    <title>WolfSheep — Game</title>
     <link rel="stylesheet" href="css/style.css"/>
 </head>
 <body>
     <nav id="navbar">
-        <a class="nav-brand" href="/">🐺<span style="color:#ff3366">Wolf</span><span style="color:#33ff66">Sheep</span></a>
-        <a class="nav-link" href="/">🏠 Главная</a>
-        <a class="nav-link" href="/profile.html">👤 Профиль</a>
+        <div class="nav-left">
+            <a class="nav-brand" href="/">🐺<span style="color:#ff3366">Wolf</span><span style="color:#33ff66">Sheep</span></a>
+            <a class="nav-link" href="/" data-i18n="nav_home">🏠 Home</a>
+            <a class="nav-link" href="/profile.html" data-i18n="nav_profile">👤 Profile</a>
+        </div>
+        <div class="nav-center">
+            <span class="nav-players" id="nav-players">🟢 0</span>
+        </div>
+        <div class="nav-right" id="nav-right"></div>
     </nav>
 
     <div id="main-content">
         <div class="game-layout">
             <div class="game-left">
-                <div class="game-title">⚡ WolfSheep</div>
-                <div id="board-wrapper"><canvas id="board" width="600" height="600"></canvas></div>
-                <div id="turn-badge">⬤ Ход Красного</div>
-                <div id="status-msg">Клик по клетке — ход, по линии — стена.</div>
-                <div class="game-controls">
-                    <button id="surrenderBtn" class="game-btn danger">🏳 Сдаться</button>
-                    <button id="resetBtn" class="game-btn danger">↺ Выйти</button>
+                <div id="board-wrapper">
+                    <canvas id="board" width="600" height="600"></canvas>
+                    <div class="board-watermark">WolfSheep.fun</div>
                 </div>
+                <div id="turn-badge">⬤ Red's turn</div>
+                <div id="status-msg">Click cell to move, click line for wall.</div>
             </div>
             <div class="game-right">
                 <div class="player-block" id="op-block">
-                    <div class="dot p2" id="op-dot"></div>
-                    <span class="pname" id="op-name">Зелёный</span>
+                    <div class="dot p2" id="op-dot"><img src="/imgs/Sheep.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%"></div>
+                    <span class="pname" id="op-name">Green</span>
                     <span class="pwalls">🧱 <span id="op-walls">10</span></span>
                     <div class="tc-badge" id="tc-badge">1+5</div>
-                    <div class="time-label">Соперник</div>
+                    <div class="time-label">Opponent</div>
                     <div class="time-box" id="op-time"><span id="op-time-text">1:00</span></div>
                 </div>
+                <div class="game-controls">
+                    <button id="surrenderBtn" class="game-btn danger">🏳 Surrender</button>
+                    <button id="resetBtn" class="game-btn danger">↺ Leave</button>
+                    <button id="playAgainBtn" class="game-btn play-again" style="display:none">🔄 Play Again</button>
+                </div>
                 <div class="player-block" id="my-block">
-                    <div class="dot p1" id="my-dot"></div>
-                    <span class="pname" id="my-name">Красный</span>
+                    <div class="dot p1" id="my-dot"><img src="/imgs/Wolf.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%"></div>
+                    <span class="pname" id="my-name">Red</span>
                     <span class="pwalls">🧱 <span id="my-walls">10</span></span>
-                    <div class="time-label">Вы</div>
+                    <div class="time-label">You</div>
                     <div class="time-box" id="my-time"><span id="my-time-text">1:00</span></div>
                 </div>
             </div>
@@ -46,14 +55,17 @@
     </div>
 
     <div id="waiting-overlay" class="show">
-        <div class="wait-text">🔍 Поиск соперника...</div>
+        <div class="wait-spinner"></div>
+        <div class="wait-text">🔍 Searching for opponent...</div>
         <div class="wait-room" id="wait-room-id"></div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/quoridor-engine.js"></script>
     <script src="js/game-ui.js"></script>
     <script src="js/network.js"></script>
+    <script src="js/nav-players.js"></script>
     <script src="js/game-app.js"></script>
 </body>
 </html>
