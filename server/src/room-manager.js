@@ -1,6 +1,7 @@
 // room-manager.js
 const Engine = require('./engine/quoridor-engine');
 const BotEngine = require('./bot-engine');
+const auth = require('./auth');
 
 class RoomManager {
     constructor(onTick) {
@@ -132,19 +133,22 @@ class RoomManager {
         return { success: true, newState: room.state };
     }
 
-    // Проверка: можно ли применить ELO. Возвращает { winnerId, loserId } или null.
-    tryApplyElo(roomId) {
+    // Применить статистику и ELO (один раз). Возвращает { winnerId, loserId } или null
+    tryApplyStatsAndElo(roomId) {
         const room = this.rooms.get(roomId);
-        if (!room) return null;
-        // Только если оба авторизованы и ELO ещё не применялось
-        if (room.eloApplied) return null;
-        if (!room.userIds[0] || !room.userIds[1]) return null;
+        if (!room || room.statsApplied) return null;
         if (room.winner === null || room.winner === undefined) return null;
-        room.eloApplied = true;
-        return {
-            winnerId: room.userIds[room.winner],
-            loserId: room.userIds[1 - room.winner],
-        };
+        room.statsApplied = true;
+        // Статистика
+        for (let i = 0; i < 2; i++) {
+            if (room.userIds[i]) auth.updateStats(room.userIds[i], i === room.winner);
+        }
+        // ELO — только если оба авторизованы (включая случай бота с дублированным userId)
+        if (room.userIds[0] && room.userIds[1] && !room.eloApplied) {
+            room.eloApplied = true;
+            return { winnerId: room.userIds[room.winner], loserId: room.userIds[1 - room.winner] };
+        }
+        return null;
     }
 
     startTimer(roomId) {
@@ -183,12 +187,12 @@ class RoomManager {
             isBotRoom: true,
         };
         room.socketToPlayer.set(socketId, 0);
+        // Даём боту userId игрока для ELO
+        room.userIds = [userId || null, userId || null];
         // Рандомный выбор стороны бота (50/50)
-        // Если выпало — бот волк (индекс 0), игрок овца (индекс 1)
         if (Math.random() < 0.5) {
             room.players = ['bot', socketId];
             room.playerNames = ['🤖 Bot', playerName];
-            room.userIds = [null, userId || null];
             room.socketToPlayer.clear();
             room.socketToPlayer.set(socketId, 1);
         }
@@ -228,16 +232,16 @@ class RoomManager {
         const tc = Engine.TIME_PRESETS[tcName] || Engine.TIME_PRESETS['1+5'];
         const state = Engine.initState(tc);
 
-        // Случайная сторона для бота
+        // Случайная сторона для бота + даём боту userId игрока для ELO
         const botIsWolf = Math.random() < 0.5;
         if (botIsWolf) {
             room.players = ['bot', room.players[0]];
             room.playerNames = ['🤖 Bot', playerName];
-            room.userIds = [null, userId || null];
+            room.userIds = [userId || null, userId || null]; // бот = тот же userId для ELO
         } else {
             room.players = [room.players[0], 'bot'];
             room.playerNames = [playerName, '🤖 Bot'];
-            room.userIds = [userId || null, null];
+            room.userIds = [userId || null, userId || null];
         }
         room.socketToPlayer.clear();
         const humanIdx = botIsWolf ? 1 : 0;

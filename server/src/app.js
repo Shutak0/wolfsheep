@@ -14,12 +14,7 @@ let roomManager; // объявим ниже
 
 // Единая точка для применения статистики и ELO после завершения игры
 function handleGameEnd(roomId) {
-    const room = roomManager.getRoom(roomId);
-    if (!room || !room.userIds) return;
-    for (let i = 0; i < 2; i++) {
-        if (room.userIds[i]) auth.updateStats(room.userIds[i], i === room.winner);
-    }
-    const elo = roomManager.tryApplyElo(roomId);
+    const elo = roomManager.tryApplyStatsAndElo(roomId);
     if (elo) auth.updateElo(elo.winnerId, elo.loserId);
 }
 
