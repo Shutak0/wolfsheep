@@ -121,7 +121,6 @@
         return;
     }
 
-    // ======== Вкладка входа (гости) — Google Only ========
-    if (profileView) profileView.style.display = 'none';
-    if (authView) authView.style.display = '';
+    // ======== Вкладка входа (гости) — редирект ========
+    window.location.href = '/login.html';
 })();
