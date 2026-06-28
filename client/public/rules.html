@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>WolfSheep — Game Rules</title>
+    <link rel="stylesheet" href="css/style.css"/>
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="caed2020-b671-4c7d-94b2-27e9399d4dca"></script>
+</head>
+<body>
+    <nav id="navbar">
+        <div class="nav-left">
+            <a class="nav-brand" href="/">🐺<span style="color:#ff3366">Wolf</span><span style="color:#33ff66">Sheep</span></a>
+            <a class="nav-link" href="/" data-i18n="nav_home">🏠 Home</a>
+            <a class="nav-link" href="/profile.html" data-i18n="nav_profile">👤 Profile</a>
+        </div>
+        <div class="nav-center">
+            <span class="nav-players" id="nav-players">0 online</span>
+        </div>
+        <div class="nav-right" id="nav-right"></div>
+    </nav>
+
+    <div id="main-content">
+        <h1 class="home-title"><span class="wolf">GAME</span> <span class="sheep">RULES</span></h1>
+        <p class="hero-tagline">Master the board. Dominate your opponent.</p>
+
+        <div class="legal-page">
+            <div class="legal-block">
+                <h2>🎯 Objective</h2>
+                <p>WolfSheep is an asymmetric strategy game for two players:</p>
+                <ul>
+                    <li><strong style="color:#ff3366">Wolf (Red):</strong> Wins by stepping onto the opponent's cell (capturing the Sheep).</li>
+                    <li><strong style="color:#33ff66">Sheep (Green):</strong> Wins by reaching the last row (row 8 — the Wolf's starting side).</li>
+                </ul>
+            </div>
+
+            <div class="legal-block">
+                <h2>🏁 Starting Position</h2>
+                <p>
+                    <strong style="color:#ff3366">Wolf</strong> starts at the bottom-center: row 8, column 4.<br/>
+                    <strong style="color:#33ff66">Sheep</strong> starts at the top-center: row 0, column 4.<br/>
+                    Each player begins with <strong>10 walls</strong>.
+                </p>
+            </div>
+
+            <div class="legal-block">
+                <h2>🦶 Movement</h2>
+                <p>On your turn, you must do <strong>one</strong> of the following:</p>
+                <ul>
+                    <li><strong>Move your piece</strong> to an adjacent cell (up, down, left, or right).</li>
+                    <li><strong>Jump over the opponent</strong> if they are standing in an adjacent cell and the cell behind them is free.</li>
+                    <li><strong>Diagonal jump:</strong> If you face the opponent and there is a wall or the board edge right behind them, you may move diagonally to either side.</li>
+                </ul>
+            </div>
+
+            <div class="legal-block">
+                <h2>🧱 Walls</h2>
+                <ul>
+                    <li>Each player starts with <strong>10 walls</strong>.</li>
+                    <li>A wall spans <strong>2 cells</strong> (one edge between two adjacent cells).</li>
+                    <li>Walls can be placed <strong>horizontally</strong> or <strong>vertically</strong>.</li>
+                    <li>Walls cannot overlap or intersect other walls.</li>
+                    <li><strong>Critical rule:</strong> You cannot completely block the opponent's path to their goal. There must always be at least one valid route.</li>
+                </ul>
+            </div>
+
+            <div class="legal-block">
+                <h2>⏱ Time Control</h2>
+                <p>Choose from three time modes:</p>
+                <ul>
+                    <li><strong>⚡ 1+5 (Blitz):</strong> 1 minute initial + 5 seconds per move.</li>
+                    <li><strong>🔥 3+2 (Standard):</strong> 3 minutes initial + 2 seconds per move.</li>
+                    <li><strong>💎 5 min (Classic):</strong> 5 minutes, no increment.</li>
+                </ul>
+                <p>Running out of time means an instant loss.</p>
+            </div>
+
+            <div class="legal-block">
+                <h2>🏆 Winning Conditions</h2>
+                <ul>
+                    <li><strong style="color:#ff3366">Wolf wins</strong> by landing on the Sheep's cell (capture).</li>
+                    <li><strong style="color:#33ff66">Sheep wins</strong> by reaching any cell in row 8.</li>
+                    <li><strong>Timeout:</strong> The player whose clock runs out loses.</li>
+                    <li><strong>Surrender:</strong> A player may resign at any time.</li>
+                </ul>
+            </div>
+
+            <div class="legal-block">
+                <h2>💡 Tips</h2>
+                <ul>
+                    <li>As <strong style="color:#ff3366">Wolf</strong>: Use walls to create a cage around the Sheep. Cut off escape routes early.</li>
+                    <li>As <strong style="color:#33ff66">Sheep</strong>: Stay mobile. Use walls to slow the Wolf down and create multiple paths to the goal.</li>
+                    <li>Don't waste walls — 10 may seem like a lot, but they run out fast!</li>
+                    <li>Always check if your wall placement leaves the opponent a valid path to their goal.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-links">
+            <a href="/about.html">About Us</a>
+            <a href="/rules.html">Game Rules</a>
+            <a href="/privacy.html">Privacy Policy</a>
+            <a href="/terms.html">Terms of Service</a>
+        </div>
+        <div class="footer-copy">© 2025 WolfSheep.fun — All rights reserved</div>
+    </footer>
+
+    <script src="js/i18n.js"></script>
+    <script src="js/nav-players.js"></script>
+</body>
+</html>

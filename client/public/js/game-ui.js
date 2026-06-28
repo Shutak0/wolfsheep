@@ -282,7 +282,7 @@
         }
 
         // ---- подсказки ходов (только для текущего игрока в его ход) ----
-        if (state.turn === myIdx && !state.gameOver) {
+        if (state.turn === myIdx && !state.gameOver && !(options && options.replayMode)) {
             for (const m of state.validMoves) {
                 const cx = cellCenterX(m.col);
                 const cy = cellCenterY(m.row);
@@ -426,7 +426,7 @@
             ctx.restore(); // завершаем обратный поворот бейджа
 
             // ---- индикатор хода (пунктирная обводка) ----
-            if (state.turn === i && !state.gameOver) {
+            if (state.turn === i && !state.gameOver && !(options && options.replayMode)) {
                 ctx.save();
                 if (myIdx === 1) {
                     ctx.translate(cx, cy);
@@ -448,7 +448,7 @@
         }
 
         // ---- оверлей победы (с обратным поворотом для игрока 1) ----
-        if (state.gameOver && state.winner !== null) {
+        if (state.gameOver && state.winner !== null && !(options && options.replayMode)) {
             ctx.save();
             if (myIdx === 1) {
                 ctx.translate(W / 2, H / 2);

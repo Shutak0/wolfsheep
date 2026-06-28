@@ -141,6 +141,29 @@ canvas { display:block; border-radius:10px; cursor:pointer; background:#0a0a0a; 
 .stat-card .stat-label { font-size:12px; color:#94a3b8; margin-top:4px; text-transform:uppercase; letter-spacing:1px; }
 
 /* ---------- responsive ---------- */
+/* ---------- footer ---------- */
+.site-footer { background:#0d0d1a; border-top:1px solid #2a1a4a; padding:20px 20px 16px; text-align:center; margin-top:40px; }
+.footer-links { display:flex; justify-content:center; gap:24px; flex-wrap:wrap; margin-bottom:10px; }
+.footer-links a { color:#94a3b8; font-size:13px; font-weight:500; transition:all 0.2s; }
+.footer-links a:hover { color:#c084fc; text-shadow:0 0 10px #8a2be2; }
+.footer-copy { color:#64748b; font-size:11px; margin-top:8px; }
+
+/* ---------- legal / static pages ---------- */
+.legal-page { max-width:800px; width:100%; }
+.legal-block { background:#0d0d1a; border:2px solid #2a1a5a; border-radius:18px; padding:28px 32px; margin-bottom:20px; box-shadow:0 0 25px rgba(138,43,226,0.1); transition:0.3s; }
+.legal-block:hover { border-color:#8a2be2; box-shadow:0 0 35px rgba(138,43,226,0.2); }
+.legal-block h2 { color:#c084fc; font-size:20px; font-weight:700; margin-bottom:14px; letter-spacing:1px; text-shadow:0 0 15px rgba(138,43,226,0.3); }
+.legal-block p { color:#cbd5e1; font-size:15px; line-height:1.7; }
+.legal-block ul { margin-top:10px; padding-left:22px; }
+.legal-block li { color:#cbd5e1; font-size:14px; line-height:1.7; margin-bottom:8px; }
+.legal-block a { color:#c084fc; text-decoration:underline; }
+.legal-block a:hover { color:#a855f7; }
+
+/* ---------- responsive ---------- */
+@media (max-width:900px) {
+
+
+/* ---------- responsive ---------- */
 @media (max-width:900px) {
     .play-zone { flex-direction:column; align-items:center; }
     .play-zone-right { width:100%; max-width:600px; }

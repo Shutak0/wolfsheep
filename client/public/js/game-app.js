@@ -11,7 +11,7 @@
     const tcBadge = document.getElementById('tc-badge');
 
     const myBlock = document.getElementById('my-block'), opBlock = document.getElementById('op-block');
-    const playAgainBtn = document.getElementById('playAgainBtn');
+    const playAgainBtn = document.getElementById('playAgainBtn'), recBtn = document.getElementById('recBtn');
     const myDot = document.getElementById('my-dot'), opDot = document.getElementById('op-dot');
     const myName = document.getElementById('my-name'), opName = document.getElementById('op-name');
     const myWalls = document.getElementById('my-walls'), opWalls = document.getElementById('op-walls');
@@ -20,6 +20,7 @@
 
     const Engine = window.QuoridorEngine, UI = window.QuoridorUI;
     let state = null, playerImages = [null, null], hoverWall = null;
+    let moveRecord = [], prevState = null, replayTimer = null, replayActive = false;
     const network = new QuoridorNetwork();
     let myIndex = null, gameStarted = false;
     const DOT_CLASSES = ['p1', 'p2'];
@@ -65,6 +66,7 @@
             turnBadge.textContent = '🏆 ' + UI.COLOR_NAMES[state.winner] + ' ' + __('game_win_target');
             if (rt) turnBadge.textContent = '🏆 ' + UI.COLOR_NAMES[state.winner] + ' ' + __('game_win_target') + ' ' + rt;
             surrenderBtn.style.display = 'none';
+            recBtn.style.display = 'inline-block';
             playAgainBtn.style.display = 'inline-block';
         } else {
             turnBadge.textContent = '⬤ ' + UI.COLOR_NAMES[state.turn] + '\'s turn';
@@ -72,13 +74,27 @@
         }
         updateTimeDisplay();
     }
+    function diffMove(oldS, newS) {
+        for (var p = 0; p < 2; p++) {
+            if (oldS.players[p].row !== newS.players[p].row || oldS.players[p].col !== newS.players[p].col) {
+                return { type: 'move', player: p, row: newS.players[p].row, col: newS.players[p].col };
+            }
+        }
+        if (newS.walls.length > oldS.walls.length) {
+            var w = newS.walls[newS.walls.length - 1];
+            return { type: 'wall', player: oldS.turn, row: w.row, col: w.col, orient: w.orient };
+        }
+        return null;
+    }
+
+
     function getReason(r) { switch(r){ case 'timeout':return __('game_win_timeout'); case 'surrender':return __('game_win_surrender'); case 'disconnect':return __('game_win_disconnect'); default:return ''; } }
 
-    function render() { UI.render(canvas, state, playerImages, hoverWall, { playerIndex: myIndex != null ? myIndex : 0 }); updateUI(); }
+    function render() { UI.render(canvas, state, playerImages, hoverWall, { playerIndex: myIndex != null ? myIndex : 0, replayMode: replayActive }); updateUI(); }
     function setStatus(msg, isWin) { statusMsg.textContent = msg; statusMsg.className = isWin ? 'win' : ''; }
 
     function handleCanvasClick(e) {
-        if (!gameStarted || state.gameOver || myIndex !== state.turn) return;
+        if (replayActive || !gameStarted || state.gameOver || myIndex !== state.turn) return;
         var pos = UI.getBoardPos(canvas, e.clientX, e.clientY, myIndex != null ? myIndex : 0);
         if (!pos) return;
         var wh = UI.findWallHit(canvas, pos.x, pos.y, state);
@@ -111,8 +127,17 @@
         opDot.innerHTML = '<img src="/imgs/' + opAnimal + '.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
         if (d.timeControl) { tcBadge.textContent = d.timeControl; }
     };
-    network.onGameStarted = () => { gameStarted = true; waitingOverlay.classList.remove('show'); setStatus(__('game_started'), false); hoverWall = null; render(); };
-    network.onGameState = (newState) => { state = newState; render(); };
+    network.onGameStarted = () => { gameStarted = true; moveRecord = []; prevState = null; waitingOverlay.classList.remove('show'); setStatus(__('game_started'), false); hoverWall = null; render(); };
+    network.onGameState = (newState) => {
+        if (replayActive) return;
+        if (prevState && !newState.gameOver) {
+            var m = diffMove(prevState, newState);
+            if (m) moveRecord.push(m);
+        }
+        state = newState;
+        prevState = Engine.deepClone(newState);
+        render();
+    };
     network.onGameOver = (data) => { state.gameOver = true; state.winner = data.winner; state.winReason = data.winReason || 'target'; render(); setStatus('🏆 ' + data.winnerName + ' ' + __('game_win_target') + ' ' + getReason(state.winReason), true); };
     network.onError = (msg) => setStatus(__('game_error') + msg, false);
     network.onOpponentDisconnected = () => { setStatus(__('game_opponent_left'), true); state.gameOver = true; render(); };
@@ -120,9 +145,51 @@
     surrenderBtn.addEventListener('click', () => { if (gameStarted && !state.gameOver) network.surrender(); });
     surrenderBtn.textContent = __('game_surrender');
     resetBtn.textContent = __('game_leave');
-    resetBtn.addEventListener('click', () => { window.location.href = '/'; });
+    resetBtn.addEventListener('click', () => { if (replayTimer) clearInterval(replayTimer); replayActive = false; window.location.href = '/'; });
     playAgainBtn.textContent = '🔄 ' + __('play_again');
     playAgainBtn.addEventListener('click', () => { window.location.reload(); });
+    recBtn.addEventListener('click', () => {
+        if (replayActive) return;
+        if (moveRecord.length < 2) return;
+        replayActive = true;
+        recBtn.style.display = 'none';
+        playAgainBtn.style.display = 'none';
+        surrenderBtn.style.display = 'none';
+        resetBtn.style.display = 'none';
+
+        const total = moveRecord.length + 1;
+
+        const replayState = Engine.initState(tc);
+        replayState.gameOver = false;
+        state = replayState;
+        let idx = 0;
+        render();
+        setStatus('⏯ Replay 0/' + (total - 1), false);
+
+        replayTimer = setInterval(() => {
+            if (!replayActive) { clearInterval(replayTimer); return; }
+            if (idx >= moveRecord.length) {
+                clearInterval(replayTimer);
+                replayTimer = null;
+                replayState.gameOver = true;
+                state = replayState;
+                replayActive = false;
+                render();
+                setStatus('⏯ ' + __('game_win_target'), true);
+                recBtn.style.display = 'inline-block';
+                playAgainBtn.style.display = 'inline-block';
+                resetBtn.style.display = 'inline-block';
+                return;
+            }
+            Engine.applyAction(replayState, moveRecord[idx]);
+            Engine.endTurn(replayState);
+            replayState.gameOver = false;
+            state = replayState;
+            render();
+            setStatus('⏯ Replay ' + (idx + 1) + '/' + (total - 1), false);
+            idx++;
+        }, 2000);
+    });
     document.querySelector('.wait-text').textContent = __('game_searching');
 
     window.addEventListener('beforeunload', () => { if (gameStarted && !state.gameOver) network.disconnect(); });

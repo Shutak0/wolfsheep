@@ -90,14 +90,10 @@ function evaluate(state, playerIndex) {
     const centerBonus = (8 - (Math.abs(myP.row - 4) + Math.abs(myP.col - 4))) * 0.3;
 
     if (playerIndex === 0) {
-        // Волк: хочет быть ближе к овце (w2s ↓), овца дальше от цели (s2g ↑)
         return -w2s * 130 + s2g * 65 + wallDiff * 30 - sheep.row * 18 + centerBonus;
     } else {
-        // ОВЦА (переработанные веса):
-        //   Главная цель: кратчайший путь к ряду 8 (s2g*150),
-        //   держаться подальше от волка (w2s*65),
-        //   сильный forward-bias: ряд овцы * 50 (было 18!)
-        return -s2g * 150 + w2s * 65 + sheep.row * 50 + wallDiff * 20 + centerBonus;
+        // ОВЦА: агрессивный forward-bias, меньше страха перед волком
+        return -s2g * 200 + w2s * 35 + sheep.row * 120 + wallDiff * 15 + centerBonus;
     }
 }
 
@@ -293,10 +289,7 @@ function makeMove(state, botIndex) {
     if (botIndex === 0) {
         if (manh <= 3) depth = CRITICAL_DEPTH;
     } else {
-        // ОВЦА: умная глубина
-        if (s2g <= 2) depth = CRITICAL_DEPTH;           // почти у цели
-        else if (sheepStallCount >= 2) depth = CRITICAL_DEPTH; // стагнация
-        else if (manh <= 3) depth = CRITICAL_DEPTH;      // волк близко
+        depth = CRITICAL_DEPTH; // овца ВСЕГДА считает глубже (5 вместо 3)
     }
 
     // ---- ANTI-STALL: отслеживание прогресса овцы ----
