@@ -53,7 +53,7 @@
             sessionStorage.setItem('ws_tc', tc);
             sessionStorage.setItem('ws_name', name);
             sessionStorage.setItem('ws_color', color);
-            sessionStorage.setItem('ws_userId', userId || '');
+            sessionStorage.setItem('ws_userId', userId ? parseInt(userId) : '');
             sessionStorage.setItem('ws_bot', isBot ? '1' : '');
             window.location.href = '/game.html';
         });
@@ -64,8 +64,9 @@
     if (rightDiv) {
         if (userId) {
             var nick = localStorage.getItem('ws_nick') || localStorage.getItem('ws_username') || 'Player';
-            var nameSpan = document.createElement('span');
-            nameSpan.style.cssText = 'color:#c084fc; margin-right:12px; font-weight:600;';
+            var nameSpan = document.createElement('a');
+            nameSpan.href = '/profile.html';
+            nameSpan.style.cssText = 'color:#c084fc; margin-right:12px; font-weight:600; text-decoration:none;';
             nameSpan.textContent = nick;
             rightDiv.appendChild(nameSpan);
             var logoutLink = document.createElement('a');
@@ -74,15 +75,19 @@
             logoutLink.style.cssText = 'color:#94a3b8; font-size:14px;';
             logoutLink.addEventListener('click', function (e) {
                 e.preventDefault();
+                localStorage.removeItem('ws_token');
                 localStorage.removeItem('ws_userId');
                 localStorage.removeItem('ws_username');
                 localStorage.removeItem('ws_nick');
+                localStorage.removeItem('ws_rating');
+                localStorage.removeItem('ws_email');
+                localStorage.removeItem('ws_picture');
                 window.location.reload();
             });
             rightDiv.appendChild(logoutLink);
         } else {
             var loginLink = document.createElement('a');
-            loginLink.href = '/profile.html';
+            loginLink.href = '/login.html';
             loginLink.textContent = __('nav_login');
             loginLink.className = 'nav-link';
             rightDiv.appendChild(loginLink);

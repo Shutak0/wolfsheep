@@ -1,10 +1,17 @@
-// auth.js — система аккаунтов WolfSheep
+// auth.js — Google OAuth + JWT аутентификация WolfSheep
+require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 const fs = require('fs');
 const path = require('path');
-const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { OAuth2Client } = require('google-auth-library');
 
 const DB_PATH = path.join(__dirname, '..', 'db.json');
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback-dev-secret';
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
+
+// ==================== DB helpers ====================
 function loadDb() {
     try {
         if (fs.existsSync(DB_PATH)) {
@@ -17,48 +24,108 @@ function saveDb(db) {
     fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), 'utf8');
 }
 
-function findUser(db, username) {
-    return db.users.find(u => u.username.toLowerCase() === username.toLowerCase());
+function findUserByGoogleId(db, googleId) {
+    return db.users.find(u => u.googleId === googleId);
 }
 
-function register(username, password) {
-    const db = loadDb();
-    if (!username || username.trim().length < 2) return { success: false, error: 'Имя должно быть не менее 2 символов.' };
-    if (!password || password.length < 4) return { success: false, error: 'Пароль должен быть не менее 4 символов.' };
-    if (findUser(db, username)) return { success: false, error: 'Это имя уже занято.' };
+function findUserById(db, userId) {
+    return db.users.find(u => u.id === userId);
+}
 
-    const hash = bcrypt.hashSync(password, 10);
-    const user = {
-        id: db.nextId++,
-        username: username.trim(),
-        password: hash,
-        createdAt: new Date().toISOString(),
-        rating: 1000,
-        stats: {
-            games: 0,
-            wins: 0,
-            losses: 0,
-        },
-        // nick можно задать только один раз
-        nick: username.trim(),
-    };
-    db.users.push(user);
-    saveDb(db);
-    return { success: true, user: { id: user.id, username: user.username, nick: user.nick, rating: user.rating, stats: user.stats } };
+// ==================== JWT helpers ====================
+function generateToken(user) {
+    return jwt.sign(
+        { userId: user.id, googleId: user.googleId },
+        JWT_SECRET,
+        { expiresIn: '7d' }
+    );
+}
+
+function verifyToken(token) {
+    try {
+        return jwt.verify(token, JWT_SECRET);
+    } catch (e) {
+        return null;
+    }
+}
+
+// ==================== Google OAuth ====================
+/**
+ * Проверяет Google ID-токен и возвращает данные пользователя.
+ * Если пользователь с таким googleId не найден — создаёт нового.
+ */
+async function googleAuth(idToken) {
+    if (!idToken) return { success: false, error: 'No token provided.' };
+
+    let payload;
+    try {
+        const ticket = await googleClient.verifyIdToken({
+            idToken,
+            audience: GOOGLE_CLIENT_ID,
+        });
+        payload = ticket.getPayload();
+    } catch (e) {
+        return { success: false, error: 'Invalid Google token.' };
     }
 
-function login(username, password) {
+    const googleId = payload.sub;
+    const email = payload.email || '';
+    const name = payload.name || email.split('@')[0] || 'Player';
+    const picture = payload.picture || '';
+
     const db = loadDb();
-    const user = findUser(db, username);
-    if (!user) return { success: false, error: 'Пользователь не найден.' };
-    if (!bcrypt.compareSync(password, user.password)) return { success: false, error: 'Неверный пароль.' };
-    return { success: true, user: { id: user.id, username: user.username, nick: user.nick, stats: user.stats } };
+
+    let user = findUserByGoogleId(db, googleId);
+
+    if (user) {
+        // Обновляем имя/аватар при каждом входе (не ник!)
+        user.email = email;
+        user.name = name;
+        user.picture = picture;
+        saveDb(db);
+    } else {
+        // Регистрируем нового пользователя
+        user = {
+            id: db.nextId++,
+            googleId,
+            email,
+            name,
+            picture,
+            username: name.trim(),
+            createdAt: new Date().toISOString(),
+            rating: 1000,
+            stats: {
+                games: 0,
+                wins: 0,
+                losses: 0,
+            },
+            nick: name.trim(), // начальный ник = name, можно сменить один раз
+        };
+        db.users.push(user);
+        saveDb(db);
+    }
+
+    const token = generateToken(user);
+
+    return {
+        success: true,
+        token,
+        user: {
+            id: user.id,
+            username: user.username,
+            nick: user.nick,
+            rating: user.rating,
+            stats: user.stats,
+            email: user.email,
+            picture: user.picture,
+        },
+    };
 }
 
-// Обновить ник (только если не задан)
+// ==================== Профиль и ник ====================
 function setNick(userId, nick) {
     const db = loadDb();
-    const user = db.users.find(u => u.id === userId);
+    const user = findUserById(db, userId);
     if (!user) return { success: false, error: 'Пользователь не найден.' };
     if (user.nick !== user.username) return { success: false, error: 'Ник уже задан и не может быть изменён.' };
     if (!nick || nick.trim().length < 2) return { success: false, error: 'Ник слишком короткий.' };
@@ -67,18 +134,25 @@ function setNick(userId, nick) {
     return { success: true, nick: user.nick };
 }
 
-// Получить профиль
 function getProfile(userId) {
     const db = loadDb();
-    const user = db.users.find(u => u.id === userId);
+    const user = findUserById(db, userId);
     if (!user) return null;
-    return { id: user.id, username: user.username, nick: user.nick, rating: user.rating, stats: user.stats };
+    return {
+        id: user.id,
+        username: user.username,
+        nick: user.nick,
+        rating: user.rating,
+        stats: user.stats,
+        email: user.email,
+        picture: user.picture,
+    };
 }
 
-// Обновить статистику
+// ==================== Статистика и ELO (без изменений) ====================
 function updateStats(userId, didWin) {
     const db = loadDb();
-    const user = db.users.find(u => u.id === userId);
+    const user = findUserById(db, userId);
     if (!user) return;
     user.stats.games++;
     if (didWin) user.stats.wins++;
@@ -86,11 +160,10 @@ function updateStats(userId, didWin) {
     saveDb(db);
 }
 
-// ELO (единый для всех контролей)
 function updateElo(winnerId, loserId) {
     const db = loadDb();
-    const winner = db.users.find(u => u.id === winnerId);
-    const loser = db.users.find(u => u.id === loserId);
+    const winner = findUserById(db, winnerId);
+    const loser = findUserById(db, loserId);
     if (!winner || !loser) return;
 
     const Ra = winner.rating || 1000;
@@ -106,7 +179,6 @@ function updateElo(winnerId, loserId) {
     saveDb(db);
 }
 
-// Получить топ-N игроков по ELO
 function getLeaderboard(limit) {
     const db = loadDb();
     const sorted = db.users
@@ -117,4 +189,14 @@ function getLeaderboard(limit) {
     return sorted;
 }
 
-module.exports = { register, login, getProfile, setNick, updateStats, updateElo, getLeaderboard };
+module.exports = {
+    googleAuth,
+    verifyToken,
+    getProfile,
+    setNick,
+    updateStats,
+    updateElo,
+    getLeaderboard,
+};
+
+// Устаревшие методы — удалены: register, login

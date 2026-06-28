@@ -6,44 +6,41 @@
     <title>WolfSheep — Вход</title>
     <link rel="stylesheet" href="css/style.css"/>
     <script defer src="https://cloud.umami.is/script.js" data-website-id="caed2020-b671-4c7d-94b2-27e9399d4dca"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
-        .auth-container { max-width:400px; width:100%; background:#0d0d1a; border:2px solid #2a1a5a; border-radius:20px; padding:36px 32px; box-shadow:0 0 40px rgba(138,43,226,0.2); }
-        .auth-tabs { display:flex; gap:0; margin-bottom:24px; }
-        .auth-tab { flex:1; text-align:center; padding:10px; background:transparent; border:2px solid #2a1a5a; color:#94a3b8; font-weight:600; cursor:pointer; font-family:inherit; font-size:15px; transition:0.2s; }
-        .auth-tab:first-child { border-radius:12px 0 0 12px; }
-        .auth-tab:last-child { border-radius:0 12px 12px 0; }
-        .auth-tab.active { background:#2a1a5a; color:#c084fc; border-color:#8a2be2; }
-        .auth-form { display:none; flex-direction:column; gap:16px; }
-        .auth-form.active { display:flex; }
-        .auth-form input { width:100%; padding:10px 14px; border-radius:12px; background:#1a1a30; border:2px solid #2a1a5a; color:#e0e0f0; font-size:16px; font-family:inherit; outline:none; transition:0.2s; }
-        .auth-form input:focus { border-color:#8a2be2; }
-        .auth-btn { background:#8a2be2; color:white; border:none; padding:12px; border-radius:30px; font-size:16px; font-weight:600; cursor:pointer; transition:0.2s; font-family:inherit; width:100%; }
-        .auth-btn:hover { background:#a855f7; box-shadow:0 0 25px rgba(138,43,226,0.5); }
-        .auth-error { color:#ff3366; font-size:13px; text-align:center; min-height:20px; }
+        .auth-container { max-width:400px; width:100%; background:#0d0d1a; border:2px solid #2a1a5a; border-radius:20px; padding:36px 32px; box-shadow:0 0 40px rgba(138,43,226,0.2); text-align:center; }
+        .auth-container p { color:#94a3b8; font-size:14px; margin-bottom:24px; }
+        .google-btn-wrapper { display:flex; justify-content:center; margin-bottom:16px; }
+        .auth-error { color:#ff3366; font-size:13px; text-align:center; min-height:20px; margin-top:12px; }
         .auth-play-guest { margin-top:16px; text-align:center; }
         .auth-play-guest a { color:#94a3b8; text-decoration:underline; font-size:14px; }
+        .auth-loading { display:none; color:#c084fc; font-size:14px; animation:pulse 1.5s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
     </style>
 </head>
 <body>
     <div id="main-content">
         <h1 class="home-title" style="margin-top:20px;"><span class="wolf">WOLF</span><span class="sheep">SHEEP</span></h1>
         <div class="auth-container">
-            <div class="auth-tabs">
-                <button class="auth-tab active" data-tab="login">Вход</button>
-                <button class="auth-tab" data-tab="register">Регистрация</button>
+            <p>Sign in with your Google account to save progress, climb the leaderboard, and unlock your WolfSheep nickname.</p>
+            <div class="google-btn-wrapper">
+                <div id="g_id_onload"
+                     data-client_id="632162253266-42grlsk3jgboladf7ivb0lsontujrvsi.apps.googleusercontent.com"
+                     data-callback="handleGoogleLogin"
+                     data-auto_prompt="false">
+                </div>
+                <div class="g_id_signin"
+                     data-type="standard"
+                     data-size="large"
+                     data-theme="filled_blue"
+                     data-text="sign_in_with"
+                     data-shape="rectangular"
+                     data-logo_alignment="left">
+                </div>
             </div>
-            <div class="auth-form active" id="form-login">
-                <input type="text" id="loginUser" placeholder="Логин" />
-                <input type="password" id="loginPass" placeholder="Пароль" />
-                <button class="auth-btn" id="loginBtn">Войти</button>
-            </div>
-            <div class="auth-form" id="form-register">
-                <input type="text" id="regUser" placeholder="Логин (от 2 символов)" />
-                <input type="password" id="regPass" placeholder="Пароль (от 4 символов)" />
-                <button class="auth-btn" id="regBtn">Зарегистрироваться</button>
-            </div>
+            <div class="auth-loading" id="auth-loading">Signing in…</div>
             <div class="auth-error" id="auth-error"></div>
-            <div class="auth-play-guest"><a href="/">Играть без аккаунта</a></div>
+            <div class="auth-play-guest"><a href="/">Play without account</a></div>
         </div>
     </div>
 
@@ -56,7 +53,6 @@
         </div>
         <div class="footer-copy">© 2025 WolfSheep.fun — All rights reserved</div>
     </footer>
-
 
     <script src="js/login.js"></script>
 </body>

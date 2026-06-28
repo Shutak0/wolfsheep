@@ -42,31 +42,44 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '../../client/public')));
 app.use('/imgs', express.static(path.join(__dirname, '..', 'imgs')));
 
+// ---------- JWT Auth Middleware ----------
+function authMiddleware(req, res, next) {
+    const header = req.headers.authorization || '';
+    const token = header.startsWith('Bearer ') ? header.slice(7) : null;
+    if (!token) return res.status(401).json({ success: false, error: 'No token provided.' });
+    const decoded = auth.verifyToken(token);
+    if (!decoded) return res.status(401).json({ success: false, error: 'Invalid or expired token.' });
+    req.userId = decoded.userId;
+    req.googleId = decoded.googleId;
+    next();
+}
+
 // ---------- REST Auth ----------
-app.post('/api/register', (req, res) => {
-    const { username, password } = req.body;
-    const result = auth.register(username, password);
-    res.json(result);
+// Google OAuth: клиент присылает ID-токен, сервер проверяет → возвращает JWT
+app.post('/api/auth/google', async (req, res) => {
+    const { idToken } = req.body;
+    if (!idToken) return res.json({ success: false, error: 'No idToken provided.' });
+    try {
+        const result = await auth.googleAuth(idToken);
+        res.json(result);
+    } catch (e) {
+        console.error('Google auth error:', e);
+        res.json({ success: false, error: 'Server error.' });
+    }
 });
 
-app.post('/api/login', (req, res) => {
-    const { username, password } = req.body;
-    const result = auth.login(username, password);
-    res.json(result);
-});
-
-app.get('/api/profile', (req, res) => {
-    const userId = parseInt(req.query.userId);
-    if (!userId) return res.json({ success: false, error: 'No userId' });
-    const profile = auth.getProfile(userId);
+// Получить профиль (требуется JWT)
+app.get('/api/profile', authMiddleware, (req, res) => {
+    const profile = auth.getProfile(req.userId);
     if (!profile) return res.json({ success: false, error: 'User not found' });
     res.json({ success: true, profile });
 });
 
-app.post('/api/profile/nick', (req, res) => {
-    const { userId, nick } = req.body;
-    if (!userId) return res.json({ success: false, error: 'No userId' });
-    const result = auth.setNick(userId, nick);
+// Обновить ник (требуется JWT)
+app.post('/api/profile/nick', authMiddleware, (req, res) => {
+    const { nick } = req.body;
+    if (!nick) return res.json({ success: false, error: 'No nick provided.' });
+    const result = auth.setNick(req.userId, nick);
     res.json(result);
 });
 

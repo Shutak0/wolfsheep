@@ -37,7 +37,7 @@
     const tcName = sessionStorage.getItem('ws_tc') || '1+5';
     const playerName = sessionStorage.getItem('ws_name') || 'Player';
     const playerColor = sessionStorage.getItem('ws_color') || 'auto';
-    const userId = sessionStorage.getItem('ws_userId') || null;
+    const userId = sessionStorage.getItem('ws_userId') ? parseInt(sessionStorage.getItem('ws_userId')) : null;
     const tc = Engine.TIME_PRESETS[tcName] || Engine.TIME_PRESETS['1+5'];
     state = Engine.initState(tc);
     tcBadge.textContent = tcName;

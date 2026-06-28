@@ -1,14 +1,54 @@
-// profile.js — профиль + регистрация WolfSheep
+// profile.js — профиль WolfSheep (Google OAuth + JWT)
 (function () {
     var __ = window.__ || function(k){return k;};
+    var token = localStorage.getItem('ws_token');
     var userId = localStorage.getItem('ws_userId');
     var profileView = document.getElementById('profile-view');
     var authView = document.getElementById('auth-view');
 
-    // === Вкладка профиля (авторизованные) ===
-    if (userId) {
+    // Колбэк для Google Identity Services (на profile.html)
+    window.handleGoogleLoginProfile = function (response) {
+        var idToken = response.credential;
+        var errorEl = document.getElementById('auth-error');
+        var loadingEl = document.getElementById('auth-loading');
+        if (!idToken) {
+            errorEl.textContent = 'Google sign-in failed. Please try again.';
+            return;
+        }
+        if (loadingEl) loadingEl.style.display = 'block';
+        errorEl.textContent = '';
+
+        fetch('/api/auth/google', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken: idToken })
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (!data.success) {
+                errorEl.textContent = data.error || 'Authentication failed.';
+                if (loadingEl) loadingEl.style.display = 'none';
+                return;
+            }
+            localStorage.setItem('ws_token', data.token);
+            localStorage.setItem('ws_userId', data.user.id);
+            localStorage.setItem('ws_username', data.user.username);
+            localStorage.setItem('ws_nick', data.user.nick);
+            localStorage.setItem('ws_rating', data.user.rating || 1000);
+            localStorage.setItem('ws_email', data.user.email || '');
+            localStorage.setItem('ws_picture', data.user.picture || '');
+            window.location.reload();
+        })
+        .catch(function () {
+            errorEl.textContent = 'Network error. Please try again.';
+            if (loadingEl) loadingEl.style.display = 'none';
+        });
+    };
+
+    // ======== Вкладка профиля (авторизованные) ========
+    if (userId && token) {
         profileView.style.display = '';
-        authView.style.display = 'none';
+        if (authView) authView.style.display = 'none';
 
         var nameInput = document.getElementById('profileName');
         var colorInput = document.getElementById('profileColor');
@@ -24,7 +64,9 @@
             msgEl.style.color = color || '#94a3b8';
         }
 
-        fetch('/api/profile?userId=' + userId)
+        fetch('/api/profile', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        })
             .then(function (r) { return r.json(); })
             .then(function (data) {
                 if (data.success) {
@@ -53,8 +95,11 @@
             if (nick && nick !== localStorage.getItem('ws_nick')) {
                 fetch('/api/profile/nick', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: parseInt(userId), nick: nick })
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ nick: nick })
                 })
                     .then(function (r) { return r.json(); })
                     .then(function (data) {
@@ -64,6 +109,9 @@
                         } else {
                             showMsg(data.error || 'Error.', '#ff3366');
                         }
+                    })
+                    .catch(function () {
+                        showMsg('Network error.', '#ff3366');
                     });
             } else {
                 showMsg(__('profile_saved'), '#33ff66');
@@ -73,56 +121,7 @@
         return;
     }
 
-    // === Вкладка входа/регистрации (гости) ===
-    profileView.style.display = 'none';
-    authView.style.display = '';
-
-    var tabs = authView.querySelectorAll('.auth-tab');
-    var errorEl = document.getElementById('auth-error');
-    var loginBtn = document.getElementById('loginBtn');
-    var regBtn = document.getElementById('regBtn');
-
-    tabs.forEach(function (tab) {
-        tab.addEventListener('click', function () {
-            tabs.forEach(function (t) { t.classList.remove('active'); });
-            tab.classList.add('active');
-            authView.querySelectorAll('.auth-form').forEach(function (f) { f.classList.remove('active'); });
-            document.getElementById('form-' + tab.dataset.tab).classList.add('active');
-            errorEl.textContent = '';
-        });
-    });
-
-    function showError(msg) { errorEl.textContent = msg; }
-
-    function doAuth(url, username, password) {
-        fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: username, password: password })
-        })
-            .then(function (r) { return r.json(); })
-            .then(function (data) {
-                if (!data.success) { showError(data.error); return; }
-                localStorage.setItem('ws_userId', data.user.id);
-                localStorage.setItem('ws_username', data.user.username);
-                localStorage.setItem('ws_nick', data.user.nick);
-                localStorage.setItem('ws_rating', data.user.rating || 1000);
-                window.location.reload();
-            })
-            .catch(function () { showError(__('auth_error_network')); });
-    }
-
-    loginBtn.addEventListener('click', function () {
-        var username = document.getElementById('loginUser').value.trim();
-        var password = document.getElementById('loginPass').value;
-        if (!username || !password) return showError(__('auth_error_fill'));
-        doAuth('/api/login', username, password);
-    });
-
-    regBtn.addEventListener('click', function () {
-        var username = document.getElementById('regUser').value.trim();
-        var password = document.getElementById('regPass').value;
-        if (!username || !password) return showError(__('auth_error_fill'));
-        doAuth('/api/register', username, password);
-    });
+    // ======== Вкладка входа (гости) — Google Only ========
+    if (profileView) profileView.style.display = 'none';
+    if (authView) authView.style.display = '';
 })();
