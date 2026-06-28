@@ -226,7 +226,7 @@
         document.querySelectorAll('[data-i18n]').forEach(function (el) {
             var key = el.getAttribute('data-i18n');
             if (t[key]) {
-                el.textContent = t[key];
+                el.innerHTML = t[key];
             }
         });
         // Apply placeholder translations
