@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Database (contains user passwords & game stats)
+server/db.json
+*.db
+*.sqlite
+
+# OS junk
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+
+# Build / dist
+dist/
+build/
+
+# Temporary scripts
+fix-css.js
+filelist.txt
+
+# Uploads / user content (if any)
+server/uploads/
+server/imgs/avatars/
+
+# Runtime
+*.pid
+*.seed
