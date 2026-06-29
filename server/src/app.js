@@ -94,17 +94,6 @@ app.get('/.well-known/security.txt', (req, res) => {
     res.sendFile(path.join(__dirname, '../../client/public/.well-known/security.txt'));
 });
 
-// ---- Custom 404 handler (after all routes) ----
-app.use((req, res, next) => {
-    if (req.accepts('html')) {
-        res.status(404);
-        res.setHeader('X-Robots-Tag', 'noindex, follow');
-        res.sendFile(path.join(__dirname, '../../client/public/404.html'));
-    } else {
-        res.status(404).json({ error: 'Not found' });
-    }
-});
-
 function getPlayerElo(userId) {
     if (!userId) return 1000;
     const profile = auth.getProfile(userId);
@@ -343,6 +332,17 @@ io.on('connection', (socket) => {
             }
         }
     });
+});
+
+// ---- Custom 404 handler (MUST be last, after ALL routes) ----
+app.use((req, res) => {
+    if (req.accepts('html')) {
+        res.status(404);
+        res.setHeader('X-Robots-Tag', 'noindex, follow');
+        res.sendFile(path.join(__dirname, '../../client/public/404.html'));
+    } else {
+        res.status(404).json({ error: 'Not found' });
+    }
 });
 
 const PORT = process.env.PORT || 3000;
