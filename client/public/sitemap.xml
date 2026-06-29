@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <!-- Главная страница -->
+  <url>
+    <loc>https://wolfsheep.fun/</loc>
+    <lastmod>2026-06-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://wolfsheep.fun/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://wolfsheep.fun/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://wolfsheep.fun/"/>
+  </url>
+  <!-- Игровая страница -->
+  <url>
+    <loc>https://wolfsheep.fun/game.html</loc>
+    <lastmod>2026-06-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://wolfsheep.fun/game.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://wolfsheep.fun/game.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://wolfsheep.fun/game.html"/>
+  </url>
+  <!-- Правила игры -->
+  <url>
+    <loc>https://wolfsheep.fun/rules.html</loc>
+    <lastmod>2026-06-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://wolfsheep.fun/rules.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://wolfsheep.fun/rules.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://wolfsheep.fun/rules.html"/>
+  </url>
+  <!-- О проекте -->
+  <url>
+    <loc>https://wolfsheep.fun/about.html</loc>
+    <lastmod>2026-06-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://wolfsheep.fun/about.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://wolfsheep.fun/about.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://wolfsheep.fun/about.html"/>
+  </url>
+  <!-- Вход -->
+  <url>
+    <loc>https://wolfsheep.fun/login.html</loc>
+    <lastmod>2026-06-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://wolfsheep.fun/login.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://wolfsheep.fun/login.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://wolfsheep.fun/login.html"/>
+  </url>
+  <!-- Профиль -->
+  <url>
+    <loc>https://wolfsheep.fun/profile.html</loc>
+    <lastmod>2026-06-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://wolfsheep.fun/profile.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://wolfsheep.fun/profile.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://wolfsheep.fun/profile.html"/>
+  </url>
+  <!-- Политика конфиденциальности -->
+  <url>
+    <loc>https://wolfsheep.fun/privacy.html</loc>
+    <lastmod>2026-06-29</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://wolfsheep.fun/privacy.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://wolfsheep.fun/privacy.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://wolfsheep.fun/privacy.html"/>
+  </url>
+  <!-- Условия использования -->
+  <url>
+    <loc>https://wolfsheep.fun/terms.html</loc>
+    <lastmod>2026-06-29</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://wolfsheep.fun/terms.html"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://wolfsheep.fun/terms.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://wolfsheep.fun/terms.html"/>
+  </url>
+</urlset>

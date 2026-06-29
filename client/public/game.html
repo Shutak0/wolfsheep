@@ -3,16 +3,88 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <!-- Primary Meta Tags -->
+    <title>Play WolfSheep Online — Free Strategy Board Game | Quoridor</title>
+    <meta name="description" content="Play WolfSheep — a free real-time multiplayer strategy board game. Move your piece, place walls, outsmart your opponent. ELO rating, instant matchmaking, bot mode. Join now!"/>
+    <meta name="keywords" content="play wolf sheep, quoridor game, online board game, strategy game, multiplayer game, wall game, free online game, ELO, matchmaking, bot game"/>
+    <meta name="author" content="WolfSheep"/>
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large"/>
+    <meta name="googlebot" content="index, follow"/>
+    <meta name="rating" content="general"/>
     <meta name="theme-color" content="#1a1a2e"/>
     <meta name="apple-mobile-web-app-capable" content="yes"/>
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
     <meta name="apple-mobile-web-app-title" content="WolfSheep"/>
     <meta name="mobile-web-app-capable" content="yes"/>
+
+    <!-- Canonical & Alternate -->
+    <link rel="canonical" href="https://wolfsheep.fun/game.html"/>
+    <link rel="alternate" hreflang="en" href="https://wolfsheep.fun/game.html"/>
+    <link rel="alternate" hreflang="ru" href="https://wolfsheep.fun/game.html"/>
+    <link rel="alternate" hreflang="x-default" href="https://wolfsheep.fun/game.html"/>
+
+    <!-- Icons & PWA -->
     <link rel="apple-touch-icon" href="/imgs/icon-192.png"/>
     <link rel="manifest" href="/manifest.json"/>
-    <title>WolfSheep — Game</title>
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Play WolfSheep Online — Free Strategy Board Game | Quoridor"/>
+    <meta property="og:description" content="Real-time multiplayer strategy game. Move pieces, place walls, climb the leaderboard. Free and no ads!"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:url" content="https://wolfsheep.fun/game.html"/>
+    <meta property="og:image" content="https://wolfsheep.fun/imgs/screen-1.png"/>
+    <meta property="og:image:alt" content="WolfSheep — игровой процесс: доска 9×9, Wolf и Sheep"/>
+    <meta property="og:image:width" content="1920"/>
+    <meta property="og:image:height" content="1080"/>
+    <meta property="og:site_name" content="WolfSheep"/>
+    <meta property="og:locale" content="ru_RU"/>
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="Play WolfSheep Online — Free Strategy Board Game"/>
+    <meta name="twitter:description" content="Real-time multiplayer strategy. Move pieces, place walls. Free and no ads!"/>
+    <meta name="twitter:image" content="https://wolfsheep.fun/imgs/screen-1.png"/>
+
+    <!-- DNS Prefetch & Preconnect -->
+    <link rel="dns-prefetch" href="https://cloud.umami.is"/>
+    <link rel="dns-prefetch" href="https://accounts.google.com"/>
+    <link rel="preconnect" href="https://cloud.umami.is"/>
+    <link rel="preconnect" href="https://accounts.google.com"/>
+
+    <!-- Preload critical CSS -->
+    <link rel="preload" href="css/style.css" as="style"/>
     <link rel="stylesheet" href="css/style.css"/>
     <script defer src="https://cloud.umami.is/script.js" data-website-id="caed2020-b671-4c7d-94b2-27e9399d4dca"></script>
+
+    <!-- Structured Data: BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "WolfSheep — Home", "item": "https://wolfsheep.fun/" },
+        { "@type": "ListItem", "position": 2, "name": "Play Game", "item": "https://wolfsheep.fun/game.html" }
+      ]
+    }
+    </script>
+
+    <!-- Structured Data: WebApplication -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "WolfSheep",
+      "url": "https://wolfsheep.fun/game.html",
+      "description": "Free real-time multiplayer strategy board game inspired by Quoridor.",
+      "applicationCategory": "GameApplication",
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": "WolfSheep",
+        "url": "https://wolfsheep.fun/"
+      }
+    }
+    </script>
 </head>
 <body>
     <nav id="navbar">
@@ -39,7 +111,7 @@
             </div>
             <div class="game-right">
                 <div class="player-block" id="op-block">
-                    <div class="dot p2" id="op-dot"><img src="/imgs/Sheep.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%"></div>
+                    <div class="dot p2" id="op-dot"><img src="/imgs/Sheep.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%" alt="Sheep player avatar"></div>
                     <span class="pname" id="op-name">Green</span>
                     <span class="player-elo" id="op-elo"></span>
                     <span class="pwalls">🧱 <span id="op-walls">10</span></span>
@@ -54,7 +126,7 @@
                     <button id="playAgainBtn" class="game-btn play-again" style="display:none">🔄 Play Again</button>
                 </div>
                 <div class="player-block" id="my-block">
-                    <div class="dot p1" id="my-dot"><img src="/imgs/Wolf.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%"></div>
+                    <div class="dot p1" id="my-dot"><img src="/imgs/Wolf.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%" alt="Wolf player avatar"></div>
                     <span class="pname" id="my-name">Red</span>
                     <span class="player-elo" id="my-elo"></span>
                     <span class="pwalls">🧱 <span id="my-walls">10</span></span>
@@ -74,7 +146,6 @@
         </div>
         <div class="footer-copy">© 2025 WolfSheep.fun — All rights reserved</div>
     </footer>
-
 
     <div id="waiting-overlay" class="show">
         <div class="wait-spinner"></div>

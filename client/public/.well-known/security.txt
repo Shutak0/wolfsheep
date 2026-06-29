@@ -1,0 +1,27 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
+
+# WolfSheep Security Policy
+# https://wolfsheep.fun/.well-known/security.txt
+
+Canonical: https://wolfsheep.fun/.well-known/security.txt
+
+# Contact for security issues
+Contact: mailto:shutakswm@gmail.com
+
+# Preferred languages
+Preferred-Languages: en, ru
+
+# Our security acknowledgment page
+Acknowledgments: https://wolfsheep.fun/about.html
+
+# Policy last updated
+Expires: 2027-06-30T00:00:00.000Z
+
+# We accept vulnerability reports
+Policy: https://wolfsheep.fun/terms.html
+
+# Hiring / careers — not applicable
+Hiring: https://wolfsheep.fun/
+
+-----END PGP SIGNED MESSAGE-----

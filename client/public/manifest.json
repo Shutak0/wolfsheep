@@ -1,13 +1,36 @@
 {
-  "name": "WolfSheep — Strategy Game",
+  "name": "WolfSheep — Free Online Strategy Board Game",
   "short_name": "WolfSheep",
-  "description": "Strategic duel on a grid board — chase your opponent or break through to the goal",
-  "start_url": "/",
+  "description": "Strategic duel on a 9×9 grid — chase your opponent or break through to the goal. Multiplayer, ELO rating, leaderboard. Free and no ads!",
+  "start_url": "/?utm_source=pwa",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "any",
   "background_color": "#0a0a0f",
   "theme_color": "#1a1a2e",
+  "lang": "ru",
+  "categories": ["games", "entertainment", "utilities"],
+  "iarc_rating_id": "e58c82f8-8ed2-4053-8ef6-7a3d7b60d09a",
+  "screenshots": [
+    {
+      "src": "/imgs/screen-1.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "label": "WolfSheep — Game Board"
+    },
+    {
+      "src": "/imgs/screen-2.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "label": "WolfSheep — Leaderboard & Modes"
+    },
+    {
+      "src": "/imgs/screen-3.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "label": "WolfSheep — Game Rules"
+    }
+  ],
   "icons": [
     {
       "src": "/imgs/Wolf.png",
@@ -26,6 +49,31 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "shortcuts": [
+    {
+      "name": "Play Game",
+      "short_name": "Play",
+      "description": "Start a new game",
+      "url": "/game.html?utm_source=shortcut",
+      "icons": [{ "src": "/imgs/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Profile",
+      "short_name": "Profile",
+      "description": "View your stats",
+      "url": "/profile.html?utm_source=shortcut",
+      "icons": [{ "src": "/imgs/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Leaderboard",
+      "short_name": "Top",
+      "description": "View top players",
+      "url": "/?utm_source=shortcut#leaderboard",
+      "icons": [{ "src": "/imgs/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }

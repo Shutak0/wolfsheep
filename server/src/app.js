@@ -37,8 +37,73 @@ roomManager = new RoomManager((roomId, room) => {
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '../../client/public')));
-app.use('/imgs', express.static(path.join(__dirname, '..', 'imgs')));
+
+// ================= SECURITY & SEO HEADERS =================
+app.use((req, res, next) => {
+    // HSTS — force HTTPS for 2 years
+    res.setHeader('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+    // Prevent MIME-type sniffing
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    // Clickjacking protection
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    // XSS filter
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    // Referrer policy
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    // Permissions policy
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    next();
+});
+
+// Static files with cache headers
+const staticOptions = {
+    maxAge: '7d',
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.html')) {
+            // HTML: short cache, always revalidate
+            res.setHeader('Cache-Control', 'public, max-age=3600, must-revalidate');
+            res.setHeader('X-Robots-Tag', 'index, follow, max-snippet:-1, max-image-preview:large');
+        } else if (filePath.match(/\.(js|css)$/)) {
+            res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+        } else if (filePath.match(/\.(png|jpg|jpeg|gif|webp|svg|ico)$/)) {
+            res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
+        } else if (filePath.endsWith('.xml')) {
+            res.setHeader('Cache-Control', 'public, max-age=86400');
+            res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+        } else if (filePath.endsWith('.txt')) {
+            res.setHeader('Cache-Control', 'public, max-age=86400');
+            res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        } else if (filePath.endsWith('.json') && !filePath.includes('manifest')) {
+            res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+        }
+    }
+};
+
+app.use(express.static(path.join(__dirname, '../../client/public'), staticOptions));
+app.use('/imgs', express.static(path.join(__dirname, '..', 'imgs'), {
+    maxAge: '30d',
+    setHeaders: (res) => {
+        res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
+    }
+}));
+
+// ---- .well-known routes ----
+app.get('/.well-known/security.txt', (req, res) => {
+    res.type('text/plain; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.sendFile(path.join(__dirname, '../../client/public/.well-known/security.txt'));
+});
+
+// ---- Custom 404 handler (after all routes) ----
+app.use((req, res, next) => {
+    if (req.accepts('html')) {
+        res.status(404);
+        res.setHeader('X-Robots-Tag', 'noindex, follow');
+        res.sendFile(path.join(__dirname, '../../client/public/404.html'));
+    } else {
+        res.status(404).json({ error: 'Not found' });
+    }
+});
 
 function getPlayerElo(userId) {
     if (!userId) return 1000;

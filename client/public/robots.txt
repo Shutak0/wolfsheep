@@ -1,0 +1,33 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /socket.io/
+Crawl-delay: 5
+
+User-agent: Googlebot
+Allow: /
+Disallow: /api/
+Disallow: /socket.io/
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Disallow: /api/
+Disallow: /socket.io/
+Crawl-delay: 2
+
+User-agent: Yandex
+Allow: /
+Disallow: /api/
+Disallow: /socket.io/
+Crawl-delay: 3
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+# Host and Sitemaps
+Host: https://wolfsheep.fun
+Sitemap: https://wolfsheep.fun/sitemap.xml
