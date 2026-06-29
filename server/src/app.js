@@ -17,10 +17,11 @@ function handleGameEnd(roomId) {
     if (elo) auth.updateElo(elo.winnerId, elo.loserId);
 }
 
+// Ускоренная задержка хода бота (×2 быстрее)
 function getHumanDelay(moveCount) {
-    if (moveCount <= 3) return 200 + Math.floor(Math.random() * 400);
-    if (moveCount <= 8) return 250 + Math.floor(Math.random() * 4000);
-    return 300 + Math.floor(Math.random() * 2000);
+    if (moveCount <= 3) return 100 + Math.floor(Math.random() * 200);   // 0.1-0.3s
+    if (moveCount <= 8) return 125 + Math.floor(Math.random() * 2000); // 0.125-2.125s
+    return 150 + Math.floor(Math.random() * 1000);                      // 0.15-1.15s
 }
 
 roomManager = new RoomManager((roomId, room) => {
