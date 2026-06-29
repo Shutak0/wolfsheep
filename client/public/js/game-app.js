@@ -14,6 +14,7 @@
     const playAgainBtn = document.getElementById('playAgainBtn'), recBtn = document.getElementById('recBtn');
     const myDot = document.getElementById('my-dot'), opDot = document.getElementById('op-dot');
     const myName = document.getElementById('my-name'), opName = document.getElementById('op-name');
+    const myElo = document.getElementById('my-elo'), opElo = document.getElementById('op-elo');
     const myWalls = document.getElementById('my-walls'), opWalls = document.getElementById('op-walls');
     const myTimeEl = document.getElementById('my-time'), opTimeEl = document.getElementById('op-time');
     const myTimeText = document.getElementById('my-time-text'), opTimeText = document.getElementById('op-time-text');
@@ -111,6 +112,20 @@
         render();
     }
 
+    function updateNamesAndElo(d) {
+        var mc = d.color === 'red' ? 0 : 1, oc = 1 - mc;
+        // Имена — из player_assigned (с сервера) или fallback
+        if (d.playerName) myName.textContent = d.playerName;
+        else myName.textContent = UI.COLOR_NAMES[mc];
+        if (d.opponentName) opName.textContent = d.opponentName;
+        else opName.textContent = UI.COLOR_NAMES[oc];
+        // ELO
+        if (d.playerElo !== undefined) myElo.textContent = '🏆 ' + d.playerElo;
+        else myElo.textContent = '';
+        if (d.opponentElo !== undefined) opElo.textContent = '🏆 ' + d.opponentElo;
+        else opElo.textContent = '';
+    }
+
     network.onRoomCreated = (d) => {
         waitingOverlay.classList.add('show');
         waitRoomId.textContent = 'ID: ' + d.roomId;
@@ -120,7 +135,7 @@
     network.onPlayerAssigned = (d) => {
         myIndex = d.playerIndex;
         var mc = d.color === 'red' ? 0 : 1, oc = 1 - mc;
-        myName.textContent = UI.COLOR_NAMES[mc]; opName.textContent = UI.COLOR_NAMES[oc];
+        updateNamesAndElo(d);
         myDot.className = 'dot ' + DOT_CLASSES[mc]; opDot.className = 'dot ' + DOT_CLASSES[oc];
         var myAnimal = d.color === 'red' ? 'Wolf' : 'Sheep', opAnimal = d.color === 'red' ? 'Sheep' : 'Wolf';
         myDot.innerHTML = '<img src="/imgs/' + myAnimal + '.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';

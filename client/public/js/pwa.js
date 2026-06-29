@@ -46,8 +46,8 @@
     // Не показываем, если юзер уже закрывал баннер недавно (< 7 дней)
     if (wasDismissedRecently()) return;
 
-    // Показываем баннер с задержкой — только когда юзер освоился на странице
-    scheduleBanner();
+    // Показываем баннер сразу на мобильных устройствах
+    showBanner();
   });
 
   // ======== 3. Событие appinstalled — скрываем баннер ========
@@ -76,21 +76,7 @@
     }
   }
 
-  // ======== 6. Планируем показ баннера с задержкой ========
-  function scheduleBanner() {
-    // Показываем через 30 секунд — ненавязчиво, когда юзер уже на странице
-    setTimeout(function () {
-      // Перепроверяем условия
-      if (isStandalone()) return;
-      if (shownThisSession) return;
-      if (wasDismissedRecently()) return;
-      if (!deferredPrompt) return;
-
-      showBanner();
-    }, 30000);
-  }
-
-  // ======== 7. Показываем мини-баннер внизу ========
+  // ======== 6. Показываем мини-баннер внизу (сразу) ========
   function showBanner() {
     if (installBanner) return;
 
@@ -101,8 +87,8 @@
     installBanner.innerHTML =
       '<div class="pwa-banner-inner">' +
         '<span class="pwa-banner-icon">🐺</span>' +
-        '<span class="pwa-banner-text">Установи приложение WolfSheep</span>' +
-        '<button class="pwa-banner-btn" id="pwa-install-yes">Установить</button>' +
+        '<span class="pwa-banner-text">📱 Установи приложение WolfSheep (APK)</span>' +
+        '<button class="pwa-banner-btn" id="pwa-install-yes">⚡ Установить APK</button>' +
         '<button class="pwa-banner-close" id="pwa-install-close" aria-label="Закрыть">✕</button>' +
       '</div>';
 

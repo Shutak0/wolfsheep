@@ -50,10 +50,6 @@ function verifyToken(token) {
 }
 
 // ==================== Google OAuth ====================
-/**
- * Проверяет Google ID-токен и возвращает данные пользователя.
- * Если пользователь с таким googleId не найден — создаёт нового.
- */
 async function googleAuth(idToken) {
     if (!idToken) return { success: false, error: 'No token provided.' };
 
@@ -78,13 +74,11 @@ async function googleAuth(idToken) {
     let user = findUserByGoogleId(db, googleId);
 
     if (user) {
-        // Обновляем имя/аватар при каждом входе (не ник!)
         user.email = email;
         user.name = name;
         user.picture = picture;
         saveDb(db);
     } else {
-        // Регистрируем нового пользователя
         user = {
             id: db.nextId++,
             googleId,
@@ -99,7 +93,7 @@ async function googleAuth(idToken) {
                 wins: 0,
                 losses: 0,
             },
-            nick: name.trim(), // начальный ник = name, можно сменить один раз
+            nick: name.trim(),
         };
         db.users.push(user);
         saveDb(db);
@@ -127,7 +121,6 @@ function setNick(userId, nick) {
     const db = loadDb();
     const user = findUserById(db, userId);
     if (!user) return { success: false, error: 'Пользователь не найден.' };
-    if (user.nick !== user.username) return { success: false, error: 'Ник уже задан и не может быть изменён.' };
     if (!nick || nick.trim().length < 2) return { success: false, error: 'Ник слишком короткий.' };
     user.nick = nick.trim();
     saveDb(db);
@@ -149,7 +142,7 @@ function getProfile(userId) {
     };
 }
 
-// ==================== Статистика и ELO (без изменений) ====================
+// ==================== Статистика и ELO ====================
 function updateStats(userId, didWin) {
     const db = loadDb();
     const user = findUserById(db, userId);
@@ -179,6 +172,21 @@ function updateElo(winnerId, loserId) {
     saveDb(db);
 }
 
+// Расчёт ELO против виртуального бота с таким же рейтингом (±16 очков)
+function updateBotRating(userId, didWin) {
+    const db = loadDb();
+    const user = findUserById(db, userId);
+    if (!user) return;
+    const R = user.rating || 1000;
+    const K = 32;
+    // Виртуальный противник имеет такой же рейтинг → E = 0.5
+    // Победитель: +16, проигравший: -16
+    const score = didWin ? 1 : 0;
+    const E = 0.5;
+    user.rating = Math.round(R + K * (score - E));
+    saveDb(db);
+}
+
 function getLeaderboard(limit) {
     const db = loadDb();
     const sorted = db.users
@@ -196,7 +204,6 @@ module.exports = {
     setNick,
     updateStats,
     updateElo,
+    updateBotRating,
     getLeaderboard,
 };
-
-// Устаревшие методы — удалены: register, login

@@ -110,6 +110,7 @@ canvas { display:block; border-radius:10px; cursor:pointer; background:#0a0a0a; 
 .player-block .pname { color:#c084fc; font-weight:600; font-size:16px; }
 .player-block .pwalls { color:#94a3b8; font-size:14px; background:rgba(0,0,0,0.5); padding:4px 16px; border-radius:30px; }
 .player-block .pwalls span { color:#00ffff; font-weight:700; }
+.player-elo { color:#fbbf24; font-size:12px; font-weight:600; letter-spacing:0.5px; text-shadow:0 0 8px rgba(251,191,36,0.3); text-align:center; }
 .time-box { width:100%; text-align:center; padding:6px 10px; border-radius:12px; border:2px solid #2a1a5a; background:rgba(10,5,25,0.8); font-size:24px; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:2px; color:#c084fc; text-shadow:0 0 12px #8a2be2; transition:0.3s; }
 .time-box.warning { color:#ffaa00; border-color:#ffaa00; animation:pulse 0.6s infinite alternate; }
 .time-box.danger { color:#ff3366; border-color:#ff3366; animation:pulse 0.3s infinite alternate; }
@@ -265,7 +266,7 @@ canvas, button, .mode-card, .tc-btn, .game-btn, .profile-save, .auth-btn {
     .footer-links { gap:10px; }
 }
 
-/* ========== PWA Install Banner ========== */
+/* ========== PWA Install Banner (+40% larger) ========== */
 #pwa-install-banner {
   position: fixed;
   bottom: 0;
@@ -287,20 +288,20 @@ canvas, button, .mode-card, .tc-btn, .game-btn, .profile-save, .auth-btn {
   box-shadow: 0 -4px 30px rgba(138, 43, 226, 0.35);
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
+  gap: 14px;
+  padding: 17px 16px;
   max-width: 500px;
   margin: 0 auto;
   pointer-events: auto;
 }
 .pwa-banner-icon {
-  font-size: 28px;
+  font-size: 39px;
   flex-shrink: 0;
 }
 .pwa-banner-text {
   flex: 1;
   color: #e0e0f0;
-  font-size: 14px;
+  font-size: 20px;
   font-weight: 600;
   letter-spacing: 0.3px;
   white-space: nowrap;
@@ -311,9 +312,9 @@ canvas, button, .mode-card, .tc-btn, .game-btn, .profile-save, .auth-btn {
   background: #8a2be2;
   color: #fff;
   border: none;
-  padding: 8px 18px;
+  padding: 11px 25px;
   border-radius: 24px;
-  font-size: 13px;
+  font-size: 18px;
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
@@ -329,7 +330,7 @@ canvas, button, .mode-card, .tc-btn, .game-btn, .profile-save, .auth-btn {
   background: none;
   border: none;
   color: #64748b;
-  font-size: 18px;
+  font-size: 25px;
   cursor: pointer;
   padding: 4px 8px;
   flex-shrink: 0;
@@ -342,17 +343,17 @@ canvas, button, .mode-card, .tc-btn, .game-btn, .profile-save, .auth-btn {
 
 @media (max-width: 600px) {
   .pwa-banner-inner {
-    gap: 6px;
-    padding: 10px 12px;
+    gap: 8px;
+    padding: 14px 12px;
   }
   .pwa-banner-text {
-    font-size: 12px;
+    font-size: 17px;
   }
   .pwa-banner-btn {
-    font-size: 12px;
-    padding: 6px 14px;
+    font-size: 17px;
+    padding: 8px 20px;
   }
   .pwa-banner-icon {
-    font-size: 24px;
+    font-size: 34px;
   }
 }

@@ -10,26 +10,23 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIO(server, { cors: { origin: "*", methods: ["GET", "POST"] } });
 
-let roomManager; // объявим ниже
+let roomManager;
 
-// Единая точка для применения статистики и ELO после завершения игры
 function handleGameEnd(roomId) {
     const elo = roomManager.tryApplyStatsAndElo(roomId);
     if (elo) auth.updateElo(elo.winnerId, elo.loserId);
 }
 
-// Человеческая задержка хода бота (2-3× быстрее, миттельшпиль — шире рандом)
 function getHumanDelay(moveCount) {
-    if (moveCount <= 3) return 200 + Math.floor(Math.random() * 400);        // 0.2-0.6s  (~3× быстрее)
-    if (moveCount <= 8) return 250 + Math.floor(Math.random() * 4000);       // 0.25-4.25s (миттельшпиль: широчайший рандом)
-    return 300 + Math.floor(Math.random() * 2000);                            // 0.3-2.3s  (~2× быстрее)
+    if (moveCount <= 3) return 200 + Math.floor(Math.random() * 400);
+    if (moveCount <= 8) return 250 + Math.floor(Math.random() * 4000);
+    return 300 + Math.floor(Math.random() * 2000);
 }
 
 roomManager = new RoomManager((roomId, room) => {
     if (room && room.status === 'playing') {
         io.to(roomId).emit('game_state', room.state);
     } else if (room && room.status === 'finished') {
-        // При таймауте тоже применяем статистику и ELO (один раз)
         handleGameEnd(roomId);
         io.to(roomId).emit('game_state', room.state);
         const winnerName = room.playerNames[room.winner];
@@ -41,6 +38,29 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../../client/public')));
 app.use('/imgs', express.static(path.join(__dirname, '..', 'imgs')));
+
+function getPlayerElo(userId) {
+    if (!userId) return 1000;
+    const profile = auth.getProfile(userId);
+    return profile ? (profile.rating || 1000) : 1000;
+}
+
+function buildPlayerAssigned(room, playerIndex) {
+    const colorMap = ['red', 'green'];
+    const color = colorMap[playerIndex] || 'red';
+    const otherIndex = 1 - playerIndex;
+    const playerId = room.userIds[playerIndex];
+    const otherId = room.userIds[otherIndex];
+    return {
+        playerIndex,
+        color,
+        timeControl: room.timeControlName,
+        playerName: room.playerNames[playerIndex] || color,
+        playerElo: getPlayerElo(playerId),
+        opponentName: room.playerNames[otherIndex] || colorMap[otherIndex] || 'green',
+        opponentElo: room.isBotRoom ? getPlayerElo(playerId) : getPlayerElo(otherId),
+    };
+}
 
 // ---------- JWT Auth Middleware ----------
 function authMiddleware(req, res, next) {
@@ -55,7 +75,6 @@ function authMiddleware(req, res, next) {
 }
 
 // ---------- REST Auth ----------
-// Google OAuth: клиент присылает ID-токен, сервер проверяет → возвращает JWT
 app.post('/api/auth/google', async (req, res) => {
     const { idToken } = req.body;
     if (!idToken) return res.json({ success: false, error: 'No idToken provided.' });
@@ -68,14 +87,12 @@ app.post('/api/auth/google', async (req, res) => {
     }
 });
 
-// Получить профиль (требуется JWT)
 app.get('/api/profile', authMiddleware, (req, res) => {
     const profile = auth.getProfile(req.userId);
     if (!profile) return res.json({ success: false, error: 'User not found' });
     res.json({ success: true, profile });
 });
 
-// Обновить ник (требуется JWT)
 app.post('/api/profile/nick', authMiddleware, (req, res) => {
     const { nick } = req.body;
     if (!nick) return res.json({ success: false, error: 'No nick provided.' });
@@ -99,9 +116,8 @@ io.on('connection', (socket) => {
         socket.join(roomId);
         const room = roomManager.getRoom(roomId);
         socket.emit('room_created', { roomId, timeControl: tc });
-        socket.emit('player_assigned', { playerIndex: 0, color: 'red' });
+        socket.emit('player_assigned', buildPlayerAssigned(room, 0));
         socket.emit('game_state', room.state);
-        // game_started отправляем только когда оба игрока в комнате
     });
 
     socket.on('join_room', ({ roomId, playerName, color, userId }) => {
@@ -110,16 +126,14 @@ io.on('connection', (socket) => {
         socket.join(roomId);
         const room = roomManager.getRoom(roomId);
         const playerIndex = room.players.indexOf(socket.id);
-        const colorMap = ['red', 'green'];
-        const assignedColor = colorMap[playerIndex];
         socket.emit('room_joined', { roomId });
-        socket.emit('player_assigned', { playerIndex, color: assignedColor, timeControl: room.timeControlName });
+        socket.emit('player_assigned', buildPlayerAssigned(room, playerIndex));
         socket.emit('game_state', room.state);
         io.to(roomId).emit('game_started');
         const otherIndex = 1 - playerIndex;
         const otherSocketId = room.players[otherIndex];
         if (otherSocketId) {
-            io.to(otherSocketId).emit('player_assigned', { playerIndex: otherIndex, color: colorMap[otherIndex], timeControl: room.timeControlName });
+            io.to(otherSocketId).emit('player_assigned', buildPlayerAssigned(room, otherIndex));
         }
         const updatedRoom = roomManager.getRoom(roomId);
         if (updatedRoom) io.to(roomId).emit('game_state', updatedRoom.state);
@@ -131,13 +145,11 @@ io.on('connection', (socket) => {
         socket.join(roomId);
         const room = roomManager.getRoom(roomId);
         const playerIndex = room.socketToPlayer.get(socket.id);
-        const colorMap = ['red', 'green'];
-        const assignedColor = colorMap[playerIndex !== undefined ? playerIndex : 0];
+        const idx = playerIndex !== undefined ? playerIndex : 0;
         socket.emit('room_created', { roomId: roomId, timeControl: tc, isBot: true });
-        socket.emit('player_assigned', { playerIndex: playerIndex !== undefined ? playerIndex : 0, color: assignedColor, timeControl: tc });
+        socket.emit('player_assigned', buildPlayerAssigned(room, idx));
         socket.emit('game_state', room.state);
         socket.emit('game_started');
-        // Если ход бота — делаем первый ход с человеческой задержкой
         if (room.state.turn === (room.players[0] === 'bot' ? 0 : 1)) {
             const delay = getHumanDelay(0);
             setTimeout(() => {
@@ -158,9 +170,8 @@ io.on('connection', (socket) => {
         socket.join(result.roomId);
         if (result.isNew) {
             socket.emit('room_created', { roomId: result.roomId, timeControl: tc });
-            socket.emit('player_assigned', { playerIndex: 0, color: 'red', timeControl: tc });
+            socket.emit('player_assigned', buildPlayerAssigned(room, 0));
             socket.emit('game_state', room.state);
-            // Таймер 10с: если не нашёлся соперник — незаметно подключаем бота
             const fallbackRoomId = result.roomId;
             setTimeout(() => {
                 const fbRoom = roomManager.getRoom(fallbackRoomId);
@@ -168,12 +179,10 @@ io.on('connection', (socket) => {
                     const conv = roomManager.convertToBotRoom(fallbackRoomId);
                     if (conv) {
                         const updated = roomManager.getRoom(fallbackRoomId);
-                        const colorMap = ['red', 'green'];
                         const humanIdx = conv.humanIndex;
-                        socket.emit('player_assigned', { playerIndex: humanIdx, color: colorMap[humanIdx], timeControl: tc });
+                        socket.emit('player_assigned', buildPlayerAssigned(updated, humanIdx));
                         socket.emit('game_state', updated.state);
                         socket.emit('game_started');
-                        // Первый ход бота если нужно
                         const botIdx = 1 - humanIdx;
                         if (updated.state.turn === botIdx) {
                             const delay = getHumanDelay(0);
@@ -187,16 +196,14 @@ io.on('connection', (socket) => {
             }, 10000);
         } else {
             const playerIndex = room.players.indexOf(socket.id);
-            const colorMap = ['red', 'green'];
-            const assignedColor = colorMap[playerIndex];
             socket.emit('room_joined', { roomId: result.roomId, timeControl: tc });
-            socket.emit('player_assigned', { playerIndex, color: assignedColor, timeControl: room.timeControlName });
+            socket.emit('player_assigned', buildPlayerAssigned(room, playerIndex));
             socket.emit('game_state', room.state);
             io.to(result.roomId).emit('game_started');
             const otherIndex = 1 - playerIndex;
             const otherSocketId = room.players[otherIndex];
             if (otherSocketId) {
-                io.to(otherSocketId).emit('player_assigned', { playerIndex: otherIndex, color: colorMap[otherIndex], timeControl: room.timeControlName });
+                io.to(otherSocketId).emit('player_assigned', buildPlayerAssigned(room, otherIndex));
             }
             const updatedRoom = roomManager.getRoom(result.roomId);
             if (updatedRoom) io.to(result.roomId).emit('game_state', updatedRoom.state);
@@ -216,7 +223,6 @@ io.on('connection', (socket) => {
             const winnerName = room.playerNames[room.winner];
             io.to(roomId).emit('game_over', { winner: room.winner, winnerName, winReason: room.state.winReason || 'target' });
         }
-        // Если это бот-комната и сейчас ход бота — делаем ход с человеческой задержкой
         if (room && room.isBotRoom && room.status === 'playing') {
             const botIndex = room.players[0] === 'bot' ? 0 : 1;
             if (room.state.turn === botIndex) {

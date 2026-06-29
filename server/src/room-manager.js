@@ -25,7 +25,8 @@ class RoomManager {
             socketToPlayer: new Map(),
             timeControlName: timeControlName || '1+5',
             eloApplied: false,
-            isGuestRoom: !userId, // комната создана гостем
+            statsApplied: false,
+            isGuestRoom: !userId,
         };
         room.socketToPlayer.set(hostSocketId, 0);
         this.rooms.set(roomId, room);
@@ -36,7 +37,6 @@ class RoomManager {
         const room = this.rooms.get(roomId);
         if (!room) return { success: false, error: 'Комната не найдена' };
         if (room.players[1] !== null) return { success: false, error: 'Комната уже заполнена' };
-        // Гости не могут заходить в комнаты авторизованных и наоборот
         const isGuest = !userId;
         if (room.isGuestRoom !== isGuest) {
             return { success: false, error: 'Нельзя смешивать гостевые и авторизованные комнаты.' };
@@ -79,7 +79,6 @@ class RoomManager {
         const isGuest = !userId;
         for (let [roomId, room] of this.rooms) {
             if (room.status === 'waiting' && room.players[1] === null && room.timeControlName === targetTC) {
-                // Гости матчатся только с комнатами гостей
                 if (room.isGuestRoom === isGuest) {
                     const result = this.joinRoom(roomId, socketId, playerName, colorPreference, userId);
                     if (result.success) return { roomId, isNew: false };
@@ -133,21 +132,37 @@ class RoomManager {
         return { success: true, newState: room.state };
     }
 
-    // Применить статистику и ELO (один раз). Возвращает { winnerId, loserId } или null
+    // Применить статистику и ELO однократно.
     tryApplyStatsAndElo(roomId) {
         const room = this.rooms.get(roomId);
         if (!room || room.statsApplied) return null;
         if (room.winner === null || room.winner === undefined) return null;
         room.statsApplied = true;
-        // Статистика
+
+        // Статистика — только для реальных пользователей (не бот)
         for (let i = 0; i < 2; i++) {
-            if (room.userIds[i]) auth.updateStats(room.userIds[i], i === room.winner);
+            if (room.userIds[i] && room.players[i] !== 'bot') {
+                auth.updateStats(room.userIds[i], i === room.winner);
+            }
         }
-        // ELO — только если оба авторизованы (включая случай бота с дублированным userId)
-        if (room.userIds[0] && room.userIds[1] && !room.eloApplied) {
+
+        // ELO — если оба авторизованы и это не бот-комната
+        if (!room.isBotRoom && room.userIds[0] && room.userIds[1] && !room.eloApplied) {
             room.eloApplied = true;
             return { winnerId: room.userIds[room.winner], loserId: room.userIds[1 - room.winner] };
         }
+
+        // Для бот-комнаты: ELO против виртуального равного соперника (±16)
+        if (room.isBotRoom && !room.eloApplied) {
+            room.eloApplied = true;
+            const humanIdx = room.players[0] === 'bot' ? 1 : 0;
+            const humanId = room.userIds[humanIdx];
+            if (humanId) {
+                const didWin = humanIdx === room.winner;
+                auth.updateBotRating(humanId, didWin);
+            }
+        }
+
         return null;
     }
 
@@ -158,13 +173,12 @@ class RoomManager {
             const room = self.rooms.get(roomId);
             if (!room || room.status !== 'playing') { self.stopTimer(roomId); return; }
 
-            // Время тикает для текущего игрока (включая бота)
             const timedOut = Engine.tickTime(room.state, 1000);
             if (timedOut) {
                 room.status = 'finished';
                 room.winner = room.state.winner;
                 self.stopTimer(roomId);
-                if (self.onTick) self.onTick(roomId, room); // отправить game_state + game_over клиентам
+                if (self.onTick) self.onTick(roomId, room);
                 return;
             }
 
@@ -173,48 +187,54 @@ class RoomManager {
         this.timers.set(roomId, interval);
     }
 
-    // ---------- бот ----------
+    // ==================== БОТ ====================
+
+    generateBotNick() {
+        const prefixes = ['Player', 'Shadow', 'Wolf', 'Sheep', 'Raven', 'Blitz', 'Neon', 'Stryker', 'Zed', 'Kai', 'Rex', 'Max', 'Axel', 'Dash', 'Hunter'];
+        const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+        const num = Math.floor(Math.random() * 900) + 100;
+        return prefix + num;
+    }
+
     createBotRoom(socketId, playerName, colorPreference, timeControlName, userId) {
         const roomId = this.generateRoomId();
         const tc = Engine.TIME_PRESETS[timeControlName] || Engine.TIME_PRESETS['1+5'];
         const state = Engine.initState(tc);
+        const botNick = this.generateBotNick();
         const room = {
             players: [socketId, 'bot'],
-            playerNames: [playerName, '🤖 Bot'],
+            playerNames: [playerName, botNick],
             userIds: [userId || null, null],
             state: state,
-            status: 'waiting', // сразу начнём
+            status: 'waiting',
             winner: null,
             colorPreference: [colorPreference || 'auto', 'auto'],
             socketToPlayer: new Map(),
             timeControlName: timeControlName || '1+5',
             eloApplied: false,
+            statsApplied: false,
             isGuestRoom: false,
             isBotRoom: true,
         };
         room.socketToPlayer.set(socketId, 0);
-        // Даём боту userId игрока для ELO
-        room.userIds = [userId || null, userId || null];
-        // Рандомный выбор стороны бота (50/50)
         if (Math.random() < 0.5) {
             room.players = ['bot', socketId];
-            room.playerNames = ['🤖 Bot', playerName];
+            room.playerNames = [botNick, playerName];
+            room.userIds = [null, userId || null];
             room.socketToPlayer.clear();
             room.socketToPlayer.set(socketId, 1);
         }
         room.status = 'playing';
         this.rooms.set(roomId, room);
-        // Запускаем таймер для бот-комнаты (тики нужны для времени игрока)
         this.startTimer(roomId);
         return roomId;
     }
 
-    // Бот делает ход
     applyBotMove(roomId) {
         const room = this.rooms.get(roomId);
         if (!room || room.status !== 'playing' || !room.isBotRoom) return null;
         const botIndex = room.players[0] === 'bot' ? 0 : 1;
-        if (room.state.turn !== botIndex) return null; // не ход бота
+        if (room.state.turn !== botIndex) return null;
         const move = BotEngine.makeMove(room.state, botIndex);
         if (!move) return null;
 
@@ -228,7 +248,6 @@ class RoomManager {
         return { newState: room.state, move: move, success: true };
     }
 
-    // Конвертировать ожидающую комнату в бот-комнату (fallback)
     convertToBotRoom(roomId) {
         const room = this.rooms.get(roomId);
         if (!room || room.status !== 'waiting') return false;
@@ -237,17 +256,17 @@ class RoomManager {
         const tcName = room.timeControlName;
         const tc = Engine.TIME_PRESETS[tcName] || Engine.TIME_PRESETS['1+5'];
         const state = Engine.initState(tc);
+        const botNick = this.generateBotNick();
 
-        // Случайная сторона для бота + даём боту userId игрока для ELO
         const botIsWolf = Math.random() < 0.5;
         if (botIsWolf) {
             room.players = ['bot', room.players[0]];
-            room.playerNames = ['🤖 Bot', playerName];
-            room.userIds = [userId || null, userId || null]; // бот = тот же userId для ELO
+            room.playerNames = [botNick, playerName];
+            room.userIds = [null, userId || null];
         } else {
             room.players = [room.players[0], 'bot'];
-            room.playerNames = [playerName, '🤖 Bot'];
-            room.userIds = [userId || null, userId || null];
+            room.playerNames = [playerName, botNick];
+            room.userIds = [userId || null, null];
         }
         room.socketToPlayer.clear();
         const humanIdx = botIsWolf ? 1 : 0;
@@ -255,7 +274,9 @@ class RoomManager {
         room.state = state;
         room.status = 'playing';
         room.isBotRoom = true;
-        room._botMoveCount = 0; // счётчик ходов бота для "человеческого" поведения
+        room.statsApplied = false;
+        room.eloApplied = false;
+        room._botMoveCount = 0;
         this.startTimer(roomId);
         return { humanIndex: humanIdx, botIsWolf };
     }
