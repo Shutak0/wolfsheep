@@ -99,6 +99,7 @@
             walls: [],
             validMoves: [],
             timeControl: tc,
+            positionHistory: [],
         };
         state.validMoves = computeValidMoves(state);
         return state;
@@ -223,6 +224,14 @@
         return { success: true };
     }
 
+    function posKey(state) {
+        const p0 = state.players[0], p1 = state.players[1];
+        let vh = 0, hh = 0;
+        for (let r = 0; r < 8; r++) for (let c = 0; c < 9; c++) if (state.vEdge[r][c]) vh ^= (1 << ((r * 9 + c) & 31));
+        for (let r = 0; r < 9; r++) for (let c = 0; c < 8; c++) if (state.hEdge[r][c]) hh ^= (1 << ((r * 8 + c) & 31));
+        return `${p0.row},${p0.col}|${p1.row},${p1.col}|${vh}|${hh}`;
+    }
+
     function tryMove(state, row, col) {
         if (state.gameOver) return { success: false, message: 'Game over.' };
         const p = state.turn;
@@ -241,6 +250,20 @@
         state.turn = otherPlayer(state.turn);
         computeValidMoves(state);
         if (!state.validMoves.length) { state.turn = otherPlayer(state.turn); computeValidMoves(state); }
+
+        // Проверка трёхкратного повторения позиции
+        if (!state.positionHistory) state.positionHistory = [];
+        const key = posKey(state);
+        state.positionHistory.push(key);
+        let count = 0;
+        for (const h of state.positionHistory) {
+            if (h === key) count++;
+        }
+        if (count >= 3) {
+            state.gameOver = true;
+            state.winner = null;  // ничья
+            state.winReason = 'repetition';
+        }
     }
 
     function tickTime(state, deltaMs) {

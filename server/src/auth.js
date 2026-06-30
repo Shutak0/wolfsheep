@@ -1,8 +1,9 @@
-// auth.js — Google OAuth + JWT аутентификация WolfSheep
+// auth.js — Google OAuth + Password Auth + JWT аутентификация WolfSheep
 require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 const fs = require('fs');
 const path = require('path');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const { OAuth2Client } = require('google-auth-library');
 
 const DB_PATH = path.join(__dirname, '..', 'db.json');
@@ -10,6 +11,15 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fallback-dev-secret';
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
+
+// ==================== Ник-генератор (общий для ботов и новых пользователей) ====================
+const BOT_PREFIXES = ['Player', 'Shadow', 'Wolf', 'Sheep', 'Raven', 'Blitz', 'Neon', 'Stryker', 'Zed', 'Kai', 'Rex', 'Max', 'Axel', 'Dash', 'Hunter'];
+
+function generateNick() {
+    const prefix = BOT_PREFIXES[Math.floor(Math.random() * BOT_PREFIXES.length)];
+    const num = Math.floor(Math.random() * 900) + 100;
+    return prefix + num;
+}
 
 // ==================== DB helpers ====================
 function loadDb() {
@@ -35,7 +45,7 @@ function findUserById(db, userId) {
 // ==================== JWT helpers ====================
 function generateToken(user) {
     return jwt.sign(
-        { userId: user.id, googleId: user.googleId },
+        { userId: user.id, googleId: user.googleId || null },
         JWT_SECRET,
         { expiresIn: '7d' }
     );
@@ -47,6 +57,86 @@ function verifyToken(token) {
     } catch (e) {
         return null;
     }
+}
+
+// ==================== Password Auth ====================
+function registerWithPassword(username, password) {
+    if (!username || username.trim().length < 2) return { success: false, error: 'Логин должен быть не менее 2 символов.' };
+    if (!password || password.length < 4) return { success: false, error: 'Пароль должен быть не менее 4 символов.' };
+
+    const db = loadDb();
+    const trimmed = username.trim();
+
+    // Проверяем, не занят ли username
+    const existing = db.users.find(u =>
+        u.username === trimmed || u.nick === trimmed
+    );
+    if (existing) return { success: false, error: 'Этот логин уже занят.' };
+
+    const hash = bcrypt.hashSync(password, 10);
+    const nick = generateNick();
+
+    const user = {
+        id: db.nextId++,
+        googleId: null,
+        email: '',
+        name: trimmed,
+        picture: '',
+        username: trimmed,
+        password: hash,
+        createdAt: new Date().toISOString(),
+        rating: 1000,
+        stats: { games: 0, wins: 0, losses: 0 },
+        nick: nick,
+    };
+
+    db.users.push(user);
+    saveDb(db);
+
+    const token = generateToken(user);
+
+    return {
+        success: true,
+        token,
+        user: {
+            id: user.id,
+            username: user.username,
+            nick: user.nick,
+            rating: user.rating,
+            stats: user.stats,
+            email: user.email,
+            picture: user.picture,
+        },
+    };
+}
+
+function loginWithPassword(username, password) {
+    if (!username || !password) return { success: false, error: 'Введите логин и пароль.' };
+
+    const db = loadDb();
+    const user = db.users.find(u =>
+        u.username === username.trim() && u.password
+    );
+    if (!user) return { success: false, error: 'Неверный логин или пароль.' };
+
+    const valid = bcrypt.compareSync(password, user.password);
+    if (!valid) return { success: false, error: 'Неверный логин или пароль.' };
+
+    const token = generateToken(user);
+
+    return {
+        success: true,
+        token,
+        user: {
+            id: user.id,
+            username: user.username,
+            nick: user.nick,
+            rating: user.rating,
+            stats: user.stats,
+            email: user.email,
+            picture: user.picture,
+        },
+    };
 }
 
 // ==================== Google OAuth ====================
@@ -93,7 +183,7 @@ async function googleAuth(idToken) {
                 wins: 0,
                 losses: 0,
             },
-            nick: name.trim(),
+            nick: generateNick(),
         };
         db.users.push(user);
         saveDb(db);
@@ -199,6 +289,8 @@ function getLeaderboard(limit) {
 
 module.exports = {
     googleAuth,
+    registerWithPassword,
+    loginWithPassword,
     verifyToken,
     getProfile,
     setNick,
@@ -206,4 +298,5 @@ module.exports = {
     updateElo,
     updateBotRating,
     getLeaderboard,
+    generateNick,
 };

@@ -6,7 +6,7 @@
 
     <!-- Primary Meta Tags -->
     <title>Sign In — WolfSheep | Free Online Strategy Board Game</title>
-    <meta name="description" content="Sign in to WolfSheep with your Google account to save your progress, climb the leaderboard, and unlock your nickname. Free strategy board game — no ads, no paywalls."/>
+    <meta name="description" content="Sign in to WolfSheep with your Google account or create a login/password to save your progress, climb the leaderboard, and unlock your nickname. Free strategy board game — no ads, no paywalls."/>
     <meta name="keywords" content="wolf sheep login, sign in, quoridor account, board game profile, ELO rating, game statistics"/>
     <meta name="author" content="WolfSheep"/>
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large"/>
@@ -30,7 +30,7 @@
 
     <!-- Open Graph -->
     <meta property="og:title" content="Sign In — WolfSheep | Free Online Strategy Board Game"/>
-    <meta property="og:description" content="Sign in with Google to save progress, climb the leaderboard, and unlock your WolfSheep nickname."/>
+    <meta property="og:description" content="Sign in with Google or create a login/password to save progress, climb the leaderboard, and unlock your WolfSheep nickname."/>
     <meta property="og:type" content="website"/>
     <meta property="og:url" content="https://wolfsheep.fun/login.html"/>
     <meta property="og:image" content="https://wolfsheep.fun/imgs/Wolf.png"/>
@@ -43,7 +43,7 @@
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary"/>
     <meta name="twitter:title" content="Sign In — WolfSheep | Free Strategy Board Game"/>
-    <meta name="twitter:description" content="Sign in with Google to save progress and climb the leaderboard."/>
+    <meta name="twitter:description" content="Sign in with Google or create a login/password to save progress and climb the leaderboard."/>
     <meta name="twitter:image" content="https://wolfsheep.fun/imgs/Wolf.png"/>
 
     <!-- DNS Prefetch & Preconnect -->
@@ -60,12 +60,30 @@
     <style>
         .auth-container { max-width:400px; width:100%; background:#0d0d1a; border:2px solid #2a1a5a; border-radius:20px; padding:36px 32px; box-shadow:0 0 40px rgba(138,43,226,0.2); text-align:center; }
         .auth-container p { color:#94a3b8; font-size:14px; margin-bottom:24px; }
-        .google-btn-wrapper { display:flex; justify-content:center; margin-bottom:16px; }
+        .google-btn-wrapper { display:flex; justify-content:center; margin-bottom:20px; }
+        .auth-divider { display:flex; align-items:center; margin:20px 0 16px; color:#4a3a6a; }
+        .auth-divider::before, .auth-divider::after { content:''; flex:1; border-bottom:1px solid #2a1a5a; }
+        .auth-divider span { padding:0 12px; font-size:12px; color:#6a5a8a; }
+        .auth-form { display:flex; flex-direction:column; gap:12px; }
+        .auth-form input { background:#1a1a3e; border:1px solid #2a1a5a; border-radius:10px; padding:12px 16px; color:#e0e0f0; font-size:15px; outline:none; transition:border-color 0.2s; }
+        .auth-form input:focus { border-color:#8a43e2; }
+        .auth-form input::placeholder { color:#5a4a7a; }
+        .auth-form button { width:100%; padding:12px; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer; transition:all 0.2s; border:none; }
+        .btn-register { background:linear-gradient(135deg, #8a43e2, #6d28d9); color:#fff; }
+        .btn-register:hover { background:linear-gradient(135deg, #9b5aee, #7c3aed); transform:translateY(-1px); box-shadow:0 4px 20px rgba(138,67,226,0.4); }
+        .btn-login { background:transparent; border:1px solid #3a2a5a !important; color:#c084fc; }
+        .btn-login:hover { background:rgba(138,67,226,0.15); border-color:#8a43e2 !important; }
         .auth-error { color:#ff3366; font-size:13px; text-align:center; min-height:20px; margin-top:12px; }
-        .auth-play-guest { margin-top:16px; text-align:center; }
-        .auth-play-guest a { color:#94a3b8; text-decoration:underline; font-size:14px; }
+        .auth-play-guest { margin-top:20px; text-align:center; }
+        .auth-play-guest a { color:#c084fc; text-decoration:underline; font-size:18px; font-weight:600; transition:all 0.2s; }
+        .auth-play-guest a:hover { color:#a855f7; text-shadow:0 0 10px rgba(138,43,226,0.5); }
         .auth-loading { display:none; color:#c084fc; font-size:14px; animation:pulse 1.5s infinite; }
         @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+        .tab-switch { display:flex; gap:0; margin-bottom:20px; }
+        .tab-switch button { flex:1; padding:10px; border:1px solid #2a1a5a; background:transparent; color:#94a3b8; font-size:14px; cursor:pointer; transition:all 0.2s; }
+        .tab-switch button:first-child { border-radius:10px 0 0 10px; }
+        .tab-switch button:last-child { border-radius:0 10px 10px 0; }
+        .tab-switch button.active { background:rgba(138,67,226,0.25); color:#c084fc; border-color:#8a43e2; }
     </style>
 
     <!-- Structured Data: BreadcrumbList -->
@@ -100,7 +118,8 @@
     <div id="main-content">
         <h1 class="home-title" style="margin-top:20px;"><span class="wolf">WOLF</span><span class="sheep">SHEEP</span></h1>
         <div class="auth-container">
-            <p>Sign in with your Google account to save progress, climb the leaderboard, and unlock your WolfSheep nickname.</p>
+            <p>Sign in with your Google account or create a login/password to save progress, climb the leaderboard, and unlock your WolfSheep nickname.</p>
+
             <div class="google-btn-wrapper">
                 <div id="g_id_onload"
                      data-client_id="632162253266-42grlsk3jgboladf7ivb0lsontujrvsi.apps.googleusercontent.com"
@@ -116,7 +135,21 @@
                      data-logo_alignment="left">
                 </div>
             </div>
-            <div class="auth-loading" id="auth-loading">Signing in…</div>
+
+            <div class="auth-divider"><span>or</span></div>
+
+            <div class="tab-switch">
+                <button id="tab-register" class="active" onclick="switchTab('register')">Create Account</button>
+                <button id="tab-login" onclick="switchTab('login')">Sign In</button>
+            </div>
+
+            <form class="auth-form" id="auth-form">
+                <input type="text" id="username" placeholder="Login (min. 2 characters)" maxlength="24" autocomplete="username"/>
+                <input type="password" id="password" placeholder="Password (min. 4 characters)" maxlength="64" autocomplete="current-password"/>
+                <button type="button" class="btn-register" id="submit-btn">Create Account</button>
+            </form>
+
+            <div class="auth-loading" id="auth-loading">Please wait…</div>
             <div class="auth-error" id="auth-error"></div>
             <div class="auth-play-guest"><a href="/">Play without account</a></div>
         </div>

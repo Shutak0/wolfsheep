@@ -142,6 +142,20 @@ app.post('/api/auth/google', async (req, res) => {
     }
 });
 
+app.post('/api/auth/register', (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) return res.json({ success: false, error: 'Введите логин и пароль.' });
+    const result = auth.registerWithPassword(username, password);
+    res.json(result);
+});
+
+app.post('/api/auth/login', (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) return res.json({ success: false, error: 'Введите логин и пароль.' });
+    const result = auth.loginWithPassword(username, password);
+    res.json(result);
+});
+
 app.get('/api/profile', authMiddleware, (req, res) => {
     const profile = auth.getProfile(req.userId);
     if (!profile) return res.json({ success: false, error: 'User not found' });

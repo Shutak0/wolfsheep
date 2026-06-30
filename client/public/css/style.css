@@ -266,7 +266,7 @@ canvas, button, .mode-card, .tc-btn, .game-btn, .profile-save, .auth-btn {
     .footer-links { gap:10px; }
 }
 
-/* ========== PWA Install Banner (+40% larger) ========== */
+/* ========== PWA Install Banner (×2 larger) ========== */
 #pwa-install-banner {
   position: fixed;
   bottom: 0;
@@ -275,7 +275,7 @@ canvas, button, .mode-card, .tc-btn, .game-btn, .profile-save, .auth-btn {
   z-index: 9999;
   transform: translateY(100%);
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 8px 12px;
+  padding: 12px 18px;
   pointer-events: none;
 }
 #pwa-install-banner.pwa-banner-visible {
@@ -283,27 +283,27 @@ canvas, button, .mode-card, .tc-btn, .game-btn, .profile-save, .auth-btn {
 }
 .pwa-banner-inner {
   background: linear-gradient(135deg, #0d0d1a 0%, #1a1020 100%);
-  border: 1px solid #2a1a5a;
-  border-radius: 16px 16px 0 0;
-  box-shadow: 0 -4px 30px rgba(138, 43, 226, 0.35);
+  border: 2px solid #3a2a6a;
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -6px 40px rgba(138, 43, 226, 0.45);
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 17px 16px;
-  max-width: 500px;
+  gap: 18px;
+  padding: 24px 22px;
+  max-width: 600px;
   margin: 0 auto;
   pointer-events: auto;
 }
 .pwa-banner-icon {
-  font-size: 39px;
+  font-size: 56px;
   flex-shrink: 0;
 }
 .pwa-banner-text {
   flex: 1;
   color: #e0e0f0;
-  font-size: 20px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -312,25 +312,25 @@ canvas, button, .mode-card, .tc-btn, .game-btn, .profile-save, .auth-btn {
   background: #8a2be2;
   color: #fff;
   border: none;
-  padding: 11px 25px;
-  border-radius: 24px;
-  font-size: 18px;
+  padding: 16px 32px;
+  border-radius: 28px;
+  font-size: 22px;
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
   transition: all 0.2s;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.7px;
 }
 .pwa-banner-btn:hover {
   background: #a855f7;
-  box-shadow: 0 0 20px rgba(138, 43, 226, 0.6);
+  box-shadow: 0 0 25px rgba(138, 43, 226, 0.6);
 }
 .pwa-banner-close {
   background: none;
   border: none;
   color: #64748b;
-  font-size: 25px;
+  font-size: 31px;
   cursor: pointer;
   padding: 4px 8px;
   flex-shrink: 0;
@@ -343,17 +343,17 @@ canvas, button, .mode-card, .tc-btn, .game-btn, .profile-save, .auth-btn {
 
 @media (max-width: 600px) {
   .pwa-banner-inner {
-    gap: 8px;
-    padding: 14px 12px;
+    gap: 10px;
+    padding: 18px 14px;
   }
   .pwa-banner-text {
-    font-size: 17px;
+    font-size: 20px;
   }
   .pwa-banner-btn {
-    font-size: 17px;
-    padding: 8px 20px;
+    font-size: 20px;
+    padding: 10px 24px;
   }
   .pwa-banner-icon {
-    font-size: 34px;
+    font-size: 44px;
   }
 }

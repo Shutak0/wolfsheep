@@ -7,7 +7,7 @@
     if (!userId) {
         var banner = document.createElement('div');
         banner.id = 'guest-banner';
-        banner.style.cssText = 'position:fixed; top:56px; left:0; right:0; z-index:99; width:100%; background:#1a1020; border-bottom:1px solid #ffaa00; padding:8px 20px; text-align:center; color:#ffaa00; font-size:13px; line-height:1.4; backdrop-filter:blur(6px);';
+        banner.style.cssText = 'position:fixed; top:56px; left:0; right:0; z-index:99; width:100%; background:#1a1020; border-bottom:2px solid #ffaa00; padding:14px 20px; text-align:center; color:#ffaa00; font-size:17px; font-weight:700; line-height:1.5; backdrop-filter:blur(6px);';
         banner.innerHTML = __('guest_banner');
         document.body.appendChild(banner);
     }

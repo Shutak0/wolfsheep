@@ -189,18 +189,11 @@ class RoomManager {
 
     // ==================== БОТ ====================
 
-    generateBotNick() {
-        const prefixes = ['Player', 'Shadow', 'Wolf', 'Sheep', 'Raven', 'Blitz', 'Neon', 'Stryker', 'Zed', 'Kai', 'Rex', 'Max', 'Axel', 'Dash', 'Hunter'];
-        const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-        const num = Math.floor(Math.random() * 900) + 100;
-        return prefix + num;
-    }
-
     createBotRoom(socketId, playerName, colorPreference, timeControlName, userId) {
         const roomId = this.generateRoomId();
         const tc = Engine.TIME_PRESETS[timeControlName] || Engine.TIME_PRESETS['1+5'];
         const state = Engine.initState(tc);
-        const botNick = this.generateBotNick();
+        const botNick = auth.generateNick();
         const room = {
             players: [socketId, 'bot'],
             playerNames: [playerName, botNick],
@@ -256,7 +249,7 @@ class RoomManager {
         const tcName = room.timeControlName;
         const tc = Engine.TIME_PRESETS[tcName] || Engine.TIME_PRESETS['1+5'];
         const state = Engine.initState(tc);
-        const botNick = this.generateBotNick();
+        const botNick = auth.generateNick();
 
         const botIsWolf = Math.random() < 0.5;
         if (botIsWolf) {
