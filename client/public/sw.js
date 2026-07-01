@@ -1,5 +1,5 @@
 // WolfSheep Service Worker — кэширует статику, поддерживает офлайн
-const CACHE_NAME = 'wolfsheep-v1';
+const CACHE_NAME = 'wolfsheep-v3';
 
 const STATIC_ASSETS = [
   '/',
@@ -25,7 +25,11 @@ const STATIC_ASSETS = [
   '/js/game-ui.js',
   '/js/network.js',
   '/js/quoridor-engine.js',
-  '/js/nav-players.js'
+  '/js/nav-players.js',
+  '/emotes/emote-1.webp',
+  '/emotes/emote-2.webp',
+  '/emotes/emote-3.webp',
+  '/emotes/emote-4.webp'
 ];
 
 // Установка: кэшируем статику

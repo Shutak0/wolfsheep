@@ -275,6 +275,46 @@ class RoomManager {
     }
 
     stopTimer(roomId) { const i = this.timers.get(roomId); if (i) { clearInterval(i); this.timers.delete(roomId); } }
+
+    // ==================== BOT EMOTES ====================
+    getRandomBotEmote() {
+        const r = Math.random();
+        if (r < 0.40) return 1;      // 40%
+        if (r < 0.70) return 2;      // 30%
+        if (r < 0.80) return 3;      // 10%
+        return 4;                     // 20%
+    }
+
+    scheduleBotEmote(roomId) {
+        this.clearBotEmote(roomId);
+        const room = this.rooms.get(roomId);
+        if (!room || !room.isBotRoom || room.status !== 'playing') return;
+        const delay = 3000 + Math.floor(Math.random() * 7000); // 3–10s
+        const interval = setTimeout(() => {
+            const r = this.rooms.get(roomId);
+            if (!r || !r.isBotRoom || r.status !== 'playing') return;
+            const botIndex = r.players[0] === 'bot' ? 0 : 1;
+            // Не спамим в момент хода бота (пропускаем, запланируем следующий)
+            if (r.state.turn === botIndex) {
+                this.scheduleBotEmote(roomId);
+                return;
+            }
+            const emoteId = this.getRandomBotEmote();
+            // Сохраняем callback для отправки эмоции (вызывается извне)
+            if (this._onBotEmote) {
+                this._onBotEmote(roomId, botIndex, emoteId);
+            }
+            this.scheduleBotEmote(roomId);
+        }, delay);
+        if (!this._emoteTimers) this._emoteTimers = new Map();
+        this._emoteTimers.set(roomId, interval);
+    }
+
+    clearBotEmote(roomId) {
+        if (!this._emoteTimers) return;
+        const t = this._emoteTimers.get(roomId);
+        if (t) { clearTimeout(t); this._emoteTimers.delete(roomId); }
+    }
 }
 
 module.exports = RoomManager;

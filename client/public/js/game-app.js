@@ -25,6 +25,7 @@
     var network = new QuoridorNetwork();
     var myIndex = null, gameStarted = false;
     var DOT_CLASSES = ['p1', 'p2'];
+    var emoteCooldown = 0;
 
     function preloadDefaultImages() {
         var wolfImg = new Image();
@@ -217,6 +218,7 @@
     };
     network.onError = function (msg) { setStatus(__('game_error') + msg, false); };
     network.onOpponentDisconnected = function () { setStatus(__('game_opponent_left'), true); state.gameOver = true; render(); };
+    network.onEmote = function (d) { playEmoteAnim(d.emoteId, d.fromPlayer); };
 
     // ---- Кнопки ----
     surrenderBtn.addEventListener('click', function () { if (gameStarted && !state.gameOver) network.surrender(); });
@@ -301,6 +303,94 @@
     });
 
     document.querySelector('.wait-text').textContent = __('game_searching');
+
+    // ---- Emotes ----
+    var emoteWrapper = document.getElementById('emote-toggle-wrapper');
+    var emoteToggleBtn = document.getElementById('emote-toggle-btn');
+    var emoteFlyout = document.getElementById('emote-flyout');
+    var boardWrapper = document.getElementById('board-wrapper');
+    var emoteBtns = emoteFlyout.querySelectorAll('.emote-btn');
+    var flyoutOpen = false;
+
+    function toggleFlyout(show) {
+        flyoutOpen = typeof show === 'boolean' ? show : !flyoutOpen;
+        if (flyoutOpen) {
+            emoteFlyout.classList.add('open');
+            emoteToggleBtn.classList.add('active');
+        } else {
+            emoteFlyout.classList.remove('open');
+            emoteToggleBtn.classList.remove('active');
+        }
+    }
+
+    emoteToggleBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        toggleFlyout();
+    });
+
+    // Close flyout when clicking outside
+    document.addEventListener('click', function (e) {
+        if (flyoutOpen && !emoteWrapper.contains(e.target)) {
+            toggleFlyout(false);
+        }
+    });
+
+    function playEmoteAnim(emoteId, fromPlayer) {
+        if (!state || myIndex === null) return;
+        var pp = state.players[fromPlayer];
+        if (!pp) return;
+        var pieceX = UI.cellCenterX(pp.col), pieceY = UI.cellCenterY(pp.row);
+        // Конвертируем canvas-координаты в координаты относительно #board-wrapper
+        var canvasRect = canvas.getBoundingClientRect();
+        var wrapperRect = boardWrapper.getBoundingClientRect();
+        var scaleX = canvasRect.width / canvas.width, scaleY = canvasRect.height / canvas.height;
+        // Корректировка с учётом поворота доски для player 1
+        var sx = pieceX, sy = pieceY;
+        if (myIndex === 1) {
+            sx = canvas.width - pieceX;
+            sy = canvas.height - pieceY;
+        }
+        // Позиция относительно board-wrapper (компенсируем scroll через разницу rect'ов)
+        var relX = (canvasRect.left - wrapperRect.left) + sx * scaleX;
+        var relY = (canvasRect.top - wrapperRect.top) + sy * scaleY;
+        // Смещение слева-сверху от фишки
+        var offsetX = -38 * scaleX, offsetY = -38 * scaleY;
+        var emoteEl = document.createElement('img');
+        emoteEl.src = '/emotes/emote-' + emoteId + '.webp';
+        emoteEl.className = 'emote-anim';
+        emoteEl.style.left = (relX + offsetX) + 'px';
+        emoteEl.style.top = (relY + offsetY) + 'px';
+        boardWrapper.appendChild(emoteEl);
+        emoteEl.addEventListener('animationend', function () {
+            if (emoteEl.parentNode) emoteEl.parentNode.removeChild(emoteEl);
+        });
+    }
+
+    function sendEmote(emoteId) {
+        if (!gameStarted || !state || state.gameOver) return;
+        var now = Date.now();
+        if (now < emoteCooldown) return;
+        emoteCooldown = now + 2000; // 2s cooldown
+        toggleFlyout(false);
+        network.sendEmote(emoteId);
+        // Локальная анимация от своего игрока
+        if (myIndex !== null) playEmoteAnim(emoteId, myIndex);
+        // Визуальный фидбек — disable кнопок на 2s
+        emoteBtns.forEach(function (b) { b.disabled = true; });
+        emoteToggleBtn.disabled = true;
+        setTimeout(function () {
+            emoteBtns.forEach(function (b) { b.disabled = false; });
+            emoteToggleBtn.disabled = false;
+        }, 2000);
+    }
+
+    emoteBtns.forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var id = parseInt(btn.getAttribute('data-emote'));
+            if (id) sendEmote(id);
+        });
+    });
 
     function handleCanvasClick(e) {
         if (replayActive || !gameStarted || state.gameOver || myIndex !== state.turn) return;

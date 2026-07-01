@@ -13,6 +13,7 @@ const io = socketIO(server, { cors: { origin: "*", methods: ["GET", "POST"] } })
 let roomManager;
 
 function handleGameEnd(roomId) {
+    roomManager.clearBotEmote(roomId);
     const elo = roomManager.tryApplyStatsAndElo(roomId);
     if (elo) auth.updateElo(elo.winnerId, elo.loserId);
 }
@@ -34,6 +35,11 @@ roomManager = new RoomManager((roomId, room) => {
         io.to(roomId).emit('game_over', { winner: room.winner, winnerName, winReason: room.state.winReason || 'timeout' });
     }
 });
+
+// Callback для отправки бот-эмоций клиенту
+roomManager._onBotEmote = (roomId, botIndex, emoteId) => {
+    io.to(roomId).emit('emote_received', { emoteId, fromPlayer: botIndex });
+};
 
 app.use(cors());
 app.use(express.json());
@@ -226,6 +232,7 @@ io.on('connection', (socket) => {
         socket.emit('player_assigned', buildPlayerAssigned(room, idx));
         socket.emit('game_state', room.state);
         socket.emit('game_started');
+        roomManager.scheduleBotEmote(roomId);
         if (room.state.turn === (room.players[0] === 'bot' ? 0 : 1)) {
             const delay = getHumanDelay(0);
             setTimeout(() => {
@@ -259,6 +266,7 @@ io.on('connection', (socket) => {
                         socket.emit('player_assigned', buildPlayerAssigned(updated, humanIdx));
                         socket.emit('game_state', updated.state);
                         socket.emit('game_started');
+                        roomManager.scheduleBotEmote(fallbackRoomId);
                         const botIdx = 1 - humanIdx;
                         if (updated.state.turn === botIdx) {
                             const delay = getHumanDelay(0);
@@ -320,6 +328,17 @@ io.on('connection', (socket) => {
                 }, delay);
             }
         }
+    });
+
+    socket.on('send_emote', ({ emoteId }) => {
+        let roomId = null;
+        for (let [id, room] of roomManager.rooms) { if (room.players.includes(socket.id)) { roomId = id; break; } }
+        if (!roomId) return;
+        const room = roomManager.getRoom(roomId);
+        if (!room || room.status !== 'playing') return;
+        const playerIndex = room.socketToPlayer.get(socket.id);
+        if (playerIndex === undefined) return;
+        io.to(roomId).emit('emote_received', { emoteId, fromPlayer: playerIndex });
     });
 
     socket.on('surrender', () => {
