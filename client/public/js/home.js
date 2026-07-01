@@ -95,8 +95,7 @@
 
     var cards = document.querySelectorAll('.mode-card');
     cards.forEach(function (card) {
-        var btn = card.querySelector('.tc-btn');
-        btn.addEventListener('click', function () {
+        card.addEventListener('click', function () {
             var tc = card.dataset.tc;
             var isBot = card.dataset.bot === 'true';
             var name = localStorage.getItem('ws_nick') || localStorage.getItem('ws_username') || 'Player';
