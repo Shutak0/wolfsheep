@@ -43,6 +43,27 @@ a:hover { text-shadow: 0 0 12px #8a2be2; }
 .mode-card .tc-desc { color:#94a3b8; font-size:14px; line-height:1.6; }
 .mode-card .tc-btn { background:#2a1a5a; color:white; border:none; padding:10px 24px; border-radius:30px; font-size:16px; font-weight:600; cursor:pointer; transition:all 0.2s; margin-top:8px; }
 .mode-card .tc-btn:hover { background:#8a2be2; box-shadow:0 0 25px rgba(138,43,226,0.5); }
+/* New mode layout: главная кнопка + маленькие + бот */
+.mode-layout { display:flex; gap:24px; align-items:stretch; justify-content:center; }
+.mode-main-col { display:flex; flex-direction:column; gap:16px; align-items:center; }
+.mode-bot-col { display:flex; align-items:stretch; }
+.mode-small-row { display:flex; gap:12px; }
+.mode-card-main { width:280px !important; padding:16px 20px !important; }
+.mode-card-main .tc-icon { font-size:38px !important; }
+.mode-card-main .tc-name { font-size:26px !important; }
+.mode-card-main .tc-desc { font-size:13px !important; }
+.mode-card-main .tc-btn { font-size:14px !important; padding:6px 24px !important; }
+.mode-card-small { width:130px !important; padding:10px 8px !important; gap:4px !important; }
+.mode-card-small .tc-icon { font-size:20px !important; }
+.mode-card-small .tc-name { font-size:13px !important; }
+.mode-card-small .tc-desc { font-size:9px !important; }
+.mode-card-small .tc-btn { font-size:11px !important; padding:4px 12px !important; }
+.mode-bot-col .mode-card { width:280px; height:100%; }
+.mode-bot-col .mode-card .tc-icon { font-size:38px !important; }
+.mode-bot-col .mode-card .tc-name { font-size:24px !important; }
+.mode-bot-col .mode-card .tc-desc { font-size:13px !important; }
+.mode-bot-col .mode-card .tc-btn { font-size:14px !important; padding:6px 24px !important; }
+
 .mode-card-bot { border-color:#ffaa00 !important; background:linear-gradient(135deg, #0d0d1a 0%, #1a1020 100%) !important; box-shadow:0 0 20px rgba(255,170,0,0.2); }
 .mode-card-bot:hover { border-color:#ffcc00 !important; box-shadow:0 0 40px rgba(255,170,0,0.4) !important; }
 .mode-card-bot .bot-btn { background:#ff8800 !important; }
@@ -60,6 +81,10 @@ a:hover { text-shadow: 0 0 12px #8a2be2; }
 /* Leaderboard */
 .leaderboard-section { max-width:600px; width:100%; margin-bottom:24px; }
 .leaderboard-table { background:#0d0d1a; border:2px solid #4a2a8a; border-radius:16px; overflow:hidden; box-shadow:0 0 25px rgba(138,43,226,0.3), 0 0 50px rgba(138,43,226,0.1); }
+.lb-scroll { max-height:260px; overflow-y:auto; scrollbar-width:thin; scrollbar-color:#4a2a8a #0d0d1a; }
+.lb-scroll::-webkit-scrollbar { width:6px; }
+.lb-scroll::-webkit-scrollbar-track { background:#0d0d1a; }
+.lb-scroll::-webkit-scrollbar-thumb { background:#4a2a8a; border-radius:3px; }
 .lb-row { display:flex; align-items:center; padding:12px 20px; border-bottom:1px solid #1a1a30; }
 .lb-row:last-child { border-bottom:none; }
 .lb-header { background:rgba(138,43,226,0.1); }
@@ -73,6 +98,14 @@ a:hover { text-shadow: 0 0 12px #8a2be2; }
 .lb-row.top1 .lb-rank { color:#ffd700; font-size:18px; font-weight:700; }
 .lb-row.top2 .lb-rank { color:#c0c0c0; font-size:16px; font-weight:700; }
 .lb-row.top3 .lb-rank { color:#cd7f32; font-size:15px; font-weight:700; }
+.lb-row.me { background:rgba(138,43,226,0.2); border-left:3px solid #c084fc; }
+.lb-row.me .lb-name { color:#c084fc; font-weight:700; }
+.lb-me-divider { border-top:2px solid #ffaa00; margin:0; }
+.lb-me-footer { background:rgba(255,170,0,0.1); border-top:2px solid #ffaa00; padding:12px 20px; display:flex; align-items:center; }
+.lb-me-footer .lb-rank { color:#ffaa00; font-weight:700; }
+.lb-me-footer .lb-name { color:#ffaa00; font-weight:700; }
+.lb-me-footer .lb-rating { color:#ffcc00; }
+.lb-me-footer .lb-games { color:#ffaa00; }
 
 /* How-to steps */
 .howto-section { max-width:800px; width:100%; margin-bottom:30px; }
@@ -185,6 +218,10 @@ canvas, button, .mode-card, .tc-btn, .game-btn, .profile-save, .auth-btn {
     .howto-steps { gap:6px; }
     .step { width:120px; padding:14px 10px; }
     .about-grid { grid-template-columns: repeat(2, 1fr); }
+    /* Mode layout */
+    .mode-layout { flex-direction:column; align-items:center; gap:16px; }
+    .mode-bot-col { width:100%; justify-content:center; }
+    .mode-bot-col .mode-card { width:280px; }
 }
 
 /* ---------- ≤ 600px (phones) ---------- */
@@ -206,6 +243,21 @@ canvas, button, .mode-card, .tc-btn, .game-btn, .profile-save, .auth-btn {
     .mode-card .tc-name { font-size:20px; }
     .mode-card .tc-desc { font-size:12px; }
     .mode-card .tc-btn { font-size:14px; padding:8px 18px; }
+    /* Mode layout mobile */
+    .mode-layout { flex-direction:column; align-items:center; gap:12px; }
+    .mode-main-col { gap:10px; }
+    .mode-card-main { width:240px !important; padding:28px 24px !important; }
+    .mode-card-main .tc-icon { font-size:42px !important; }
+    .mode-card-main .tc-name { font-size:26px !important; }
+    .mode-card-main .tc-btn { font-size:17px !important; padding:12px 28px !important; }
+    .mode-small-row { gap:8px; }
+    .mode-card-small { width:110px !important; padding:12px 10px !important; }
+    .mode-card-small .tc-icon { font-size:24px !important; }
+    .mode-card-small .tc-name { font-size:14px !important; }
+    .mode-card-small .tc-desc { font-size:10px !important; }
+    .mode-bot-col .mode-card { width:240px; }
+    .mode-bot-col .mode-card .tc-icon { font-size:42px !important; }
+    .mode-bot-col .mode-card .tc-name { font-size:24px !important; }
     .lb-row { font-size:12px; padding:8px 6px; }
     .howto-steps { gap:4px; }
     .step { width:100px; padding:10px 6px; gap:4px; }
@@ -250,6 +302,20 @@ canvas, button, .mode-card, .tc-btn, .game-btn, .profile-save, .auth-btn {
     .mode-card { width:100%; padding:16px 12px; }
     .mode-card .tc-icon { font-size:28px; }
     .mode-card .tc-name { font-size:18px; }
+    /* Mode layout tiny */
+    .mode-layout { gap:8px; }
+    .mode-card-main { width:200px !important; padding:20px 16px !important; }
+    .mode-card-main .tc-icon { font-size:34px !important; }
+    .mode-card-main .tc-name { font-size:22px !important; }
+    .mode-card-main .tc-btn { font-size:15px !important; padding:10px 20px !important; }
+    .mode-small-row { gap:6px; }
+    .mode-card-small { width:90px !important; padding:10px 8px !important; }
+    .mode-card-small .tc-icon { font-size:20px !important; }
+    .mode-card-small .tc-name { font-size:12px !important; }
+    .mode-card-small .tc-desc { font-size:9px !important; }
+    .mode-bot-col .mode-card { width:200px; }
+    .mode-bot-col .mode-card .tc-icon { font-size:34px !important; }
+    .mode-bot-col .mode-card .tc-name { font-size:20px !important; }
     .nav-brand { font-size:16px; padding:6px 8px; }
     .nav-link { font-size:12px; padding:6px 10px; }
     .game-layout { gap:8px; }

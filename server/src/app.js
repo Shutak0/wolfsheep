@@ -170,7 +170,14 @@ app.post('/api/profile/nick', authMiddleware, (req, res) => {
 });
 
 app.get('/api/leaderboard', (req, res) => {
-    res.json({ success: true, players: auth.getLeaderboard(10) });
+    const limit = parseInt(req.query.limit) || 50;
+    res.json({ success: true, players: auth.getLeaderboard(limit) });
+});
+
+app.get('/api/profile/rank', authMiddleware, (req, res) => {
+    const data = auth.getMyRankAndPosition(req.userId);
+    if (!data) return res.json({ success: false, error: 'Not ranked yet.' });
+    res.json({ success: true, ...data });
 });
 
 app.get('/api/status', (req, res) => res.json({ status: 'ok' }));

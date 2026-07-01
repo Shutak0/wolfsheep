@@ -282,9 +282,26 @@ function getLeaderboard(limit) {
     const sorted = db.users
         .filter(u => u.stats && u.stats.games > 0)
         .sort((a, b) => (b.rating || 1000) - (a.rating || 1000))
-        .slice(0, limit || 20)
+        .slice(0, limit || 50)
         .map(u => ({ nick: u.nick || u.username, rating: u.rating || 1000, games: u.stats.games }));
     return sorted;
+}
+
+function getMyRankAndPosition(userId) {
+    if (!userId) return null;
+    const db = loadDb();
+    const sorted = db.users
+        .filter(u => u.stats && u.stats.games > 0)
+        .sort((a, b) => (b.rating || 1000) - (a.rating || 1000));
+    const idx = sorted.findIndex(u => u.id === userId);
+    if (idx === -1) return null;
+    const user = sorted[idx];
+    return {
+        rank: idx + 1,
+        nick: user.nick || user.username,
+        rating: user.rating || 1000,
+        games: user.stats.games,
+    };
 }
 
 module.exports = {
@@ -298,5 +315,6 @@ module.exports = {
     updateElo,
     updateBotRating,
     getLeaderboard,
+    getMyRankAndPosition,
     generateNick,
 };

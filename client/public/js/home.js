@@ -1,7 +1,7 @@
 // home.js — главная страница WolfSheep
 (function () {
-    var userId = localStorage.getItem('ws_userId');
     var __ = window.__ || function(k){return k;};
+    var userId = localStorage.getItem('ws_userId');
 
     // Гостевое предупреждение
     if (!userId) {
@@ -12,32 +12,83 @@
         document.body.appendChild(banner);
     }
 
-    // Загрузка таблицы лидеров
+    function escapeHtml(text) {
+        var div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function lbRow(rank, nick, rating, games, cls) {
+        var topClass = rank === 1 ? ' top1' : rank === 2 ? ' top2' : rank === 3 ? ' top3' : '';
+        return '<div class="lb-row' + topClass + (cls ? ' ' + cls : '') + '"><span class="lb-rank">' + rank + '</span><span class="lb-name">' + escapeHtml(nick) + '</span><span class="lb-rating">' + rating + '</span><span class="lb-games">' + games + '</span></div>';
+    }
+
+    // Загрузка таблицы лидеров (50 игроков, скролл)
     function loadLeaderboard() {
         var lb = document.getElementById('leaderboard');
-        fetch('/api/leaderboard')
+        var myNick = localStorage.getItem('ws_nick') || localStorage.getItem('ws_username') || null;
+        var myUserId = userId ? parseInt(userId) : null;
+
+        fetch('/api/leaderboard?limit=50')
             .then(function (r) { return r.json(); })
             .then(function (data) {
                 if (!data.success || !data.players || !data.players.length) {
                     lb.innerHTML = '<div class="lb-row lb-header"><span class="lb-rank">' + __('leaderboard_rank') + '</span><span class="lb-name">' + __('leaderboard_player') + '</span><span class="lb-rating">' + __('leaderboard_elo') + '</span><span class="lb-games">' + __('leaderboard_games') + '</span></div><div class="lb-row"><span class="lb-empty">' + __('leaderboard_empty') + '</span></div>';
                     return;
                 }
+
+                // Ищем пользователя в списке
+                var userInList = false;
+                if (myNick) {
+                    for (var i = 0; i < data.players.length; i++) {
+                        if (data.players[i].nick === myNick) {
+                            userInList = true;
+                            break;
+                        }
+                    }
+                }
+
                 var html = '<div class="lb-row lb-header"><span class="lb-rank">' + __('leaderboard_rank') + '</span><span class="lb-name">' + __('leaderboard_player') + '</span><span class="lb-rating">' + __('leaderboard_elo') + '</span><span class="lb-games">' + __('leaderboard_games') + '</span></div>';
+                html += '<div class="lb-scroll">';
+
                 data.players.forEach(function (p, i) {
-                    var topClass = i === 0 ? ' top1' : i === 1 ? ' top2' : i === 2 ? ' top3' : '';
-                    html += '<div class="lb-row' + topClass + '"><span class="lb-rank">' + (i + 1) + '</span><span class="lb-name">' + escapeHtml(p.nick) + '</span><span class="lb-rating">' + p.rating + '</span><span class="lb-games">' + p.games + '</span></div>';
+                    var cls = (myNick && p.nick === myNick) ? 'me' : '';
+                    html += lbRow(i + 1, p.nick, p.rating, p.games, cls);
                 });
+
+                html += '</div>';
+
+                // Если пользователь в списке — он уже внутри скролла, footer не нужен
+                // Если НЕ в списке — footer снаружи скролла
+                if (!userInList && myUserId) {
+                    html += '<div class="lb-me-footer" id="lb-me-footer"><span class="lb-rank">...</span><span class="lb-name">...</span><span class="lb-rating">...</span><span class="lb-games">...</span></div>';
+                }
+
+                // Загружаем позицию пользователя, если он не в топе
+                if (!userInList && myUserId) {
+                    fetch('/api/profile/rank', {
+                        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('ws_token') }
+                    })
+                    .then(function (r) { return r.json(); })
+                    .then(function (rankData) {
+                        var footer = document.getElementById('lb-me-footer');
+                        if (footer && rankData.success) {
+                            footer.innerHTML = '<span class="lb-rank">' + rankData.rank + '</span>' +
+                                '<span class="lb-name">' + escapeHtml(rankData.nick) + '</span>' +
+                                '<span class="lb-rating">' + rankData.rating + '</span>' +
+                                '<span class="lb-games">' + rankData.games + '</span>';
+                        } else if (footer) {
+                            footer.style.display = 'none';
+                        }
+                    })
+                    .catch(function () {});
+                }
+
                 lb.innerHTML = html;
             })
             .catch(function () {
                 lb.innerHTML = '<div class="lb-row lb-header"><span class="lb-rank">' + __('leaderboard_rank') + '</span><span class="lb-name">' + __('leaderboard_player') + '</span><span class="lb-rating">' + __('leaderboard_elo') + '</span><span class="lb-games">' + __('leaderboard_games') + '</span></div><div class="lb-row"><span class="lb-empty">' + __('leaderboard_error') + '</span></div>';
             });
-    }
-
-    function escapeHtml(text) {
-        var div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
     }
 
     loadLeaderboard();

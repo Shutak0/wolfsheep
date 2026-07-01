@@ -206,30 +206,38 @@
         <div class="play-zone">
             <div class="play-zone-left">
                 <h2 class="section-title" data-i18n="section_choose">🎮 Choose a mode</h2>
-                <div class="mode-cards">
-                    <div class="mode-card" data-tc="1+5">
-                        <div class="tc-icon">⚡</div>
-                        <div class="tc-name">1 + 5</div>
-                        <div class="tc-desc">1 minute<br>+ 5 seconds per move</div>
-                        <button class="tc-btn" data-i18n="mode_btn">Play</button>
+                <div class="mode-layout">
+                    <!-- Левая колонка: PLAY (1+5) + маленькие кнопки -->
+                    <div class="mode-main-col">
+                        <div class="mode-card mode-card-main" data-tc="1+5">
+                            <div class="tc-icon">⚡</div>
+                            <div class="tc-name">PLAY</div>
+                            <div class="tc-desc">1 + 5</div>
+                            <button class="tc-btn" data-i18n="mode_btn">Play</button>
+                        </div>
+                        <div class="mode-small-row">
+                            <div class="mode-card mode-card-small" data-tc="3+2">
+                                <div class="tc-icon">🔥</div>
+                                <div class="tc-name">3 + 2</div>
+                                <div class="tc-desc">3 min + 2 sec</div>
+                                <button class="tc-btn" data-i18n="mode_btn">Play</button>
+                            </div>
+                            <div class="mode-card mode-card-small" data-tc="5">
+                                <div class="tc-icon">💎</div>
+                                <div class="tc-name">5 min</div>
+                                <div class="tc-desc">No increment</div>
+                                <button class="tc-btn" data-i18n="mode_btn">Play</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="mode-card" data-tc="3+2">
-                        <div class="tc-icon">🔥</div>
-                        <div class="tc-name">3 + 2</div>
-                        <div class="tc-desc">3 minutes<br>+ 2 seconds per move</div>
-                        <button class="tc-btn" data-i18n="mode_btn">Play</button>
-                    </div>
-                    <div class="mode-card" data-tc="5">
-                        <div class="tc-icon">💎</div>
-                        <div class="tc-name">5 min</div>
-                        <div class="tc-desc">5 minutes<br>no increment</div>
-                        <button class="tc-btn" data-i18n="mode_btn">Play</button>
-                    </div>
-                    <div class="mode-card mode-card-bot" data-tc="1+5" data-bot="true">
-                        <div class="tc-icon">🤖</div>
-                        <div class="tc-name">vs Bot</div>
-                        <div class="tc-desc">Train against AI<br>1 min + 5 sec</div>
-                        <button class="tc-btn bot-btn">⚔️ Fight Bot</button>
+                    <!-- Правая колонка: vs Bot -->
+                    <div class="mode-bot-col">
+                        <div class="mode-card mode-card-bot mode-card-main" data-tc="1+5" data-bot="true">
+                            <div class="tc-icon">🤖</div>
+                            <div class="tc-name">vs Bot</div>
+                            <div class="tc-desc">Train against AI<br>1 min + 5 sec</div>
+                            <button class="tc-btn bot-btn">⚔️ Fight Bot</button>
+                        </div>
                     </div>
                 </div>
             </div>
