@@ -206,11 +206,11 @@
 
             <!-- Deletion form -->
             <div class="deletion-form" id="deletion-form">
-                <h3>⚠️ Request Account Deletion</h3>
-                <p>You must be <strong>signed in</strong> to submit this form. This action is <strong>irreversible</strong>. All your account data, statistics, and profile will be permanently removed.</p>
+                <h3>⚠️ Delete Your Account</h3>
+                <p>You are <strong>signed in</strong>. This action is <strong>immediate and irreversible</strong>. All your account data, game statistics, and profile will be permanently removed right now.</p>
                 <textarea id="deletion-reason" placeholder="Optional: Tell us why you are leaving..."></textarea>
                 <div style="display:flex; align-items:center; gap:12px; margin-top:12px; flex-wrap:wrap;">
-                    <button id="deletion-submit-btn" onclick="submitDeletion()">🗑 Request Account Deletion</button>
+                    <button id="deletion-submit-btn" onclick="submitDeletion()">🗑 Delete My Account Now</button>
                     <a href="mailto:shutakswm@gmail.com?subject=Account%20Deletion%20Request%20—%20WolfSheep" style="color:#94a3b8; font-size:13px;">Or send an email →</a>
                 </div>
                 <div class="deletion-msg" id="deletion-msg"></div>
@@ -257,15 +257,19 @@
                 return;
             }
 
+            if (!confirm('Are you absolutely sure? This will immediately and permanently delete your account, all statistics, and your ELO rating. This cannot be undone.')) {
+                return;
+            }
+
             btn.disabled = true;
-            btn.textContent = '⏳ Processing...';
+            btn.textContent = '⏳ Deleting...';
             msgEl.className = 'deletion-msg';
             msgEl.textContent = '';
 
             try {
                 var reason = document.getElementById('deletion-reason').value.trim();
-                var res = await fetch('/api/account/request-deletion', {
-                    method: 'POST',
+                var res = await fetch('/api/account/delete', {
+                    method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': 'Bearer ' + token,
@@ -276,22 +280,25 @@
                 var data = await res.json();
 
                 if (data.success) {
+                    // Clear local session
+                    try {
+                        localStorage.removeItem('ws_token');
+                        localStorage.removeItem('ws_userId');
+                    } catch(e) {}
                     msgEl.className = 'deletion-msg success';
-                    msgEl.textContent = '✅ ' + data.message;
-                    btn.textContent = '✓ Request Submitted';
-                    btn.style.background = '#33ff66';
-                    btn.style.color = '#0a0a0f';
+                    msgEl.innerHTML = '✅ Your account has been permanently deleted. <a href="/" style="color:#00ffff;">Return to Home →</a>';
+                    btn.style.display = 'none';
                 } else {
                     msgEl.className = 'deletion-msg error';
                     msgEl.textContent = '❌ ' + (data.error || 'Something went wrong. Please try again or send an email.');
                     btn.disabled = false;
-                    btn.textContent = '🗑 Request Account Deletion';
+                    btn.textContent = '🗑 Delete My Account Now';
                 }
             } catch (err) {
                 msgEl.className = 'deletion-msg error';
                 msgEl.textContent = '❌ Network error. Please check your connection and try again.';
                 btn.disabled = false;
-                btn.textContent = '🗑 Request Account Deletion';
+                btn.textContent = '🗑 Delete My Account Now';
             }
         }
     </script>
