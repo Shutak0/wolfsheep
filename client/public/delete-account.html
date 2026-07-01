@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no"/>
+
+    <!-- Primary Meta Tags -->
+    <title>Delete Account — WolfSheep | Account Deletion & Data Removal</title>
+    <meta name="description" content="Request deletion of your WolfSheep account and all associated data. Step-by-step guide on how to remove your profile, game statistics, and personal information."/>
+    <meta name="keywords" content="delete account wolfsheep, remove profile, data deletion, account removal, GDPR, delete game data"/>
+    <meta name="author" content="WolfSheep"/>
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large"/>
+    <meta name="googlebot" content="index, follow"/>
+    <meta name="rating" content="general"/>
+    <meta name="theme-color" content="#1a1a2e"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+    <meta name="apple-mobile-web-app-title" content="WolfSheep"/>
+    <meta name="mobile-web-app-capable" content="yes"/>
+
+    <!-- Canonical & Alternate -->
+    <link rel="canonical" href="https://wolfsheep.fun/delete-account.html"/>
+    <link rel="alternate" hreflang="en" href="https://wolfsheep.fun/delete-account.html"/>
+    <link rel="alternate" hreflang="ru" href="https://wolfsheep.fun/delete-account.html"/>
+    <link rel="alternate" hreflang="x-default" href="https://wolfsheep.fun/delete-account.html"/>
+
+    <!-- Icons & PWA -->
+    <link rel="apple-touch-icon" href="/imgs/icon-192.png"/>
+    <link rel="manifest" href="/manifest.json"/>
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Delete Account — WolfSheep | Account Deletion & Data Removal"/>
+    <meta property="og:description" content="Request deletion of your WolfSheep account and all associated data. Step-by-step guide."/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:url" content="https://wolfsheep.fun/delete-account.html"/>
+    <meta property="og:image" content="https://wolfsheep.fun/imgs/Wolf.png"/>
+    <meta property="og:image:alt" content="WolfSheep logo"/>
+    <meta property="og:image:width" content="512"/>
+    <meta property="og:image:height" content="512"/>
+    <meta property="og:site_name" content="WolfSheep"/>
+    <meta property="og:locale" content="en_US"/>
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="Delete Account — WolfSheep | Account Deletion"/>
+    <meta name="twitter:description" content="Request deletion of your WolfSheep account and all associated data."/>
+    <meta name="twitter:image" content="https://wolfsheep.fun/imgs/Wolf.png"/>
+
+    <!-- DNS Prefetch & Preconnect -->
+    <link rel="dns-prefetch" href="https://cloud.umami.is"/>
+    <link rel="dns-prefetch" href="https://accounts.google.com"/>
+    <link rel="preconnect" href="https://cloud.umami.is"/>
+    <link rel="preconnect" href="https://accounts.google.com"/>
+
+    <!-- Preload critical CSS -->
+    <link rel="preload" href="css/style.css" as="style"/>
+    <link rel="stylesheet" href="css/style.css"/>
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="caed2020-b671-4c7d-94b2-27e9399d4dca"></script>
+
+    <style>
+        .deletion-section { max-width:700px; width:100%; }
+        .deletion-step { background:#0d0d1a; border:2px solid #2a1a5a; border-radius:18px; padding:24px 28px; margin-bottom:16px; box-shadow:0 0 25px rgba(138,43,226,0.1); transition:0.3s; }
+        .deletion-step:hover { border-color:#8a2be2; box-shadow:0 0 30px rgba(138,43,226,0.2); }
+        .deletion-step h3 { color:#c084fc; font-size:18px; font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:10px; }
+        .deletion-step .step-num-badge { background:#8a2be2; color:#fff; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:16px; flex-shrink:0; }
+        .deletion-step p { color:#cbd5e1; font-size:14px; line-height:1.7; }
+        .deletion-step ul { margin-top:8px; padding-left:20px; }
+        .deletion-step li { color:#94a3b8; font-size:13px; line-height:1.6; margin-bottom:6px; }
+        .deletion-form { background:#0d0d1a; border:2px solid #ff3366; border-radius:18px; padding:28px; margin-top:24px; box-shadow:0 0 35px rgba(255,51,102,0.15); }
+        .deletion-form h3 { color:#ff3366; font-size:18px; font-weight:700; margin-bottom:12px; }
+        .deletion-form p { color:#cbd5e1; font-size:14px; line-height:1.6; margin-bottom:16px; }
+        .deletion-form textarea { width:100%; padding:12px 16px; border-radius:12px; background:#1a1a30; border:2px solid #2a1a5a; color:#e0e0f0; font-size:14px; font-family:inherit; outline:none; resize:vertical; min-height:80px; transition:border-color 0.2s; }
+        .deletion-form textarea:focus { border-color:#ff3366; box-shadow:0 0 15px rgba(255,51,102,0.2); }
+        .deletion-form button { background:#ff3366; color:#fff; border:none; padding:12px 32px; border-radius:30px; font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; transition:all 0.2s; min-height:44px; }
+        .deletion-form button:hover { background:#ff5577; box-shadow:0 0 25px rgba(255,51,102,0.5); }
+        .deletion-form button:active { transform:scale(0.96); }
+        .deletion-form button:disabled { opacity:0.5; cursor:not-allowed; background:#4a1a2a; }
+        .deletion-msg { color:#94a3b8; font-size:13px; text-align:center; min-height:22px; margin-top:12px; }
+        .deletion-msg.success { color:#33ff66; }
+        .deletion-msg.error { color:#ff3366; }
+        .data-table { width:100%; border-collapse:collapse; margin-top:16px; }
+        .data-table th, .data-table td { padding:10px 14px; text-align:left; border-bottom:1px solid #1a1a30; font-size:13px; }
+        .data-table th { color:#c084fc; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-size:11px; }
+        .data-table td { color:#94a3b8; }
+        .data-table tr:last-child td { border-bottom:none; }
+        .data-table td.will-delete { color:#ff6b8a; }
+        .data-table td.will-keep { color:#33ff66; }
+    </style>
+</head>
+<body>
+    <nav id="navbar">
+        <button id="hamburger-btn" aria-label="Menu">☰</button>
+        <div class="nav-left" id="nav-left-menu">
+            <a class="nav-brand" href="/">🐺<span style="color:#ff3366">Wolf</span><span style="color:#33ff66">Sheep</span></a>
+            <a class="nav-link" href="/" data-i18n="nav_home">🏠 Home</a>
+            <a class="nav-link" href="/profile.html" data-i18n="nav_profile">👤 Profile</a>
+        </div>
+        <div class="nav-center">
+            <span class="nav-players" id="nav-players">0 online</span>
+        </div>
+        <div class="nav-right" id="nav-right"></div>
+    </nav>
+    <div id="nav-overlay"></div>
+
+    <div id="main-content">
+        <h1 class="home-title"><span class="wolf">DELETE</span> <span class="sheep">ACCOUNT</span></h1>
+        <p class="hero-tagline">WolfSheep — Account Deletion & Data Removal</p>
+        <p class="hero-desc" style="margin-bottom:24px;">Developed by Shutak / WolfSheep.fun. Here is everything you need to know about deleting your account and data.</p>
+
+        <div class="deletion-section">
+            <!-- Step-by-step guide -->
+            <h2 class="section-title">📋 How to Request Account Deletion</h2>
+
+            <div class="deletion-step">
+                <h3><span class="step-num-badge">1</span> Sign In to Your Account</h3>
+                <p>Go to the <a href="/profile.html">Profile page</a> and sign in with your Google account or username/password. You must be authenticated to request deletion — this ensures that only you can delete your own data.</p>
+            </div>
+
+            <div class="deletion-step">
+                <h3><span class="step-num-badge">2</span> Submit a Deletion Request</h3>
+                <p>Use the form at the bottom of this page to submit a deletion request. Optionally tell us why you are leaving — your feedback helps us improve the game.</p>
+            </div>
+
+            <div class="deletion-step">
+                <h3><span class="step-num-badge">3</span> Send an Email (Alternative Method)</h3>
+                <p>If you cannot sign in (e.g., you lost access to your account), send an email to <a href="mailto:shutakswm@gmail.com">shutakswm@gmail.com</a> with the subject "Account Deletion Request — WolfSheep". Include as much identifying information as possible:</p>
+                <ul>
+                    <li>Your in-game nickname</li>
+                    <li>Your approximate ELO rating</li>
+                    <li>The email address associated with your Google account (if you used Google sign-in)</li>
+                    <li>The approximate date you created the account</li>
+                </ul>
+            </div>
+
+            <div class="deletion-step">
+                <h3><span class="step-num-badge">4</span> Confirmation & Processing</h3>
+                <p>Once we receive your request, we will verify your identity and process the deletion within <strong>7 business days</strong>. You will receive a confirmation email (if an email is associated with your account).</p>
+            </div>
+
+            <!-- Data types table -->
+            <h2 class="section-title" style="margin-top:36px;">📊 What Data Is Affected</h2>
+            <div class="legal-block" style="overflow-x:auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Data Type</th>
+                            <th>Action</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Account credentials</strong></td>
+                            <td class="will-delete">🗑 Deleted</td>
+                            <td>Username, hashed password, Google ID link removed</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Nickname</strong></td>
+                            <td class="will-delete">🗑 Deleted</td>
+                            <td>Custom display name removed</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Email address</strong></td>
+                            <td class="will-delete">🗑 Deleted</td>
+                            <td>Google email association removed</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Profile picture</strong></td>
+                            <td class="will-delete">🗑 Deleted</td>
+                            <td>Google avatar URL removed</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Game statistics</strong></td>
+                            <td class="will-delete">🗑 Deleted</td>
+                            <td>Wins, losses, ELO rating, match history removed</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Leaderboard data</strong></td>
+                            <td class="will-delete">🗑 Deleted</td>
+                            <td>Your entry removed from leaderboard immediately</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Match results</strong></td>
+                            <td class="will-keep">✅ Preserved (anonymized)</td>
+                            <td>Past game outcomes against other players remain for ELO integrity, but your identity is removed</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Chat messages / emotes</strong></td>
+                            <td class="will-delete">🗑 Deleted</td>
+                            <td>In-game emotes are ephemeral and not stored</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Retention info -->
+            <div class="deletion-step" style="margin-top:16px;">
+                <h3>⏱ Data Retention Periods</h3>
+                <ul>
+                    <li><strong>Active accounts:</strong> Data is retained as long as your account exists.</li>
+                    <li><strong>After deletion request:</strong> Account is removed from the database within 7 business days.</li>
+                    <li><strong>Server logs:</strong> Connection timestamps and IP addresses are automatically rotated and purged within 30 days.</li>
+                    <li><strong>Analytics (Umami):</strong> Fully anonymized, no personal data is collected. No cookies are used.</li>
+                </ul>
+            </div>
+
+            <!-- Deletion form -->
+            <div class="deletion-form" id="deletion-form">
+                <h3>⚠️ Request Account Deletion</h3>
+                <p>You must be <strong>signed in</strong> to submit this form. This action is <strong>irreversible</strong>. All your account data, statistics, and profile will be permanently removed.</p>
+                <textarea id="deletion-reason" placeholder="Optional: Tell us why you are leaving..."></textarea>
+                <div style="display:flex; align-items:center; gap:12px; margin-top:12px; flex-wrap:wrap;">
+                    <button id="deletion-submit-btn" onclick="submitDeletion()">🗑 Request Account Deletion</button>
+                    <a href="mailto:shutakswm@gmail.com?subject=Account%20Deletion%20Request%20—%20WolfSheep" style="color:#94a3b8; font-size:13px;">Or send an email →</a>
+                </div>
+                <div class="deletion-msg" id="deletion-msg"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-links">
+            <a href="/about.html">About Us</a>
+            <a href="/rules.html">Game Rules</a>
+            <a href="/privacy.html">Privacy Policy</a>
+            <a href="/terms.html">Terms of Service</a>
+            <a href="/delete-account.html" style="color:#ff6b8a;">Delete Account</a>
+        </div>
+        <div class="footer-copy">© 2025 WolfSheep.fun — All rights reserved</div>
+    </footer>
+
+    <!-- Bottom Mobile Navigation -->
+    <nav id="bottom-nav" aria-label="Mobile navigation">
+        <div class="bn-inner">
+            <a href="/" class="bn-link"><span class="bn-icon">🏠</span><span>Home</span></a>
+            <a href="/game.html?bot=true" class="bn-link"><span class="bn-icon">🤖</span><span>vs Bot</span></a>
+            <a href="/game.html" class="bn-link"><span class="bn-icon">⚡</span><span>Play</span></a>
+            <a href="/profile.html" class="bn-link"><span class="bn-icon">👤</span><span>Profile</span></a>
+        </div>
+    </nav>
+
+    <script src="js/nav-players.js"></script>
+    <script src="js/pwa.js"></script>
+    <script>
+        function getToken() {
+            try { return localStorage.getItem('wolfsheep_token'); } catch(e) { return null; }
+        }
+
+        async function submitDeletion() {
+            var token = getToken();
+            var msgEl = document.getElementById('deletion-msg');
+            var btn = document.getElementById('deletion-submit-btn');
+
+            if (!token) {
+                msgEl.className = 'deletion-msg error';
+                msgEl.textContent = 'You must be signed in to request deletion. Go to Profile → Sign In.';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = '⏳ Processing...';
+            msgEl.className = 'deletion-msg';
+            msgEl.textContent = '';
+
+            try {
+                var reason = document.getElementById('deletion-reason').value.trim();
+                var res = await fetch('/api/account/request-deletion', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token,
+                    },
+                    body: JSON.stringify({ reason: reason }),
+                });
+
+                var data = await res.json();
+
+                if (data.success) {
+                    msgEl.className = 'deletion-msg success';
+                    msgEl.textContent = '✅ ' + data.message;
+                    btn.textContent = '✓ Request Submitted';
+                    btn.style.background = '#33ff66';
+                    btn.style.color = '#0a0a0f';
+                } else {
+                    msgEl.className = 'deletion-msg error';
+                    msgEl.textContent = '❌ ' + (data.error || 'Something went wrong. Please try again or send an email.');
+                    btn.disabled = false;
+                    btn.textContent = '🗑 Request Account Deletion';
+                }
+            } catch (err) {
+                msgEl.className = 'deletion-msg error';
+                msgEl.textContent = '❌ Network error. Please check your connection and try again.';
+                btn.disabled = false;
+                btn.textContent = '🗑 Request Account Deletion';
+            }
+        }
+    </script>
+</body>
+</html>

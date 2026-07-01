@@ -304,6 +304,32 @@ function getMyRankAndPosition(userId) {
     };
 }
 
+// ==================== Удаление аккаунта ====================
+function deleteUser(userId) {
+    const db = loadDb();
+    const idx = db.users.findIndex(u => u.id === userId);
+    if (idx === -1) return { success: false, error: 'User not found.' };
+    db.users.splice(idx, 1);
+    saveDb(db);
+    return { success: true };
+}
+
+// ==================== Запрос на удаление (email-уведомление в консоль) ====================
+function requestDeletion(userId, reason) {
+    const db = loadDb();
+    const user = findUserById(db, userId);
+    if (!user) return { success: false, error: 'User not found.' };
+    console.log('='.repeat(60));
+    console.log('[ACCOUNT DELETION REQUEST]');
+    console.log('User ID:', user.id);
+    console.log('Nickname:', user.nick || user.username);
+    console.log('Email:', user.email || 'not provided');
+    console.log('Reason:', reason || 'not provided');
+    console.log('Requested at:', new Date().toISOString());
+    console.log('='.repeat(60));
+    return { success: true, message: 'Deletion request received. We will process it within 7 days.' };
+}
+
 module.exports = {
     googleAuth,
     registerWithPassword,
@@ -317,4 +343,6 @@ module.exports = {
     getLeaderboard,
     getMyRankAndPosition,
     generateNick,
+    deleteUser,
+    requestDeletion,
 };

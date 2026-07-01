@@ -382,6 +382,18 @@ io.on('connection', (socket) => {
     });
 });
 
+// ==================== Account Deletion ====================
+app.post('/api/account/request-deletion', authMiddleware, (req, res) => {
+    const reason = req.body.reason || '';
+    const result = auth.requestDeletion(req.userId, reason);
+    res.json(result);
+});
+
+app.delete('/api/account/delete', authMiddleware, (req, res) => {
+    const result = auth.deleteUser(req.userId);
+    res.json(result);
+});
+
 // ---- Custom 404 handler (MUST be last, after ALL routes) ----
 app.use((req, res) => {
     if (req.accepts('html')) {
