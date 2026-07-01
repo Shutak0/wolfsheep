@@ -53,21 +53,21 @@
       "short_name": "Play",
       "description": "Start a new game",
       "url": "/game.html?utm_source=shortcut",
-      "icons": [{ "src": "/imgs/icon-192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/imgs/Sheep-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Profile",
       "short_name": "Profile",
       "description": "View your stats",
       "url": "/profile.html?utm_source=shortcut",
-      "icons": [{ "src": "/imgs/icon-192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/imgs/Sheep-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Leaderboard",
       "short_name": "Top",
       "description": "View top players",
       "url": "/?utm_source=shortcut#leaderboard",
-      "icons": [{ "src": "/imgs/icon-192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/imgs/Sheep-192.png", "sizes": "192x192" }]
     }
   ]
 }
