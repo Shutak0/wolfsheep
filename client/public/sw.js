@@ -1,5 +1,6 @@
-// WolfSheep Service Worker — кэширует статику, поддерживает офлайн
-const CACHE_NAME = 'wolfsheep-v3';
+// WolfSheep Service Worker — улучшенное кэширование, офлайн-фолбэк
+const CACHE_NAME = 'wolfsheep-v4';
+const OFFLINE_PAGE = '/404.html';
 
 const STATIC_ASSETS = [
   '/',
@@ -11,12 +12,16 @@ const STATIC_ASSETS = [
   '/rules.html',
   '/privacy.html',
   '/terms.html',
+  '/404.html',
   '/manifest.json',
   '/css/style.css',
   '/imgs/Wolf.png',
   '/imgs/Sheep.png',
+  '/imgs/logo-192.png',
+  '/imgs/logo-512.png',
   '/imgs/icon-192.png',
   '/imgs/icon-512.png',
+  '/js/pwa.js',
   '/js/i18n.js',
   '/js/home.js',
   '/js/login.js',
@@ -32,7 +37,13 @@ const STATIC_ASSETS = [
   '/emotes/emote-4.webp'
 ];
 
-// Установка: кэшируем статику
+// HTML-страницы (для network-first стратегии)
+const HTML_PAGES = [
+  '/', '/index.html', '/game.html', '/login.html', '/profile.html',
+  '/about.html', '/rules.html', '/privacy.html', '/terms.html'
+];
+
+// Установка: кэшируем статику заранее
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -58,27 +69,58 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch: cache-first для статики, network-first для API/socket.io
-self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
+// Вспомогательная функция: является ли запрос HTML-страницей
+function isHtmlPage(url) {
+  const path = url.pathname === '/' ? '/' : url.pathname.replace(/\/$/, '');
+  return HTML_PAGES.some(p => p === path || p.replace(/\/$/, '') === path);
+}
 
-  // Не перехватываем socket.io (оставляем как есть)
+// Fetch: разные стратегии для разных типов ресурсов
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Не перехватываем socket.io
   if (url.pathname.startsWith('/socket.io')) return;
 
-  // API-запросы — только сеть (не кэшируем)
+  // API-запросы — только сеть
   if (url.pathname.startsWith('/api/')) return;
 
-  // Google OAuth / внешние скрипты — только сеть
-  if (url.origin !== self.location.origin) return;
+  // Внешние ресурсы (Google OAuth, analytics и т.д.) — только сеть
+  if (url.origin !== self.location.origin) {
+    // Для Google OAuth и других внешних скриптов — только сеть
+    return;
+  }
 
-  // Статика — cache-first (мгновенно из кэша, фоном обновляем)
+  // HTML-страницы: network-first с офлайн-фолбэком
+  if (isHtmlPage(url) || request.headers.get('accept')?.includes('text/html')) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          // Кэшируем свежую версию
+          if (response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        })
+        .catch(() => {
+          // Нет сети — отдаём из кэша или офлайн-страницу
+          return caches.match(request).then((cached) => {
+            return cached || caches.match(OFFLINE_PAGE);
+          });
+        })
+    );
+    return;
+  }
+
+  // Статика (CSS, JS, изображения): cache-first, фоном обновляем
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      const fetchPromise = fetch(event.request).then((networkResponse) => {
-        // Обновляем кэш в фоне
+    caches.match(request).then((cached) => {
+      const fetchPromise = fetch(request).then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200) {
           const clone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
         }
         return networkResponse;
       }).catch(() => cached);
@@ -86,4 +128,11 @@ self.addEventListener('fetch', (event) => {
       return cached || fetchPromise;
     })
   );
+});
+
+// Обработка сообщения о пропуске ожидания (для немедленной активации)
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });

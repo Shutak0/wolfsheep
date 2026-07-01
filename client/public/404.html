@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no"/>
     <title>404 — Page Not Found | WolfSheep</title>
     <meta name="description" content="The page you are looking for does not exist. Return to WolfSheep — a free online strategy board game."/>
     <meta name="keywords" content="wolf sheep, quoridor, strategy board game, online board game, wall game, 404, page not found"/>
@@ -53,7 +53,8 @@
 </head>
 <body>
     <nav id="navbar">
-        <div class="nav-left">
+        <button id="hamburger-btn" aria-label="Menu">☰</button>
+        <div class="nav-left" id="nav-left-menu">
             <a class="nav-brand" href="/">🐺<span style="color:#ff3366">Wolf</span><span style="color:#33ff66">Sheep</span></a>
             <a class="nav-link" href="/">🏠 Home</a>
             <a class="nav-link" href="/profile.html">👤 Profile</a>
@@ -63,6 +64,7 @@
         </div>
         <div class="nav-right" id="nav-right"></div>
     </nav>
+    <div id="nav-overlay"></div>
 
     <div id="main-content">
         <div style="text-align:center; padding:100px 20px;">
@@ -82,7 +84,14 @@
         </div>
         <div class="footer-copy">© 2025 WolfSheep.fun — All rights reserved</div>
     </footer>
-
+    <nav id="bottom-nav" aria-label="Mobile navigation">
+        <div class="bn-inner">
+            <a href="/" class="bn-link"><span class="bn-icon">🏠</span><span>Home</span></a>
+            <a href="/game.html?bot=true" class="bn-link"><span class="bn-icon">🤖</span><span>vs Bot</span></a>
+            <a href="/game.html" class="bn-link"><span class="bn-icon">⚡</span><span>Play</span></a>
+            <a href="/profile.html" class="bn-link"><span class="bn-icon">👤</span><span>Profile</span></a>
+        </div>
+    </nav>
     <script src="js/i18n.js"></script>
     <script src="js/nav-players.js"></script>
     <script src="js/pwa.js"></script>

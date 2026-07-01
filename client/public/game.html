@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no"/>
 
     <!-- Primary Meta Tags -->
     <title>Play WolfSheep Online — Free Strategy Board Game | Quoridor</title>
@@ -88,7 +88,8 @@
 </head>
 <body>
     <nav id="navbar">
-        <div class="nav-left">
+        <button id="hamburger-btn" aria-label="Menu">☰</button>
+        <div class="nav-left" id="nav-left-menu">
             <a class="nav-brand" href="/">🐺<span style="color:#ff3366">Wolf</span><span style="color:#33ff66">Sheep</span></a>
             <a class="nav-link" href="/" data-i18n="nav_home">🏠 Home</a>
             <a class="nav-link" href="/profile.html" data-i18n="nav_profile">👤 Profile</a>
@@ -98,6 +99,7 @@
         </div>
         <div class="nav-right" id="nav-right"></div>
     </nav>
+    <div id="nav-overlay"></div>
 
     <div id="main-content">
         <div class="game-layout">
@@ -164,6 +166,28 @@
         </div>
         <div class="footer-copy">© 2025 WolfSheep.fun — All rights reserved</div>
     </footer>
+
+    <!-- Bottom Mobile Navigation -->
+    <nav id="bottom-nav" aria-label="Mobile navigation">
+        <div class="bn-inner">
+            <a href="/" class="bn-link">
+                <span class="bn-icon">🏠</span>
+                <span data-i18n="nav_home">Home</span>
+            </a>
+            <a href="/game.html?bot=true" class="bn-link">
+                <span class="bn-icon">🤖</span>
+                <span>vs Bot</span>
+            </a>
+            <a href="/game.html" class="bn-link active" aria-current="page">
+                <span class="bn-icon">⚡</span>
+                <span>Play</span>
+            </a>
+            <a href="/profile.html" class="bn-link">
+                <span class="bn-icon">👤</span>
+                <span data-i18n="nav_profile">Profile</span>
+            </a>
+        </div>
+    </nav>
 
     <div id="waiting-overlay" class="show">
         <div class="wait-spinner"></div>

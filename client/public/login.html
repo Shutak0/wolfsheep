@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no"/>
 
     <!-- Primary Meta Tags -->
     <title>Sign In — WolfSheep | Free Online Strategy Board Game</title>
@@ -115,6 +115,9 @@
     </script>
 </head>
 <body>
+    <nav id="navbar">
+        <a class="nav-brand" href="/">🐺<span style="color:#ff3366">Wolf</span><span style="color:#33ff66">Sheep</span></a>
+    </nav>
     <div id="main-content">
         <h1 class="home-title" style="margin-top:20px;"><span class="wolf">WOLF</span><span class="sheep">SHEEP</span></h1>
         <div class="auth-container">
@@ -164,6 +167,28 @@
         </div>
         <div class="footer-copy">© 2025 WolfSheep.fun — All rights reserved</div>
     </footer>
+
+    <!-- Bottom Mobile Navigation -->
+    <nav id="bottom-nav" aria-label="Mobile navigation">
+        <div class="bn-inner">
+            <a href="/" class="bn-link">
+                <span class="bn-icon">🏠</span>
+                <span data-i18n="nav_home">Home</span>
+            </a>
+            <a href="/game.html?bot=true" class="bn-link">
+                <span class="bn-icon">🤖</span>
+                <span>vs Bot</span>
+            </a>
+            <a href="/game.html" class="bn-link">
+                <span class="bn-icon">⚡</span>
+                <span>Play</span>
+            </a>
+            <a href="/profile.html" class="bn-link">
+                <span class="bn-icon">👤</span>
+                <span data-i18n="nav_profile">Profile</span>
+            </a>
+        </div>
+    </nav>
 
     <script src="js/login.js"></script>
     <script src="js/pwa.js"></script>
