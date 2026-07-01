@@ -9,7 +9,7 @@
   "background_color": "#0a0a0f",
   "theme_color": "#1a1a2e",
   "lang": "en",
-  "categories": ["games", "entertainment", "utilities"],
+  "categories": ["games", "strategy", "multiplayer"],
   "iarc_rating_id": "e58c82f8-8ed2-4053-8ef6-7a3d7b60d09a",
   "screenshots": [
     {
@@ -42,7 +42,7 @@
       "src": "/imgs/logo-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "maskable any"
     }
   ],
   "prefer_related_applications": false,
