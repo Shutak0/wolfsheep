@@ -1,35 +1,31 @@
-// WolfSheep PWA — регистрация Service Worker + ненавязчивое предложение установки
-// + офлайн-детекция, уведомление об обновлениях, индикаторы состояния
+// WolfSheep PWA — Service Worker registration + install prompt
+// + online/offline detection, update notifications, connectivity indicators
 (function () {
   'use strict';
 
   var deferredPrompt = null;
   var installBanner = null;
-  var bannerDismissed = null;
   var shownThisSession = false;
   var updateToast = null;
   var connectivityToast = null;
   var isOnline = navigator.onLine;
   var waitingWorker = null;
 
-  // ======== 1. Регистрация Service Worker ========
+  // ======== 1. Register Service Worker ========
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {
       navigator.serviceWorker.register('/sw.js')
         .then(function (reg) {
           console.log('[PWA] SW registered:', reg.scope);
 
-          // Проверяем, есть ли ожидающий обновления воркер
           if (reg.waiting) {
             console.log('[PWA] Waiting SW found — activating and reloading');
             reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-            // Перезагружаем страницу после активации нового SW
             navigator.serviceWorker.addEventListener('controllerchange', function () {
               window.location.reload();
             });
           }
 
-          // Следим за обновлением SW — мгновенно активируем и перезагружаем
           reg.onupdatefound = function () {
             var installing = reg.installing;
             if (!installing) return;
@@ -37,7 +33,6 @@
               if (installing.state === 'installed' && navigator.serviceWorker.controller) {
                 console.log('[PWA] New version detected — activating immediately');
                 installing.postMessage({ type: 'SKIP_WAITING' });
-                // Перезагрузка после активации
                 navigator.serviceWorker.addEventListener('controllerchange', function () {
                   console.log('[PWA] Reloading for new version');
                   window.location.reload();
@@ -51,60 +46,48 @@
         });
     });
 
-    // Отслеживаем смену контроллера (после skipWaiting)
     navigator.serviceWorker.addEventListener('controllerchange', function () {
       console.log('[PWA] New SW activated');
     });
   }
 
-  // ======== 2. Перехватываем beforeinstallprompt ========
+  // ======== 2. Intercept beforeinstallprompt ========
   window.addEventListener('beforeinstallprompt', function (e) {
     e.preventDefault();
     deferredPrompt = e;
-
-    // Не показываем, если уже установлено (standalone / fullscreen)
     if (isStandalone()) return;
-
-    // Не показываем повторно в этой сессии
     if (shownThisSession) return;
-
-    // Не показываем, если юзер уже закрывал баннер недавно (< 7 дней)
     if (wasDismissedRecently()) return;
-
-    // Показываем баннер сразу на мобильных устройствах
     showBanner();
   });
 
-  // ======== 3. Событие appinstalled — скрываем баннер ========
+  // ======== 3. appinstalled event — hide banner ========
   window.addEventListener('appinstalled', function () {
     console.log('[PWA] App installed successfully');
     deferredPrompt = null;
     hideBanner();
   });
 
-  // ======== 4. Проверка: уже в standalone-режиме? ========
+  // ======== 4. Check: already in standalone mode? ========
   function isStandalone() {
     return window.matchMedia('(display-mode: standalone)').matches
         || window.navigator.standalone
         || document.referrer.includes('android-app://');
   }
 
-  // ======== 5. Проверка: закрывал ли юзер баннер недавно ========
+  // ======== 5. Check: was banner dismissed recently? ========
   function wasDismissedRecently() {
     try {
       var ts = localStorage.getItem('wolfsheep_pwa_dismissed');
       if (!ts) return false;
       var daysSince = (Date.now() - parseInt(ts, 10)) / (1000 * 60 * 60 * 24);
       return daysSince < 7;
-    } catch (e) {
-      return false;
-    }
+    } catch (e) { return false; }
   }
 
-  // ======== 6. Показываем мини-баннер внизу (сразу) ========
+  // ======== 6. Show install banner at bottom ========
   function showBanner() {
     if (installBanner) return;
-
     shownThisSession = true;
 
     installBanner = document.createElement('div');
@@ -112,19 +95,14 @@
     installBanner.innerHTML =
       '<div class="pwa-banner-inner">' +
         '<span class="pwa-banner-icon">🐺</span>' +
-        '<span class="pwa-banner-text">📱 Установи приложение WolfSheep (APK)</span>' +
-        '<button class="pwa-banner-btn" id="pwa-install-yes">⚡ Установить APK</button>' +
-        '<button class="pwa-banner-close" id="pwa-install-close" aria-label="Закрыть">✕</button>' +
+        '<span class="pwa-banner-text">📱 Install WolfSheep app</span>' +
+        '<button class="pwa-banner-btn" id="pwa-install-yes">⚡ Install</button>' +
+        '<button class="pwa-banner-close" id="pwa-install-close" aria-label="Close">✕</button>' +
       '</div>';
 
     document.body.appendChild(installBanner);
+    requestAnimationFrame(function () { installBanner.classList.add('pwa-banner-visible'); });
 
-    // Анимация появления
-    requestAnimationFrame(function () {
-      installBanner.classList.add('pwa-banner-visible');
-    });
-
-    // Обработчики
     document.getElementById('pwa-install-yes').addEventListener('click', function () {
       if (!deferredPrompt) return;
       deferredPrompt.prompt();
@@ -137,30 +115,25 @@
 
     document.getElementById('pwa-install-close').addEventListener('click', function () {
       hideBanner();
-      try {
-        localStorage.setItem('wolfsheep_pwa_dismissed', Date.now().toString());
-      } catch (e) {}
+      try { localStorage.setItem('wolfsheep_pwa_dismissed', Date.now().toString()); } catch (e) {}
     });
   }
 
-  // ======== 8. Скрываем баннер ========
+  // ======== 7. Hide banner ========
   function hideBanner() {
     if (!installBanner) return;
     installBanner.classList.remove('pwa-banner-visible');
     setTimeout(function () {
-      if (installBanner && installBanner.parentNode) {
-        installBanner.parentNode.removeChild(installBanner);
-      }
+      if (installBanner && installBanner.parentNode) installBanner.parentNode.removeChild(installBanner);
       installBanner = null;
     }, 400);
   }
 
-  // ======== 9. Гамбургер-меню и мобильная навигация ========
+  // ======== 8. Hamburger menu & mobile navigation ========
   function initMobileNav() {
     var hamburger = document.getElementById('hamburger-btn');
     var navLeft = document.getElementById('nav-left-menu');
     var navOverlay = document.getElementById('nav-overlay');
-
     if (!hamburger || !navLeft) return;
 
     var isMenuOpen = false;
@@ -184,191 +157,105 @@
     }
 
     hamburger.addEventListener('click', function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      if (isMenuOpen) {
-        closeMenu();
-      } else {
-        openMenu();
-      }
+      e.preventDefault(); e.stopPropagation();
+      isMenuOpen ? closeMenu() : openMenu();
     });
+    if (navOverlay) navOverlay.addEventListener('click', closeMenu);
+    navLeft.querySelectorAll('.nav-link').forEach(function (l) { l.addEventListener('click', closeMenu); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && isMenuOpen) closeMenu(); });
 
-    // Закрытие по клику на оверлей
-    if (navOverlay) {
-      navOverlay.addEventListener('click', function () {
-        closeMenu();
-      });
-    }
-
-    // Закрытие по клику на ссылку в меню
-    navLeft.querySelectorAll('.nav-link').forEach(function (link) {
-      link.addEventListener('click', function () {
-        closeMenu();
-      });
-    });
-
-    // Закрытие по Escape
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && isMenuOpen) {
-        closeMenu();
-      }
-    });
-
-    // Свайп вправо для открытия меню (на мобильных)
     var touchStartX = 0;
-    document.addEventListener('touchstart', function (e) {
-      if (e.touches.length === 1) {
-        touchStartX = e.touches[0].clientX;
-      }
-    }, { passive: true });
-
-    document.addEventListener('touchend', function (e) {
-      if (!isMenuOpen && touchStartX < 20) {
-        var touchEndX = e.changedTouches[0].clientX;
-        if (touchEndX - touchStartX > 80) {
-          openMenu();
-        }
-      }
-    });
-
-    // Закрытие по свайпу влево
+    document.addEventListener('touchstart', function (e) { if (e.touches.length === 1) touchStartX = e.touches[0].clientX; }, { passive: true });
+    document.addEventListener('touchend', function (e) { if (!isMenuOpen && touchStartX < 20 && e.changedTouches[0].clientX - touchStartX > 80) openMenu(); });
     if (navLeft) {
-      navLeft.addEventListener('touchstart', function (e) {
-        if (e.touches.length === 1) {
-          touchStartX = e.touches[0].clientX;
-        }
-      }, { passive: true });
-
-      navLeft.addEventListener('touchend', function (e) {
-        if (isMenuOpen) {
-          var touchEndX = e.changedTouches[0].clientX;
-          if (touchStartX - touchEndX > 80) {
-            closeMenu();
-          }
-        }
-      });
+      navLeft.addEventListener('touchstart', function (e) { if (e.touches.length === 1) touchStartX = e.touches[0].clientX; }, { passive: true });
+      navLeft.addEventListener('touchend', function (e) { if (isMenuOpen && touchStartX - e.changedTouches[0].clientX > 80) closeMenu(); });
     }
   }
 
-  // Запускаем инициализацию мобильного меню при загрузке DOM
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initMobileNav);
-  } else {
-    initMobileNav();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initMobileNav);
+  else initMobileNav();
 
-  // ======== 10. Детекция онлайна/офлайна ========
+  // ======== 9. Online/offline detection ========
   function updateOnlineStatus(online) {
     isOnline = online;
     var indicator = document.getElementById('connectivity-indicator');
-    if (indicator) {
-      if (online) {
-        indicator.className = 'conn-indicator online';
-        indicator.textContent = '🟢';
-        indicator.title = 'Онлайн — соединение восстановлено';
-        hideConnectivityToast();
-        hideOfflineBar();
-        hideOfflineGameOverlay();
-      } else {
-        indicator.className = 'conn-indicator offline';
-        indicator.textContent = '🔴';
-        indicator.title = 'Офлайн — нет подключения к интернету';
-        showOfflineToast();
-        showOfflineBar();
-        // Если на странице игры — показываем оверлей
-        if (window.location.pathname.includes('game.html')) {
-          showOfflineGameOverlay();
-        }
-      }
+    if (!indicator) return;
+    if (online) {
+      indicator.className = 'conn-indicator online';
+      indicator.textContent = '🟢';
+      indicator.title = 'Online — connection restored';
+      hideConnectivityToast();
+      hideOfflineBar();
+      hideOfflineGameOverlay();
+    } else {
+      indicator.className = 'conn-indicator offline';
+      indicator.textContent = '🔴';
+      indicator.title = 'Offline — no internet connection';
+      showOfflineToast();
+      showOfflineBar();
+      if (window.location.pathname.includes('game.html')) showOfflineGameOverlay();
     }
   }
 
-  // ===== Persistent offline bar (тонкая полоса под навбаром) =====
   function showOfflineBar() {
     var bar = document.getElementById('offline-bar');
-    if (bar) {
-      bar.classList.add('show');
-      return;
-    }
+    if (bar) { bar.classList.add('show'); return; }
     bar = document.createElement('div');
     bar.id = 'offline-bar';
     bar.className = 'show';
-    bar.textContent = '⚠️ Нет подключения к интернету — вы офлайн';
+    bar.textContent = '⚠️ No internet connection — you are offline';
     document.body.insertBefore(bar, document.body.firstChild);
   }
 
   function hideOfflineBar() {
     var bar = document.getElementById('offline-bar');
-    if (bar) {
-      bar.classList.remove('show');
-    }
+    if (bar) bar.classList.remove('show');
   }
 
-  // ===== Game offline overlay (полноэкранный при обрыве во время игры) =====
   function showOfflineGameOverlay() {
     var overlay = document.getElementById('offline-game-overlay');
-    if (overlay) {
-      overlay.classList.add('show');
-      return;
-    }
+    if (overlay) { overlay.classList.add('show'); return; }
     overlay = document.createElement('div');
     overlay.id = 'offline-game-overlay';
     overlay.innerHTML =
       '<div class="og-icon">📡</div>' +
-      '<div class="og-title">Соединение потеряно</div>' +
-      '<div class="og-sub">Проверьте подключение к интернету. Игра будет восстановлена при появлении сети.</div>' +
-      '<button class="og-btn" id="og-retry-btn">🔄 Попробовать снова</button>';
+      '<div class="og-title">Connection Lost</div>' +
+      '<div class="og-sub">Check your internet connection. The game cannot continue without a network.</div>' +
+      '<button class="og-btn" id="og-retry-btn">🔄 Retry</button>';
     document.body.appendChild(overlay);
-    requestAnimationFrame(function () {
-      overlay.classList.add('show');
-    });
+    requestAnimationFrame(function () { overlay.classList.add('show'); });
 
     document.getElementById('og-retry-btn').addEventListener('click', function () {
-      if (navigator.onLine) {
-        hideOfflineGameOverlay();
-      } else {
+      if (navigator.onLine) { hideOfflineGameOverlay(); }
+      else {
         var btn = document.getElementById('og-retry-btn');
-        if (btn) {
-          btn.textContent = '⏳ Проверяем...';
-          setTimeout(function () {
-            if (btn) btn.textContent = '🔄 Попробовать снова';
-          }, 2000);
-        }
+        if (btn) { btn.textContent = '⏳ Checking...'; setTimeout(function () { if (btn) btn.textContent = '🔄 Retry'; }, 2000); }
       }
     });
   }
 
   function hideOfflineGameOverlay() {
     var overlay = document.getElementById('offline-game-overlay');
-    if (overlay) {
-      overlay.classList.remove('show');
-    }
+    if (overlay) overlay.classList.remove('show');
   }
 
   function createConnectivityIndicator() {
-    // Создаём индикатор в навбаре (рядом с числом игроков)
-    var navCenter = document.querySelector('.nav-center');
-    if (!navCenter) return;
-    var indicator = document.createElement('span');
-    indicator.id = 'connectivity-indicator';
-    indicator.className = 'conn-indicator ' + (isOnline ? 'online' : 'offline');
-    indicator.textContent = isOnline ? '🟢' : '🔴';
-    indicator.title = isOnline ? 'Онлайн' : 'Офлайн — нет подключения';
-    indicator.style.cssText = 'font-size:10px;margin-left:8px;cursor:default;';
-    navCenter.appendChild(indicator);
+    var nc = document.querySelector('.nav-center');
+    if (!nc) return;
+    var ind = document.createElement('span');
+    ind.id = 'connectivity-indicator';
+    ind.className = 'conn-indicator ' + (isOnline ? 'online' : 'offline');
+    ind.textContent = isOnline ? '🟢' : '🔴';
+    ind.title = isOnline ? 'Online' : 'Offline — no internet connection';
+    ind.style.cssText = 'font-size:10px;margin-left:8px;cursor:default;';
+    nc.appendChild(ind);
   }
 
-  window.addEventListener('online', function () {
-    console.log('[PWA] 🌐 Online — connection restored');
-    updateOnlineStatus(true);
-  });
+  window.addEventListener('online', function () { console.log('[PWA] Online'); updateOnlineStatus(true); });
+  window.addEventListener('offline', function () { console.log('[PWA] Offline'); updateOnlineStatus(false); });
 
-  window.addEventListener('offline', function () {
-    console.log('[PWA] 🔴 Offline — no internet connection');
-    updateOnlineStatus(false);
-  });
-
-  // ======== 11. Тост «Нет интернета» ========
+  // ======== 10. Offline toast ========
   function showOfflineToast() {
     if (connectivityToast) return;
     connectivityToast = document.createElement('div');
@@ -376,18 +263,12 @@
     connectivityToast.className = 'pwa-toast pwa-toast-offline';
     connectivityToast.innerHTML =
       '<span class="pwa-toast-icon">📡</span>' +
-      '<span class="pwa-toast-text">Нет подключения к интернету</span>' +
-      '<span class="pwa-toast-sub">Вы можете играть с ботом офлайн</span>' +
-      '<button class="pwa-toast-close" id="pwa-offline-close" aria-label="Закрыть">✕</button>';
+      '<span class="pwa-toast-text">No internet connection</span>' +
+      '<span class="pwa-toast-sub">Multiplayer and bot require an internet connection</span>' +
+      '<button class="pwa-toast-close" id="pwa-offline-close" aria-label="Close">✕</button>';
     document.body.appendChild(connectivityToast);
-
-    requestAnimationFrame(function () {
-      connectivityToast.classList.add('pwa-toast-visible');
-    });
-
+    requestAnimationFrame(function () { connectivityToast.classList.add('pwa-toast-visible'); });
     document.getElementById('pwa-offline-close').addEventListener('click', hideConnectivityToast);
-
-    // Авто-скрытие через 8 секунд
     setTimeout(hideConnectivityToast, 8000);
   }
 
@@ -395,14 +276,12 @@
     if (!connectivityToast) return;
     connectivityToast.classList.remove('pwa-toast-visible');
     setTimeout(function () {
-      if (connectivityToast && connectivityToast.parentNode) {
-        connectivityToast.parentNode.removeChild(connectivityToast);
-      }
+      if (connectivityToast && connectivityToast.parentNode) connectivityToast.parentNode.removeChild(connectivityToast);
       connectivityToast = null;
     }, 400);
   }
 
-  // ======== 12. Тост «Доступно обновление» ========
+  // ======== 11. Update available toast ========
   function showUpdateToast() {
     if (updateToast) return;
     updateToast = document.createElement('div');
@@ -410,55 +289,35 @@
     updateToast.className = 'pwa-toast pwa-toast-update';
     updateToast.innerHTML =
       '<span class="pwa-toast-icon">🔄</span>' +
-      '<span class="pwa-toast-text">Доступна новая версия</span>' +
-      '<button class="pwa-toast-btn" id="pwa-update-yes">Обновить</button>' +
-      '<button class="pwa-toast-close" id="pwa-update-close" aria-label="Закрыть">✕</button>';
+      '<span class="pwa-toast-text">New version available</span>' +
+      '<button class="pwa-toast-btn" id="pwa-update-yes">Update</button>' +
+      '<button class="pwa-toast-close" id="pwa-update-close" aria-label="Close">✕</button>';
     document.body.appendChild(updateToast);
-
-    // Позиционируем сверху (в отличие от офлайн-тоста который снизу)
     updateToast.style.top = 'calc(var(--safe-top) + 70px)';
     updateToast.style.bottom = 'auto';
-
-    requestAnimationFrame(function () {
-      updateToast.classList.add('pwa-toast-visible');
-    });
-
+    requestAnimationFrame(function () { updateToast.classList.add('pwa-toast-visible'); });
     document.getElementById('pwa-update-yes').addEventListener('click', function () {
-      if (waitingWorker) {
-        waitingWorker.postMessage({ type: 'SKIP_WAITING' });
-      }
+      if (waitingWorker) waitingWorker.postMessage({ type: 'SKIP_WAITING' });
       window.location.reload();
     });
-
-    document.getElementById('pwa-update-close').addEventListener('click', function () {
-      hideUpdateToast();
-    });
+    document.getElementById('pwa-update-close').addEventListener('click', hideUpdateToast);
   }
 
   function hideUpdateToast() {
     if (!updateToast) return;
     updateToast.classList.remove('pwa-toast-visible');
     setTimeout(function () {
-      if (updateToast && updateToast.parentNode) {
-        updateToast.parentNode.removeChild(updateToast);
-      }
+      if (updateToast && updateToast.parentNode) updateToast.parentNode.removeChild(updateToast);
       updateToast = null;
     }, 400);
   }
 
-  // ======== 13. Инициализация всего при загрузке ========
+  // ======== 12. Initialize ========
   function initPWAFeatures() {
     createConnectivityIndicator();
-
-    // Если офлайн при загрузке — показываем тост
-    if (!isOnline) {
-      showOfflineToast();
-    }
+    if (!isOnline) showOfflineToast();
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initPWAFeatures);
-  } else {
-    initPWAFeatures();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initPWAFeatures);
+  else initPWAFeatures();
 })();
