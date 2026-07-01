@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "fun.wolfsheep.twa",
+      "sha256_cert_fingerprints": [
+        "СЮДА_ВСТАВЬТЕ_ВАШ_SHA256_ХЕШ_В_ВЕРХНЕМ_РЕГИСТРЕ"
+      ]
+    }
+  }
+]
