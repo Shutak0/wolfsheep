@@ -308,6 +308,7 @@
     var emoteWrapper = document.getElementById('emote-toggle-wrapper');
     var emoteToggleBtn = document.getElementById('emote-toggle-btn');
     var emoteFlyout = document.getElementById('emote-flyout');
+    var emoteBackdrop = document.getElementById('emote-backdrop');
     var boardWrapper = document.getElementById('board-wrapper');
     var emoteBtns = emoteFlyout.querySelectorAll('.emote-btn');
     var flyoutOpen = false;
@@ -317,15 +318,22 @@
         if (flyoutOpen) {
             emoteFlyout.classList.add('open');
             emoteToggleBtn.classList.add('active');
+            emoteBackdrop.classList.add('show');
         } else {
             emoteFlyout.classList.remove('open');
             emoteToggleBtn.classList.remove('active');
+            emoteBackdrop.classList.remove('show');
         }
     }
 
     emoteToggleBtn.addEventListener('click', function (e) {
         e.stopPropagation();
         toggleFlyout();
+    });
+
+    // Close flyout when clicking backdrop
+    emoteBackdrop.addEventListener('click', function (e) {
+        toggleFlyout(false);
     });
 
     // Close flyout when clicking outside

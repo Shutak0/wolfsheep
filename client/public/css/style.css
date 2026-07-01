@@ -155,12 +155,12 @@ canvas { display:block; border-radius:10px; cursor:pointer; background:#0a0a0a; 
 .tc-badge { color:#94a3b8; font-size:11px; background:rgba(20,10,40,0.5); padding:3px 10px; border-radius:20px; border:1px solid #2a1a5a; }
 /* Waiting overlay с анимацией */
 .emote-toggle-wrapper { position:relative; align-self:center; z-index:50; }
-.emote-toggle-btn { width:44px; height:44px; border-radius:14px; border:2px solid #2a1a5a; background:rgba(20,10,40,0.7); cursor:pointer; font-size:22px; transition:all 0.2s; display:flex; align-items:center; justify-content:center; color:#c084fc; }
+.emote-toggle-btn { width:48px; height:48px; border-radius:14px; border:2px solid #2a1a5a; background:rgba(20,10,40,0.7); cursor:pointer; font-size:24px; transition:all 0.2s; display:flex; align-items:center; justify-content:center; color:#c084fc; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
 .emote-toggle-btn:hover, .emote-toggle-btn.active { border-color:#8a2be2; box-shadow:0 0 20px rgba(138,43,226,0.5); background:rgba(138,43,226,0.25); }
 .emote-toggle-btn:active { transform:scale(0.95); }
-.emote-flyout { display:none; position:absolute; left:0; top:0; background:#0d0d1a; border:2px solid #2a1a5a; border-radius:16px; padding:8px; gap:6px; flex-direction:column; box-shadow:0 0 30px rgba(138,43,226,0.4); }
+.emote-flyout { display:none; position:absolute; left:0; top:0; background:#0d0d1a; border:2px solid #2a1a5a; border-radius:16px; padding:8px; gap:6px; flex-direction:column; box-shadow:0 0 30px rgba(138,43,226,0.4); z-index:51; }
 .emote-flyout.open { display:flex; }
-.emote-btn { width:48px; height:48px; border-radius:12px; border:2px solid #2a1a5a; background:rgba(20,10,40,0.6); cursor:pointer; padding:3px; transition:all 0.15s; overflow:hidden; display:flex; align-items:center; justify-content:center; }
+.emote-btn { width:52px; height:52px; border-radius:14px; border:2px solid #2a1a5a; background:rgba(20,10,40,0.6); cursor:pointer; padding:3px; transition:all 0.15s; overflow:hidden; display:flex; align-items:center; justify-content:center; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
 .emote-btn:hover { border-color:#8a2be2; box-shadow:0 0 16px rgba(138,43,226,0.4); transform:scale(1.08); background:rgba(138,43,226,0.2); }
 .emote-btn:active { transform:scale(0.93); }
 .emote-btn img { width:100%; height:100%; object-fit:contain; pointer-events:none; }
@@ -174,6 +174,9 @@ canvas { display:block; border-radius:10px; cursor:pointer; background:#0a0a0a; 
     100% { opacity:0; transform:scale(0.8); }
 }
 .emote-anim { position:absolute; pointer-events:none; z-index:10; width:48px; height:48px; animation:emoteFloat 2s ease-out forwards; will-change:transform,opacity; }
+/* Emote backdrop for mobile */
+.emote-backdrop { display:none; position:fixed; inset:0; z-index:49; background:rgba(0,0,0,0.3); }
+.emote-backdrop.show { display:block; }
 #waiting-overlay { position:fixed; top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85); z-index:200; display:flex; justify-content:center; align-items:center; flex-direction:column; gap:20px; opacity:0; pointer-events:none; transition:opacity 0.4s ease; }
 #waiting-overlay.show { opacity:1; pointer-events:all; }
 .wait-text { color:#c084fc; font-size:22px; font-weight:600; text-shadow:0 0 20px #8a2be2; animation:waitPulse 1.5s ease-in-out infinite; }
@@ -232,9 +235,10 @@ canvas, button, .mode-card, .tc-btn, .game-btn, .profile-save, .auth-btn {
     .play-zone { flex-direction:column; align-items:center; }
     .play-zone-right { width:100%; max-width:600px; }
     .game-layout { flex-direction:column; align-items:center; gap:12px; }
-    .emote-toggle-wrapper { align-self:flex-start; margin-left:4px; }
-    .emote-flyout { position:absolute; left:0; top:0; flex-direction:row; gap:4px; }
-    .emote-btn { width:42px; height:42px; }
+    .emote-toggle-wrapper { align-self:flex-start; margin-left:4px; position:static; }
+    .emote-toggle-btn { width:46px; height:46px; }
+    .emote-flyout { position:absolute; left:50%; top:100%; transform:translateX(-50%); flex-direction:row; gap:6px; margin-top:4px; }
+    .emote-btn { width:52px; height:52px; }
     .game-right { flex-direction:row; min-height:auto; width:100%; gap:10px; }
     .player-block { flex:1; padding:10px; }
     canvas { width:100%; height:auto; max-width:500px; }
@@ -344,9 +348,11 @@ canvas, button, .mode-card, .tc-btn, .game-btn, .profile-save, .auth-btn {
     .nav-brand { font-size:16px; padding:6px 8px; }
     .nav-link { font-size:12px; padding:6px 10px; }
     .game-layout { gap:8px; }
-    .emote-toggle-wrapper { align-self:flex-start; margin-left:2px; }
-    .emote-flyout { flex-direction:row; gap:3px; }
-    .emote-btn { width:36px; height:36px; }
+    .emote-toggle-wrapper { align-self:flex-start; margin-left:2px; position:static; }
+    .emote-toggle-btn { width:44px; height:44px; font-size:22px; }
+    .emote-flyout { position:absolute; left:50%; top:100%; transform:translateX(-50%); flex-direction:row; gap:4px; margin-top:4px; }
+    .emote-btn { width:48px; height:48px; }
+    .emote-anim { width:40px; height:40px; }
     .game-right { gap:6px; }
     .player-block { padding:10px; }
     .game-btn { font-size:12px; padding:6px 12px; }
