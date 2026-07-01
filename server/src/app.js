@@ -65,12 +65,20 @@ app.use((req, res, next) => {
 const staticOptions = {
     maxAge: '7d',
     setHeaders: (res, filePath) => {
+        // Service Worker — НИКОГДА не кэшировать, всегда свежий
+        if (filePath.endsWith('sw.js')) {
+            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+            res.setHeader('Pragma', 'no-cache');
+            res.setHeader('Expires', '0');
+            return;
+        }
         if (filePath.endsWith('.html')) {
             // HTML: short cache, always revalidate
-            res.setHeader('Cache-Control', 'public, max-age=3600, must-revalidate');
+            res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
             res.setHeader('X-Robots-Tag', 'index, follow, max-snippet:-1, max-image-preview:large');
         } else if (filePath.match(/\.(js|css)$/)) {
-            res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+            // JS/CSS: кэшируем, НО БЕЗ immutable — браузер должен проверять свежесть
+            res.setHeader('Cache-Control', 'public, max-age=86400, must-revalidate');
         } else if (filePath.match(/\.(png|jpg|jpeg|gif|webp|svg|ico)$/)) {
             res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
         } else if (filePath.endsWith('.xml')) {
@@ -80,7 +88,7 @@ const staticOptions = {
             res.setHeader('Cache-Control', 'public, max-age=86400');
             res.setHeader('Content-Type', 'text/plain; charset=utf-8');
         } else if (filePath.endsWith('.json') && !filePath.includes('manifest')) {
-            res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+            res.setHeader('Cache-Control', 'public, max-age=86400, must-revalidate');
         }
     }
 };

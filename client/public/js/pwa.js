@@ -21,19 +21,27 @@
 
           // Проверяем, есть ли ожидающий обновления воркер
           if (reg.waiting) {
-            waitingWorker = reg.waiting;
-            showUpdateToast();
+            console.log('[PWA] Waiting SW found — activating and reloading');
+            reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+            // Перезагружаем страницу после активации нового SW
+            navigator.serviceWorker.addEventListener('controllerchange', function () {
+              window.location.reload();
+            });
           }
 
-          // Следим за обновлением SW — показываем уведомление, а не перезагружаем молча
+          // Следим за обновлением SW — мгновенно активируем и перезагружаем
           reg.onupdatefound = function () {
             var installing = reg.installing;
             if (!installing) return;
             installing.onstatechange = function () {
               if (installing.state === 'installed' && navigator.serviceWorker.controller) {
-                console.log('[PWA] New version available');
-                waitingWorker = installing;
-                showUpdateToast();
+                console.log('[PWA] New version detected — activating immediately');
+                installing.postMessage({ type: 'SKIP_WAITING' });
+                // Перезагрузка после активации
+                navigator.serviceWorker.addEventListener('controllerchange', function () {
+                  console.log('[PWA] Reloading for new version');
+                  window.location.reload();
+                });
               }
             };
           };

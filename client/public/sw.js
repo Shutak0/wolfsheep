@@ -1,5 +1,7 @@
-// WolfSheep Service Worker — улучшенное кэширование, офлайн-фолбэк
-const CACHE_NAME = 'wolfsheep-v4';
+// WolfSheep Service Worker — авто-обновление, мгновенная активация, офлайн-фолбэк
+// Версия генерируется динамически при каждой установке = старый кэш всегда сбрасывается
+const BUILD_TIME = Date.now();
+const CACHE_NAME = 'wolfsheep-v' + BUILD_TIME;
 const OFFLINE_PAGE = '/404.html';
 
 const STATIC_ASSETS = [
@@ -43,8 +45,9 @@ const HTML_PAGES = [
   '/about.html', '/rules.html', '/privacy.html', '/terms.html'
 ];
 
-// Установка: кэшируем статику заранее
+// ===== НЕМЕДЛЕННАЯ установка и активация =====
 self.addEventListener('install', (event) => {
+  console.log('[SW] Installing new version:', BUILD_TIME);
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return Promise.allSettled(
@@ -54,18 +57,30 @@ self.addEventListener('install', (event) => {
           })
         )
       );
-    }).then(() => self.skipWaiting())
+    }).then(() => {
+      // НЕМЕДЛЕННО активируемся, не ждём закрытия вкладок
+      return self.skipWaiting();
+    })
   );
 });
 
-// Активация: чистим старые кэши
+// Активация: чистим ВСЕ старые кэши, захватываем клиентов
 self.addEventListener('activate', (event) => {
+  console.log('[SW] Activating version:', BUILD_TIME);
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
-        keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
+        keys.filter((k) => k !== CACHE_NAME).map((k) => {
+          console.log('[SW] Deleting old cache:', k);
+          return caches.delete(k);
+        })
       )
-    ).then(() => self.clients.claim())
+    ).then(() => {
+      // Захватываем все открытые вкладки немедленно
+      return self.clients.claim();
+    }).then(() => {
+      console.log('[SW] Activated and claimed all clients');
+    })
   );
 });
 
@@ -87,17 +102,13 @@ self.addEventListener('fetch', (event) => {
   if (url.pathname.startsWith('/api/')) return;
 
   // Внешние ресурсы (Google OAuth, analytics и т.д.) — только сеть
-  if (url.origin !== self.location.origin) {
-    // Для Google OAuth и других внешних скриптов — только сеть
-    return;
-  }
+  if (url.origin !== self.location.origin) return;
 
-  // HTML-страницы: network-first с офлайн-фолбэком
+  // HTML-страницы: ВСЕГДА сеть, кэш только при офлайне
   if (isHtmlPage(url) || request.headers.get('accept')?.includes('text/html')) {
     event.respondWith(
-      fetch(request)
+      fetch(request, { cache: 'no-cache' }) // Принудительно без кэша браузера
         .then((response) => {
-          // Кэшируем свежую версию
           if (response.status === 200) {
             const clone = response.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
@@ -105,7 +116,6 @@ self.addEventListener('fetch', (event) => {
           return response;
         })
         .catch(() => {
-          // Нет сети — отдаём из кэша или офлайн-страницу
           return caches.match(request).then((cached) => {
             return cached || caches.match(OFFLINE_PAGE);
           });
@@ -114,10 +124,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Статика (CSS, JS, изображения): cache-first, фоном обновляем
+  // Статика (CSS, JS, изображения): cache-first, НО фоном всегда обновляем
   event.respondWith(
     caches.match(request).then((cached) => {
-      const fetchPromise = fetch(request).then((networkResponse) => {
+      // Фоновое обновление из сети
+      const fetchPromise = fetch(request, { cache: 'no-cache' }).then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200) {
           const clone = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
@@ -125,14 +136,20 @@ self.addEventListener('fetch', (event) => {
         return networkResponse;
       }).catch(() => cached);
 
+      // Если есть в кэше — отдаём мгновенно, но ОДНОВРЕМЕННО запускаем обновление
+      // Если нет в кэше — ждём сеть
       return cached || fetchPromise;
     })
   );
 });
 
-// Обработка сообщения о пропуске ожидания (для немедленной активации)
+// Обработка сообщения SKIP_WAITING — уже не нужно, т.к. skipWaiting вызывается сразу
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
+  }
+  if (event.data && event.data.type === 'CHECK_VERSION') {
+    // Клиент запросил версию — сообщаем
+    event.ports && event.ports[0] && event.ports[0].postMessage({ version: BUILD_TIME });
   }
 });
