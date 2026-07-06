@@ -49,6 +49,22 @@
     navigator.serviceWorker.addEventListener('controllerchange', function () {
       console.log('[PWA] New SW activated');
     });
+
+    // ===== Периодическая проверка обновлений SW (каждые 5 минут) =====
+    var updateInterval = 5 * 60 * 1000; // 5 минут
+    window.addEventListener('load', function () {
+      setTimeout(function () {
+        setInterval(function () {
+          if (navigator.serviceWorker.controller) {
+            navigator.serviceWorker.ready.then(function (reg) {
+              reg.update().catch(function (err) {
+                console.log('[PWA] Update check skipped:', err.message);
+              });
+            });
+          }
+        }, updateInterval);
+      }, updateInterval); // Первая проверка через 5 минут после загрузки
+    });
   }
 
   // ======== 2. Intercept beforeinstallprompt ========

@@ -77,10 +77,11 @@ const staticOptions = {
             res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
             res.setHeader('X-Robots-Tag', 'index, follow, max-snippet:-1, max-image-preview:large');
         } else if (filePath.match(/\.(js|css)$/)) {
-            // JS/CSS: кэшируем, НО БЕЗ immutable — браузер должен проверять свежесть
-            res.setHeader('Cache-Control', 'public, max-age=86400, must-revalidate');
+            // JS/CSS: всегда перепроверять свежесть (max-age=0), но поддерживаем 304 Not Modified
+            res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
         } else if (filePath.match(/\.(png|jpg|jpeg|gif|webp|svg|ico)$/)) {
-            res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
+            // Изображения: кэшировать на сутки, но разрешить перепроверку
+            res.setHeader('Cache-Control', 'public, max-age=86400, must-revalidate');
         } else if (filePath.endsWith('.xml')) {
             res.setHeader('Cache-Control', 'public, max-age=86400');
             res.setHeader('Content-Type', 'application/xml; charset=utf-8');
@@ -95,9 +96,9 @@ const staticOptions = {
 
 app.use(express.static(path.join(__dirname, '../../client/public'), staticOptions));
 app.use('/imgs', express.static(path.join(__dirname, '..', 'imgs'), {
-    maxAge: '30d',
+    maxAge: '7d',
     setHeaders: (res) => {
-        res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
+        res.setHeader('Cache-Control', 'public, max-age=604800, must-revalidate');
     }
 }));
 

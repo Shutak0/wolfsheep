@@ -68,15 +68,13 @@
                     var p = Math.min(wt / 1000, 1);
                     var d = (r + c) * 0.04;
                     var cp = Math.max(0, Math.min(1, (p - d) / (1 - d + 0.01)));
-                    var g = ctx.createRadialGradient(x + 8, y + 8, 4, x + CELL_SIZE / 2, y + CELL_SIZE / 2, CELL_SIZE);
-                    g.addColorStop(0, lerpColor('#2e2e4e', wc, cp));
-                    g.addColorStop(1, lerpColor('#1a1a30', wc, cp * 0.7));
-                    ctx.fillStyle = g;
+                    // Однотонный цвет без блика для win-анимации
+                    ctx.fillStyle = lerpColor('#1c1c32', wc, cp * 0.8);
                 } else if (winAnim && wc) {
                     ctx.fillStyle = wc; ctx.globalAlpha = 0.3;
                 } else {
-                    var g2 = ctx.createRadialGradient(x + 8, y + 8, 4, x + CELL_SIZE / 2, y + CELL_SIZE / 2, CELL_SIZE);
-                    g2.addColorStop(0, '#2e2e4e'); g2.addColorStop(1, '#1a1a30'); ctx.fillStyle = g2;
+                    // Однотонный цвет без блика — чуть светлее чёрного
+                    ctx.fillStyle = '#1c1c32';
                 }
                 roundRect(ctx, x, y, CELL_SIZE, CELL_SIZE, CORNER_RADIUS); ctx.fill();
                 if (winAnim) ctx.globalAlpha = 1;
@@ -198,7 +196,7 @@
             ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(0, 0, W, H);
             ctx.fillStyle = '#00ffff'; ctx.font = 'bold 52px "Segoe UI", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             ctx.shadowColor = '#00ffff'; ctx.shadowBlur = 50;
-            ctx.fillText('🏆 ' + COLOR_NAMES[state.winner] + ' won!', W / 2, H / 2 - 6); ctx.shadowBlur = 0;
+        //    ctx.fillText('🏆 ' + COLOR_NAMES[state.winner] + ' won!', W / 2, H / 2 - 6); ctx.shadowBlur = 0;
             ctx.restore();
         }
 

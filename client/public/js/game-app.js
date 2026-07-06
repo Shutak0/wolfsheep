@@ -118,6 +118,21 @@
 
     function setStatus(msg, isWin) { statusMsg.textContent = msg; statusMsg.className = isWin ? 'win' : ''; }
 
+    function showReplayCTA() {
+        var boardWrapper = document.getElementById('board-wrapper');
+        var overlay = document.getElementById('replay-cta');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'replay-cta';
+            overlay.className = 'replay-cta-overlay';
+            overlay.innerHTML = '<div class="replay-cta-text">Play on wolfsheep.fun</div>';
+            boardWrapper.appendChild(overlay);
+        }
+        overlay.classList.remove('show');
+        void overlay.offsetWidth;
+        overlay.classList.add('show');
+    }
+
     function startWinAnimation(onDone) {
         if (winAnimTimer) clearInterval(winAnimTimer);
         state._winTime = 0;
@@ -218,7 +233,10 @@
     };
     network.onError = function (msg) { setStatus(__('game_error') + msg, false); };
     network.onOpponentDisconnected = function () { setStatus(__('game_opponent_left'), true); state.gameOver = true; render(); };
-    network.onEmote = function (d) { playEmoteAnim(d.emoteId, d.fromPlayer); };
+    network.onEmote = function (d) {
+        if (!replayActive) moveRecord.push({ type: 'emote', emoteId: d.emoteId, fromPlayer: d.fromPlayer });
+        playEmoteAnim(d.emoteId, d.fromPlayer);
+    };
 
     // ---- Кнопки ----
     surrenderBtn.addEventListener('click', function () { if (gameStarted && !state.gameOver) network.surrender(); });
@@ -265,6 +283,7 @@
                 state = replayState;
                 replayActive = false; // replay завершён — показываем финал
                 if (finalWinner !== null && finalWinner !== undefined) {
+                    showReplayCTA();
                     startWinAnimation(function () {
                         recBtn.style.display = 'inline-block';
                         playAgainBtn.style.display = 'inline-block';
@@ -281,6 +300,15 @@
             }
 
             var move = moveRecord[idx];
+
+            if (move.type === 'emote') {
+                // Проигрываем анимацию смайлика без изменения состояния доски
+                playEmoteAnim(move.emoteId, move.fromPlayer);
+                setStatus('⏯ Replay ' + (idx + 1) + '/' + total + ' 😀', false);
+                idx++;
+                return;
+            }
+
             Engine.applyAction(replayState, move);
 
             // Детект победного хода сразу после applyAction

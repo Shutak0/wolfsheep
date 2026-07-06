@@ -141,6 +141,7 @@ a:active { text-shadow: 0 0 18px #a855f7; }
 .game-layout { display:flex; gap:22px; align-items:flex-start; }
 .game-left { display:flex; flex-direction:column; align-items:center; gap:10px; }
 #board-wrapper { position:relative; background:#0a0a12; padding:12px; border-radius:18px; box-shadow:inset 0 0 0 2px #1a0a3a, 0 0 30px rgba(138,43,226,0.4); }
+.board-corner-label { position:absolute; top:24px; left:24px; color:#ffffff; font-weight:600; font-size:23px; letter-spacing:1px; text-shadow:0 0 8px rgba(255,255,255,0.6); opacity:0.55; pointer-events:none; user-select:none; white-space:nowrap; z-index:3; }
 .board-watermark { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:#00ffff; font-weight:800; font-size:38px; letter-spacing:6px; text-shadow:0 0 30px #00ffff, 0 0 80px #0088ff; opacity:0.10; pointer-events:none; user-select:none; white-space:nowrap; z-index:2; }
 canvas { display:block; border-radius:10px; cursor:pointer; background:#0a0a0a; width:600px; height:600px; image-rendering:auto; }
 #turn-badge { color:#a855f7; font-weight:700; font-size:13px; letter-spacing:1px; background:rgba(20,10,40,0.7); padding:6px 18px; border-radius:40px; border:1px solid #4a2a8a; text-shadow:0 0 15px #8a2be2; }
@@ -390,6 +391,7 @@ canvas, button, .mode-card, .tc-btn, .game-btn, .profile-save, .auth-btn {
     .player-block { padding:12px; border-radius:16px; }
     .game-controls { flex-direction:row; flex-wrap:wrap; justify-content:center; gap:6px; }
     .game-btn { font-size:14px; padding:10px 16px; min-height:44px; }
+    .board-corner-label { top:10px; left:10px; font-size: 10px; letter-spacing:0.5px; }
     .board-watermark { font-size:clamp(18px, 4vw, 24px) !important; }
     #turn-badge { font-size:13px; padding:6px 14px; }
     #status-msg { font-size:12px; }
@@ -722,6 +724,40 @@ canvas, button, .mode-card, .tc-btn, .game-btn, .profile-save, .auth-btn {
 #offline-game-overlay .og-btn:hover {
   background: #a855f7;
   box-shadow: 0 0 25px rgba(138, 43, 226, 0.5);
+}
+
+/* ===== Replay "Play on wolfsheep.fun" overlay ===== */
+.replay-cta-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 20;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.5s ease;
+}
+.replay-cta-overlay.show {
+  opacity: 1;
+  animation: replayCtaPulse 0.6s ease-out forwards;
+}
+.replay-cta-text {
+  color: #00ffff;
+  font-weight: 800;
+  font-size: clamp(18px, 4vw, 36px);
+  letter-spacing: 3px;
+  text-shadow: 0 0 30px #00ffff, 0 0 60px #0088ff, 0 0 90px #0088ff;
+  text-align: center;
+  white-space: nowrap;
+  background: rgba(0,0,0,0.6);
+  padding: 12px 28px;
+  border-radius: 16px;
+  border: 2px solid rgba(0,255,255,0.3);
+}
+@keyframes replayCtaPulse {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
+  60% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 
 /* ===== Offline indicator bar (persistent top banner, subtle) ===== */
