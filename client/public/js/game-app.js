@@ -28,6 +28,13 @@
     var emoteCooldown = 0;
     var wallMode = null; // null=off, 'horizontal' or 'vertical' — mobile wall placement toggle
 
+    // Определяет, видна ли мобильная панель стен (т.е. экран ≤900px)
+    function isMobile() {
+        var bar = document.getElementById('wall-mode-bar');
+        if (!bar) return false;
+        return window.getComputedStyle(bar).display !== 'none';
+    }
+
     function preloadDefaultImages() {
         var wolfImg = new Image();
         wolfImg.onload = function () { playerImages[0] = wolfImg; render(); };
@@ -447,9 +454,13 @@
             return;
         }
 
-        // Обычный режим: сначала пытаемся разместить стену, затем переместить фишку
-        var wh = UI.findWallHit(canvas, pos.x, pos.y, state);
-        if (wh) { network.sendMove({ type:'wall', row:wh.row, col:wh.col, orient:wh.orient }); return; }
+        // Обычный режим:
+        // На десктопе — можно ставить стену кликом по линии
+        // На мобильных — стена ТОЛЬКО через wallMode (кнопки под доской)
+        if (!isMobile()) {
+            var wh = UI.findWallHit(canvas, pos.x, pos.y, state);
+            if (wh) { network.sendMove({ type:'wall', row:wh.row, col:wh.col, orient:wh.orient }); return; }
+        }
         var cell = UI.findCellHit(canvas, pos.x, pos.y);
         if (cell) { network.sendMove({ type:'move', row:cell.row, col:cell.col }); return; }
     }
