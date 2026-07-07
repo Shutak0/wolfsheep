@@ -142,6 +142,9 @@ a:active { text-shadow: 0 0 18px #a855f7; }
 .game-left { display:flex; flex-direction:column; align-items:center; gap:10px; }
 #board-wrapper { position:relative; background:#0a0a12; padding:12px; border-radius:18px; box-shadow:inset 0 0 0 2px #1a0a3a, 0 0 30px rgba(138,43,226,0.4); }
 
+/* Board row: emote кнопка слева, доска справа (desktop) */
+.board-row { display:flex; flex-direction:row; align-items:flex-start; gap:10px; }
+
 /* Mobile wall placement toolbar */
 #wall-mode-bar {
   display: none;
@@ -246,7 +249,7 @@ canvas { display:block; border-radius:10px; cursor:pointer; background:#0a0a0a; 
 .emote-toggle-btn { width:48px; height:48px; border-radius:14px; border:2px solid #2a1a5a; background:rgba(20,10,40,0.7); cursor:pointer; font-size:24px; transition:all 0.2s; display:flex; align-items:center; justify-content:center; color:#c084fc; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
 .emote-toggle-btn:hover, .emote-toggle-btn.active { border-color:#8a2be2; box-shadow:0 0 20px rgba(138,43,226,0.5); background:rgba(138,43,226,0.25); }
 .emote-toggle-btn:active { transform:scale(0.95); }
-.emote-flyout { display:none; position:absolute; left:0; top:0; background:#0d0d1a; border:2px solid #2a1a5a; border-radius:16px; padding:8px; gap:6px; flex-direction:column; box-shadow:0 0 30px rgba(138,43,226,0.4); z-index:51; }
+.emote-flyout { display:none; position:absolute; left:0; bottom:100%; top:auto; background:#0d0d1a; border:2px solid #2a1a5a; border-radius:16px; padding:8px; gap:6px; flex-direction:column; box-shadow:0 0 30px rgba(138,43,226,0.4); z-index:51; margin-bottom:6px; }
 .emote-flyout.open { display:flex; }
 .emote-btn { width:52px; height:52px; border-radius:14px; border:2px solid #2a1a5a; background:rgba(20,10,40,0.6); cursor:pointer; padding:3px; transition:all 0.15s; overflow:hidden; display:flex; align-items:center; justify-content:center; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
 .emote-btn:hover { border-color:#8a2be2; box-shadow:0 0 16px rgba(138,43,226,0.4); transform:scale(1.08); background:rgba(138,43,226,0.2); }
@@ -379,6 +382,8 @@ canvas, button, .mode-card, .tc-btn, .game-btn, .profile-save, .auth-btn {
     .play-zone { flex-direction:column; align-items:center; }
     .play-zone-right { width:100%; max-width:600px; }
     .game-layout { flex-direction:column; align-items:center; gap:12px; }
+    /* Board row: column on mobile (emote above board) */
+    .board-row { flex-direction:column; align-items:center; gap:8px; }
     /* Show wall mode bar on mobile */
     #wall-mode-bar { display: flex; }
     .emote-toggle-wrapper { position:relative; align-self:center; margin-bottom:4px; margin-left:0; z-index:55; }
