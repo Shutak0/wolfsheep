@@ -129,6 +129,13 @@
                     <canvas id="board" width="600" height="600"></canvas>
                     <div class="board-watermark">WolfSheep.fun</div>
                 </div>
+                <!-- Mobile wall placement toolbar -->
+                <div id="wall-mode-bar">
+                    <span class="wall-mode-label">🧱 Place wall:</span>
+                    <button class="wall-mode-btn" data-orient="horizontal" id="wall-btn-h" aria-label="Horizontal wall">━</button>
+                    <button class="wall-mode-btn" data-orient="vertical" id="wall-btn-v" aria-label="Vertical wall">┃</button>
+                    <button class="wall-mode-btn wall-mode-clear" id="wall-btn-clear" aria-label="Cancel wall mode">✕</button>
+                </div>
                 <div id="turn-badge">⬤ Red's turn</div>
                 <div id="status-msg">Click cell to move, click line for wall.</div>
             </div>

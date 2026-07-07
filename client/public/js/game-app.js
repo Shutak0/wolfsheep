@@ -26,6 +26,7 @@
     var myIndex = null, gameStarted = false;
     var DOT_CLASSES = ['p1', 'p2'];
     var emoteCooldown = 0;
+    var wallMode = null; // null=off, 'horizontal' or 'vertical' — mobile wall placement toggle
 
     function preloadDefaultImages() {
         var wolfImg = new Image();
@@ -432,6 +433,21 @@
         if (replayActive || !gameStarted || state.gameOver || myIndex !== state.turn) return;
         var pos = UI.getBoardPos(canvas, e.clientX, e.clientY, myIndex != null ? myIndex : 0);
         if (!pos) return;
+
+        // Если выбран режим стены (wallMode), ищем только линию стены
+        if (wallMode) {
+            var wh = UI.findWallHit(canvas, pos.x, pos.y, state);
+            if (wh) {
+                // Отправляем стену с нужной ориентацией, игнорируя hit-ориентацию
+                network.sendMove({ type: 'wall', row: wh.row, col: wh.col, orient: wallMode });
+                // Сбрасываем wallMode после размещения
+                setWallMode(null);
+            }
+            // Если промахнулись мимо линии — просто сбрасываем режим
+            return;
+        }
+
+        // Обычный режим: сначала пытаемся разместить стену, затем переместить фишку
         var wh = UI.findWallHit(canvas, pos.x, pos.y, state);
         if (wh) { network.sendMove({ type:'wall', row:wh.row, col:wh.col, orient:wh.orient }); return; }
         var cell = UI.findCellHit(canvas, pos.x, pos.y);
@@ -442,8 +458,67 @@
         if (!gameStarted) { hoverWall=null; render(); return; }
         var pos = UI.getBoardPos(canvas, e.clientX, e.clientY, myIndex != null ? myIndex : 0);
         if (!pos) { hoverWall=null; render(); return; }
-        hoverWall = (!state.gameOver && state.turn === myIndex) ? (UI.findWallHit(canvas, pos.x, pos.y, state) || null) : null;
+        if (!state.gameOver && state.turn === myIndex) {
+            var wh = UI.findWallHit(canvas, pos.x, pos.y, state);
+            // Если включён wallMode, показываем только линии стены И ТОЛЬКО С НУЖНОЙ ОРИЕНТАЦИЕЙ
+            if (wallMode && wh && wh.orient !== wallMode) {
+                hoverWall = null; // Не подсвечиваем стены неправильной ориентации
+            } else {
+                hoverWall = wh || null;
+            }
+        } else {
+            hoverWall = null;
+        }
         render();
+    }
+
+    // ---- Mobile wall mode bar ----
+    var wallBtnH = document.getElementById('wall-btn-h');
+    var wallBtnV = document.getElementById('wall-btn-v');
+    var wallBtnClear = document.getElementById('wall-btn-clear');
+
+    function setWallMode(mode) {
+        wallMode = mode;
+        // Обновляем активный класс на кнопках
+        if (wallBtnH) wallBtnH.classList.toggle('active', mode === 'horizontal');
+        if (wallBtnV) wallBtnV.classList.toggle('active', mode === 'vertical');
+        // Обновляем подсказку
+        if (mode === 'horizontal') {
+            statusMsg.textContent = '🧱 Tap a horizontal line to place wall';
+            statusMsg.style.color = '#00ffff';
+        } else if (mode === 'vertical') {
+            statusMsg.textContent = '🧱 Tap a vertical line to place wall';
+            statusMsg.style.color = '#00ffff';
+        } else {
+            statusMsg.textContent = 'Click cell to move, click line for wall.';
+            statusMsg.style.color = '';
+        }
+        // Перерисовываем hover
+        hoverWall = null;
+        render();
+    }
+
+    if (wallBtnH) {
+        wallBtnH.addEventListener('click', function (e) {
+            e.stopPropagation();
+            if (!gameStarted || state.gameOver || myIndex !== state.turn) return;
+            if (state.players[state.turn].walls <= 0) return;
+            setWallMode(wallMode === 'horizontal' ? null : 'horizontal');
+        });
+    }
+    if (wallBtnV) {
+        wallBtnV.addEventListener('click', function (e) {
+            e.stopPropagation();
+            if (!gameStarted || state.gameOver || myIndex !== state.turn) return;
+            if (state.players[state.turn].walls <= 0) return;
+            setWallMode(wallMode === 'vertical' ? null : 'vertical');
+        });
+    }
+    if (wallBtnClear) {
+        wallBtnClear.addEventListener('click', function (e) {
+            e.stopPropagation();
+            setWallMode(null);
+        });
     }
 
     function updateNamesAndElo(d) {
