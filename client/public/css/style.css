@@ -26,7 +26,7 @@ a:active { text-shadow: 0 0 18px #a855f7; }
 .nav-left { display:flex; align-items:center; gap:0; }
 .nav-center { flex:1; display:flex; justify-content:center; }
 .nav-players { color:#33ff66; font-size:clamp(11px, 1.5vw, 13px); font-weight:600; padding:10px 0; display:flex; align-items:center; gap:4px; white-space:nowrap; }
-.nav-players::before { content:'🟢'; font-size:9px; }
+/*.nav-players::before { content:'🟢'; font-size:9px; }
 
 /* Hamburger menu button (hidden on desktop) */
 #hamburger-btn { display:none; background:none; border:none; color:#c084fc; font-size:26px; cursor:pointer; padding:8px 12px; min-width:44px; min-height:44px; align-items:center; justify-content:center; transition:all 0.2s; border-radius:10px; }
