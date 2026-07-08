@@ -26,7 +26,7 @@ a:active { text-shadow: 0 0 18px #a855f7; }
 .nav-left { display:flex; align-items:center; gap:0; }
 .nav-center { flex:1; display:flex; justify-content:center; }
 .nav-players { color:#33ff66; font-size:clamp(11px, 1.5vw, 13px); font-weight:600; padding:10px 0; display:flex; align-items:center; gap:4px; white-space:nowrap; }
-/*.nav-players::before { content:'🟢'; font-size:9px; }
+.nav-players::before { content:'🟢'; font-size:9px; }
 
 /* Hamburger menu button (hidden on desktop) */
 #hamburger-btn { display:none; background:none; border:none; color:#c084fc; font-size:26px; cursor:pointer; padding:8px 12px; min-width:44px; min-height:44px; align-items:center; justify-content:center; transition:all 0.2s; border-radius:10px; }
@@ -136,6 +136,28 @@ a:active { text-shadow: 0 0 18px #a855f7; }
 .step-num { width:36px; height:36px; border-radius:50%; background:#2a1a5a; color:#c084fc; font-weight:700; font-size:16px; display:flex; align-items:center; justify-content:center; border:2px solid #8a2be2; }
 .step-text { color:#94a3b8; font-size:12px; line-height:1.4; }
 .step-arrow { color:#8a2be2; font-size:24px; font-weight:700; }
+
+/* Why WolfSheep section */
+.why-section { max-width:1000px; width:100%; margin-bottom:30px; }
+.why-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:18px; }
+.why-card { background:#0d0d1a; border:1px solid #2a1a5a; border-radius:18px; padding:22px 20px; transition:all 0.3s; text-align:center; }
+.why-card:hover { border-color:#8a2be2; box-shadow:0 0 25px rgba(138,43,226,0.2); transform:translateY(-2px); }
+.why-card .why-icon { font-size:36px; display:block; margin-bottom:10px; }
+.why-card strong { color:#c084fc; font-size:15px; display:block; margin-bottom:8px; letter-spacing:0.5px; }
+.why-card p { color:#94a3b8; font-size:13px; line-height:1.6; }
+
+/* FAQ section */
+.faq-section { max-width:800px; width:100%; margin-bottom:30px; }
+.faq-list { display:flex; flex-direction:column; gap:12px; }
+.faq-item { background:#0d0d1a; border:1px solid #2a1a5a; border-radius:16px; padding:0; overflow:hidden; transition:all 0.3s; }
+.faq-item:hover { border-color:#8a2be2; }
+.faq-item[open] { border-color:#8a2be2; box-shadow:0 0 25px rgba(138,43,226,0.2); }
+.faq-question { color:#c084fc; font-weight:700; font-size:15px; padding:18px 22px; cursor:pointer; list-style:none; display:flex; align-items:center; justify-content:space-between; user-select:none; -webkit-user-select:none; transition:all 0.2s; min-height:44px; }
+.faq-question::-webkit-details-marker { display:none; }
+.faq-question::after { content:'+'; font-size:22px; font-weight:400; color:#8a2be2; transition:transform 0.3s; flex-shrink:0; margin-left:12px; }
+.faq-item[open] .faq-question::after { content:'−'; transform:rotate(180deg); }
+.faq-question:hover { background:rgba(138,43,226,0.08); }
+.faq-answer { color:#cbd5e1; font-size:14px; line-height:1.7; padding:0 22px 18px; }
 
 /* ---------- game page ---------- */
 .game-layout { display:flex; gap:22px; align-items:flex-start; }
@@ -528,14 +550,45 @@ canvas, button, .mode-card, .tc-btn, .game-btn, .profile-save, .auth-btn {
     .time-box { font-size:14px; }
     .dot { width:40px !important; height:40px !important; }
     .board-watermark { font-size:clamp(14px, 4vw, 18px) !important; }
-    .step { width:80px; padding:8px 4px; }
-    .step-num { width:24px; height:24px; font-size:11px; }
-    .step-text { font-size:9px; }
-    .step-arrow { font-size:10px; margin:0 1px; }
+    /* How-to: collapse arrows on tiny screens */
+    .howto-steps { flex-direction:column; gap:6px; }
+    .step { width:100%; max-width:260px; flex-direction:row; padding:12px 14px; gap:10px; }
+    .step-num { width:28px; height:28px; font-size:13px; flex-shrink:0; }
+    .step-text { font-size:11px; text-align:left; }
+    .step-arrow { display:none; }
+    /* Why & FAQ mobile */
+    .why-grid { grid-template-columns:1fr; gap:10px; }
+    .why-card { padding:18px 14px; }
+    .faq-question { font-size:13px; padding:14px 16px; }
+    .faq-answer { font-size:13px; padding:0 16px 14px; }
     .footer-links { gap:10px; }
     /* Bottom nav compact */
     #bottom-nav .bn-link { font-size:9px; padding:4px 6px; min-width:48px; }
     #bottom-nav .bn-link .bn-icon { font-size:18px; }
+}
+
+/* ========== Landscape mode for game (phones in landscape) ========== */
+@media (max-width:900px) and (orientation:landscape) {
+    .game-layout { flex-direction:row; align-items:center; gap:12px; }
+    .game-left { flex:1.2; max-width:70%; }
+    .game-right { flex:0.8; flex-direction:column; min-height:auto; gap:8px; max-width:30%; min-width:160px; }
+    .board-row { flex-direction:row; align-items:flex-start; }
+    canvas { max-width:100%; width:100%; height:auto; max-height:70vh; }
+    #board-wrapper { padding:6px; }
+    .player-block { padding:8px 10px; gap:4px; }
+    .player-block .dot { width:36px !important; height:36px !important; }
+    .player-block .pname { font-size:12px; }
+    .player-block .pwalls { font-size:11px; padding:2px 8px; }
+    .time-box { font-size:16px; padding:4px 6px; }
+    .time-label { font-size:8px; }
+    .game-btn { font-size:11px; padding:6px 10px; min-height:36px; }
+    .tc-badge { font-size:9px; }
+    .emote-toggle-wrapper { align-self:flex-start; }
+    .emote-toggle-btn { width:32px; height:32px; font-size:16px; }
+    #wall-mode-bar { padding:6px 10px; gap:4px; }
+    .wall-mode-btn { width:40px; height:40px; font-size:18px; border-radius:10px; }
+    #turn-badge { font-size:11px; padding:4px 10px; }
+    #status-msg { font-size:10px; }
 }
 
 /* ========== PWA Install Banner ========== */
@@ -857,4 +910,70 @@ canvas, button, .mode-card, .tc-btn, .game-btn, .profile-save, .auth-btn {
 }
 #offline-bar.show {
   display: block;
+}
+
+/* ========== ACCESSIBILITY: Focus-visible & keyboard navigation ========== */
+:focus-visible {
+  outline: 2px solid #00ffff !important;
+  outline-offset: 2px !important;
+  border-radius: 4px;
+}
+
+/* Prevent focus outline on mouse/touch, keep only keyboard */
+:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Ensure interactive elements have visible focus for keyboard users */
+button:focus-visible,
+a:focus-visible,
+.mode-card:focus-visible,
+.faq-item summary:focus-visible,
+.tc-btn:focus-visible,
+.game-btn:focus-visible {
+  outline: 2px solid #00ffff;
+  outline-offset: 3px;
+  box-shadow: 0 0 16px rgba(0, 255, 255, 0.5);
+}
+
+/* Skip link for keyboard users (hidden until focused) */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 16px;
+  background: #8a2be2;
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 0 0 12px 12px;
+  z-index: 9999;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+  transition: top 0.2s;
+}
+.skip-link:focus {
+  top: 0;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* High contrast mode adjustments */
+@media (forced-colors: active) {
+  .mode-card, .about-card, .why-card, .faq-item, .legal-block {
+    border: 2px solid ButtonText;
+  }
+  .tc-btn, .game-btn, .profile-save {
+    border: 2px solid ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+  }
 }

@@ -61,6 +61,33 @@
     <xhtml:link rel="alternate" hreflang="ru" href="https://wolfsheep.fun/profile.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://wolfsheep.fun/profile.html"/>
   </url>
+  <!-- SEO-лендинг: Quoridor Online -->
+  <url>
+    <loc>https://wolfsheep.fun/quoridor-online.html</loc>
+    <lastmod>2026-07-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://wolfsheep.fun/quoridor-online.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://wolfsheep.fun/quoridor-online.html"/>
+  </url>
+  <!-- SEO-лендинг: Strategy Board Game Online -->
+  <url>
+    <loc>https://wolfsheep.fun/strategy-board-game-online.html</loc>
+    <lastmod>2026-07-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://wolfsheep.fun/strategy-board-game-online.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://wolfsheep.fun/strategy-board-game-online.html"/>
+  </url>
+  <!-- SEO-лендинг: Puzzle Game Online -->
+  <url>
+    <loc>https://wolfsheep.fun/puzzle-game-online.html</loc>
+    <lastmod>2026-07-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://wolfsheep.fun/puzzle-game-online.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://wolfsheep.fun/puzzle-game-online.html"/>
+  </url>
   <!-- Политика конфиденциальности -->
   <url>
     <loc>https://wolfsheep.fun/privacy.html</loc>
