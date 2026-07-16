@@ -19,6 +19,8 @@
     var myTimeText = document.getElementById('my-time-text'), opTimeText = document.getElementById('op-time-text');
 
     var Engine = window.QuoridorEngine, UI = window.QuoridorUI;
+    var isChallengeRoom = false;
+    var rematchReady = false;
     var state = null, playerImages = [null, null], hoverWall = null;
     var moveRecord = [], prevState = null, pendingState = null, replayTimer = null, replayActive = false;
     var winAnimTimer = null, winStartTime = 0;
@@ -173,9 +175,25 @@
         waitRoomId.textContent = 'ID: ' + d.roomId;
         setStatus(__('game_room_created'), false);
     };
-    network.onRoomJoined = function (d) { setStatus(__('game_joined'), false); };
+    network.onRoomJoined = function (d) {
+        setStatus(__('game_joined'), false);
+        // При challenge-подключении скрываем waiting overlay сразу (не ждём game_started)
+        waitingOverlay.classList.remove('show');
+    };
     network.onPlayerAssigned = function (d) {
         myIndex = d.playerIndex;
+        isChallengeRoom = !!d.isChallenge;
+        rematchReady = false;
+        gameStarted = false; // Сбрасываем для рематча
+        // Сбрасываем кнопку Play Again
+        playAgainBtn.textContent = '🔄 ' + __('play_again');
+        playAgainBtn.disabled = false;
+        playAgainBtn.style.background = '';
+        playAgainBtn.style.color = '';
+        surrenderBtn.style.display = 'inline-block';
+        surrenderBtn.disabled = false;
+        recBtn.style.display = 'none';
+        playAgainBtn.style.display = 'none';
         var mc = d.color === 'red' ? 0 : 1, oc = 1 - mc;
         updateNamesAndElo(d);
         myDot.className = 'dot ' + DOT_CLASSES[mc]; opDot.className = 'dot ' + DOT_CLASSES[oc];
@@ -245,6 +263,19 @@
         if (!replayActive) moveRecord.push({ type: 'emote', emoteId: d.emoteId, fromPlayer: d.fromPlayer });
         playEmoteAnim(d.emoteId, d.fromPlayer);
     };
+    network.onRematchReady = function (d) {
+        if (d.playerIndex !== myIndex) {
+            setStatus('🔄 Opponent wants a rematch!', false);
+            if (!rematchReady) {
+                playAgainBtn.textContent = '🔄 Accept Rematch';
+                playAgainBtn.style.background = '#33ff66';
+                playAgainBtn.style.color = '#0a0a1a';
+            }
+        }
+        if (d.playersReady >= 2) {
+            setStatus('⚡ Rematch starting!', false);
+        }
+    };
 
     // ---- Кнопки ----
     surrenderBtn.addEventListener('click', function () { if (gameStarted && !state.gameOver) network.surrender(); });
@@ -257,7 +288,17 @@
         window.location.href = '/';
     });
     playAgainBtn.textContent = '🔄 ' + __('play_again');
-    playAgainBtn.addEventListener('click', function () { window.location.reload(); });
+    playAgainBtn.addEventListener('click', function () {
+        if (isChallengeRoom && !rematchReady) {
+            rematchReady = true;
+            playAgainBtn.textContent = '⏳ Waiting for opponent…';
+            playAgainBtn.disabled = true;
+            network.requestRematch();
+        } else {
+            window.location.reload();
+        }
+    });
+    recBtn.textContent = '▶️ Replay';
 
     recBtn.addEventListener('click', function () {
         if (replayActive) return;
@@ -534,10 +575,31 @@
 
     function updateNamesAndElo(d) {
         var mc = d.color === 'red' ? 0 : 1, oc = 1 - mc;
-        if (d.playerName) myName.textContent = d.playerName; else myName.textContent = UI.COLOR_NAMES[mc];
-        if (d.opponentName) opName.textContent = d.opponentName; else opName.textContent = UI.COLOR_NAMES[oc];
+        // Свой ник
+        if (d.playerName) {
+            myName.innerHTML = d.playerId
+                ? '<a href="/player.html?id=' + d.playerId + '" target="_blank" style="color:#c084fc;text-decoration:none;cursor:pointer;">' + d.playerName + '</a>'
+                : d.playerName;
+        } else { myName.textContent = UI.COLOR_NAMES[mc]; }
+        // Ник оппонента
+        if (d.opponentName) {
+            opName.innerHTML = d.opponentId
+                ? '<a href="/player.html?id=' + d.opponentId + '" target="_blank" style="color:#c084fc;text-decoration:none;cursor:pointer;">' + d.opponentName + '</a>'
+                : d.opponentName;
+        } else { opName.textContent = UI.COLOR_NAMES[oc]; }
         if (d.playerElo !== undefined) myElo.textContent = '🏆 ' + d.playerElo; else myElo.textContent = '';
         if (d.opponentElo !== undefined) opElo.textContent = '🏆 ' + d.opponentElo; else opElo.textContent = '';
+        // Аватары тоже кликабельны
+        if (d.playerId) {
+            myDot.style.cursor = 'pointer';
+            myDot.title = 'View profile';
+            myDot.onclick = function(e) { e.stopPropagation(); window.open('/player.html?id=' + d.playerId, '_blank'); };
+        }
+        if (d.opponentId) {
+            opDot.style.cursor = 'pointer';
+            opDot.title = 'View profile';
+            opDot.onclick = function(e) { e.stopPropagation(); window.open('/player.html?id=' + d.opponentId, '_blank'); };
+        }
     }
 
     window.addEventListener('beforeunload', function () { if (gameStarted && !state.gameOver) network.disconnect(); });
@@ -547,7 +609,26 @@
 
     network.connect();
     var isBot = sessionStorage.getItem('ws_bot') === '1';
-    if (isBot) {
+    var isChallenge = sessionStorage.getItem('ws_challenge') === '1';
+    var challengeRoomId = sessionStorage.getItem('ws_room');
+    // Fallback: читаем room из URL параметров (всегда есть при редиректе)
+    var urlParams = new URLSearchParams(window.location.search);
+    var urlRoom = urlParams.get('room');
+    if (!isChallenge && urlRoom) {
+        isChallenge = true;
+        challengeRoomId = urlRoom;
+        var urlTc = urlParams.get('tc');
+        if (urlTc) { tcName = urlTc; sessionStorage.setItem('ws_tc', urlTc); }
+    }
+    // userId может быть в localStorage если sessionStorage пуст
+    if (!userId) {
+        var lsUserId = localStorage.getItem('ws_userId');
+        if (lsUserId) userId = parseInt(lsUserId);
+    }
+    if (isChallenge && challengeRoomId) {
+        sessionStorage.removeItem('ws_challenge');
+        network.joinChallenge(challengeRoomId, userId || null);
+    } else if (isBot) {
         network.botMatch(playerName, playerColor, tcName, userId ? parseInt(userId) : null);
     } else {
         network.autoMatch(playerName, playerColor, tcName, userId ? parseInt(userId) : null);

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no"/>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+    <meta http-equiv="Pragma" content="no-cache"/>
+    <meta http-equiv="Expires" content="0"/>
+    <!-- Primary Meta Tags -->
+    <title>Players — WolfSheep | All Player Profiles & Friends</title>
+    <meta name="description" content="Browse all WolfSheep players: search by nickname, view ELO rankings, add friends, and see your friends list."/>
+    <meta name="keywords" content="wolf sheep players, player list, ELO ranking, friends list, quoridor community"/>
+    <meta name="author" content="WolfSheep"/>
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large"/>
+    <meta name="googlebot" content="index, follow"/>
+    <meta name="rating" content="general"/>
+    <meta name="theme-color" content="#1a1a2e"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+    <meta name="apple-mobile-web-app-title" content="WolfSheep"/>
+    <meta name="mobile-web-app-capable" content="yes"/>
+
+    <!-- Canonical -->
+    <link rel="canonical" href="https://wolfsheep.fun/players.html"/>
+    <link rel="alternate" hreflang="en" href="https://wolfsheep.fun/players.html"/>
+    <link rel="alternate" hreflang="ru" href="https://wolfsheep.fun/players.html"/>
+    <link rel="alternate" hreflang="x-default" href="https://wolfsheep.fun/players.html"/>
+
+    <!-- Icons & PWA -->
+    <link rel="apple-touch-icon" href="/imgs/icon-192.png"/>
+    <link rel="manifest" href="/manifest.json"/>
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Players — WolfSheep | All Player Profiles & Friends"/>
+    <meta property="og:description" content="Browse all WolfSheep players: search by nickname, view ELO rankings, add friends."/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:url" content="https://wolfsheep.fun/players.html"/>
+    <meta property="og:image" content="https://wolfsheep.fun/imgs/Wolf.png"/>
+    <meta property="og:image:alt" content="WolfSheep logo"/>
+    <meta property="og:image:width" content="512"/>
+    <meta property="og:image:height" content="512"/>
+    <meta property="og:site_name" content="WolfSheep"/>
+    <meta property="og:locale" content="ru_RU"/>
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="Players — WolfSheep | All Player Profiles & Friends"/>
+    <meta name="twitter:description" content="Browse all WolfSheep players: search by nickname, view ELO rankings, add friends."/>
+    <meta name="twitter:image" content="https://wolfsheep.fun/imgs/Wolf.png"/>
+
+    <!-- DNS Prefetch & Preconnect -->
+    <link rel="dns-prefetch" href="https://cloud.umami.is"/>
+    <link rel="preconnect" href="https://cloud.umami.is"/>
+
+    <!-- Preload critical CSS -->
+    <link rel="preload" href="css/style.css" as="style"/>
+    <link rel="stylesheet" href="css/style.css"/>
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="caed2020-b671-4c7d-94b2-27e9399d4dca"></script>
+    <style>
+        .players-page { max-width:720px; margin:0 auto; padding:20px 16px 40px; }
+
+        /* Search */
+        .players-search-wrap { margin-bottom:24px; }
+        .players-search-input { width:100%; padding:12px 16px; border-radius:12px; border:1px solid rgba(255,255,255,0.12); background:#0f0f23; color:#e0e0e0; font-size:15px; outline:none; transition:border 0.2s; }
+        .players-search-input:focus { border-color:#c084fc; }
+        .players-search-input::placeholder { color:#666; }
+
+        /* Friends section */
+        .players-section-title { font-size:18px; font-weight:700; color:#fff; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+        .players-section-title .count { font-size:13px; color:#94a3b8; font-weight:400; }
+
+        .friends-grid { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:24px; }
+        .friend-card { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:10px 14px; text-decoration:none; color:inherit; transition:background 0.2s; }
+        .friend-card:hover { background:rgba(255,255,255,0.08); }
+        .friend-card-avatar { width:40px; height:40px; border-radius:50%; object-fit:cover; flex-shrink:0; font-size:24px; display:flex; align-items:center; justify-content:center; }
+        .friend-card-info { display:flex; flex-direction:column; }
+        .friend-card-nick { font-size:14px; font-weight:600; color:#fff; }
+        .friend-card-rating { font-size:12px; color:#c084fc; }
+        .no-friends { color:#94a3b8; font-size:14px; padding:20px 0; text-align:center; }
+
+        /* Players list */
+        .players-list { display:flex; flex-direction:column; gap:4px; }
+        .player-row { display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:10px; text-decoration:none; color:inherit; transition:background 0.15s; }
+        .player-row:hover { background:rgba(255,255,255,0.05); }
+        .player-row-rank { width:36px; text-align:center; font-size:13px; color:#94a3b8; flex-shrink:0; }
+        .player-row-avatar { width:36px; height:36px; border-radius:50%; object-fit:cover; flex-shrink:0; font-size:22px; display:flex; align-items:center; justify-content:center; }
+        .player-row-info { flex:1; min-width:0; }
+        .player-row-nick { font-size:14px; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .player-row-stats { font-size:11px; color:#94a3b8; }
+        .player-row-rating { font-size:14px; font-weight:700; color:#c084fc; flex-shrink:0; text-align:right; min-width:50px; }
+        .player-row-games { font-size:12px; color:#666; flex-shrink:0; text-align:right; min-width:40px; display:none; }
+        @media(min-width:480px) { .player-row-games { display:block; } }
+
+        .players-loading { text-align:center; color:#94a3b8; padding:40px 20px; }
+        .players-empty { text-align:center; color:#94a3b8; padding:40px 20px; font-size:14px; }
+    </style>
+
+    <!-- Structured Data: BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "WolfSheep — Home", "item": "https://wolfsheep.fun/" },
+        { "@type": "ListItem", "position": 2, "name": "Players", "item": "https://wolfsheep.fun/players.html" }
+      ]
+    }
+    </script>
+
+    <!-- Structured Data: WebPage -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "Players — WolfSheep",
+      "url": "https://wolfsheep.fun/players.html",
+      "description": "Browse all WolfSheep players: search by nickname, view ELO rankings, add friends.",
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": "WolfSheep",
+        "url": "https://wolfsheep.fun/"
+      }
+    }
+    </script>
+</head>
+<body>
+    <nav id="navbar">
+        <button id="hamburger-btn" aria-label="Menu">☰</button>
+        <div class="nav-left" id="nav-left-menu">
+            <a class="nav-brand" href="/">🐺<span style="color:#ff3366">Wolf</span><span style="color:#33ff66">Sheep</span></a>
+            <a class="nav-link" href="/" data-i18n="nav_home">🏠 Home</a>
+        </div>
+        <div class="nav-center">
+            <span class="nav-players" id="nav-players">🟢 0</span>
+        </div>
+        <div class="nav-right" id="nav-right"></div>
+    </nav>
+    <div id="nav-overlay"></div>
+
+    <div id="main-content">
+        <div class="players-page">
+            <!-- Search -->
+            <div class="players-search-wrap">
+                <input type="text" class="players-search-input" id="players-search" placeholder="🔍 Search by nickname…" autocomplete="off" />
+            </div>
+
+            <!-- Friends section -->
+            <div class="players-section-title" id="friends-title" style="display:none;">👥 Friends <span class="count" id="friends-count"></span></div>
+            <div class="friends-grid" id="friends-grid"></div>
+
+            <!-- No friends message -->
+            <div class="no-friends" id="no-friends-msg" style="display:none;">
+                <p>You have no friends yet. Visit a player's profile to add them!</p>
+            </div>
+
+            <!-- All players section -->
+            <div class="players-section-title">🌍 All Players <span class="count" id="players-count"></span></div>
+            <div class="players-list" id="players-list">
+                <div class="players-loading">Loading players…</div>
+            </div>
+            <div class="players-empty" id="players-empty" style="display:none;">No players found.</div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-links">
+            <a href="/about.html">About Us</a>
+            <a href="/rules.html">Game Rules</a>
+            <a href="/privacy.html">Privacy Policy</a>
+            <a href="/terms.html">Terms of Service</a>
+        </div>
+        <div class="footer-copy">© 2025 WolfSheep.fun — All rights reserved</div>
+    </footer>
+
+    <!-- Bottom Mobile Navigation -->
+    <nav id="bottom-nav" aria-label="Mobile navigation">
+        <div class="bn-inner">
+            <a href="/" class="bn-link">
+                <span class="bn-icon">🏠</span>
+                <span data-i18n="nav_home">Home</span>
+            </a>
+            <a href="/game.html?bot=true" class="bn-link">
+                <span class="bn-icon">🤖</span>
+                <span>vs Bot</span>
+            </a>
+            <a href="/game.html" class="bn-link">
+                <span class="bn-icon">⚡</span>
+                <span>Play</span>
+            </a>
+            <a href="/profile.html" class="bn-link">
+                <span class="bn-icon">👤</span>
+                <span data-i18n="nav_profile">Profile</span>
+            </a>
+        </div>
+    </nav>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/nav-players.js"></script>
+    <script src="js/socket-challenge.js"></script>
+    <script src="js/players.js"></script>
+    <script src="js/pwa.js"></script>
+</body>
+</html>

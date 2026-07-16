@@ -113,6 +113,17 @@
             color_red: 'Red',
             color_green: 'Green',
             color_auto: 'Auto',
+            // Challenge
+            challenge_title: '⚔️ Invite to Battle',
+            challenge_invite_btn: '⚔️ Invite',
+            challenge_sending: '⏳ Sending…',
+            challenge_received: '⚔️ {name} challenges you!',
+            challenge_sent: '⚔️ Challenge sent! Waiting for response…',
+            challenge_declined: '{name} declined your challenge.',
+            challenge_player_offline: 'Player is offline right now.',
+            challenge_challenger_offline: 'Challenger is no longer online.',
+            challenge_accept: '✅ Accept',
+            challenge_decline: '❌ Decline',
         },
         ru: {
             nav_home: '🏠 Главная',
@@ -208,7 +219,7 @@
             game_opponent_left: 'Соперник отключился. Вы победили!',
             game_surrender_confirm: 'Вы уверены, что хотите сдаться?',
             game_red: 'Красный',
-            game_green: 'в',
+            game_green: 'Зелёный',
             game_winner: '🏆 {winner} победил! {reason}',
             game_walls: '🧱',
             game_waiting_id: 'ID: {id}',
@@ -216,8 +227,19 @@
             auth_tab_login: 'Вход',
             auth_tab_register: 'Регистрация',
             color_red: 'Красный',
-            color_green: 'в',
+            color_green: 'Зелёный',
             color_auto: 'Авто',
+            // Challenge
+            challenge_title: '⚔️ Вызвать на бой',
+            challenge_invite_btn: '⚔️ Вызвать',
+            challenge_sending: '⏳ Отправка…',
+            challenge_received: '⚔️ {name} вызывает вас на бой!',
+            challenge_sent: '⚔️ Вызов отправлен! Ожидание ответа…',
+            challenge_declined: '{name} отклонил ваш вызов.',
+            challenge_player_offline: 'Игрок сейчас не в сети.',
+            challenge_challenger_offline: 'Вызывающий игрок уже не в сети.',
+            challenge_accept: '✅ Принять',
+            challenge_decline: '❌ Отклонить',
         }
     };
 

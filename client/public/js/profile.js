@@ -59,6 +59,30 @@
         var statRate = document.getElementById('stat-rate');
         var msgEl = document.getElementById('profile-msg');
 
+        // Share-ссылка на публичный профиль
+        var shareLink = window.location.origin + '/player.html?id=' + userId;
+        var shareInput = document.getElementById('player-share-link');
+        if (shareInput) {
+            shareInput.value = shareLink;
+        }
+        var shareCopyBtn = document.getElementById('player-share-copy');
+        if (shareCopyBtn) {
+            shareCopyBtn.addEventListener('click', function () {
+                if (shareInput) {
+                    shareInput.select();
+                    shareInput.setSelectionRange(0, 99999);
+                }
+                navigator.clipboard.writeText(shareLink).then(function () {
+                    shareCopyBtn.textContent = '✅ Copied!';
+                    setTimeout(function () { shareCopyBtn.textContent = '📋 Copy'; }, 2000);
+                }).catch(function () {
+                    document.execCommand('copy');
+                    shareCopyBtn.textContent = '✅ Copied!';
+                    setTimeout(function () { shareCopyBtn.textContent = '📋 Copy'; }, 2000);
+                });
+            });
+        }
+
         function showMsg(text, color) {
             msgEl.textContent = text;
             msgEl.style.color = color || '#94a3b8';

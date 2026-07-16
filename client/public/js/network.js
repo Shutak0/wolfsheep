@@ -14,6 +14,7 @@ class QuoridorNetwork {
         this.onRoomCreated = null;
         this.onRoomJoined = null;
         this.onEmote = null;
+        this.onRematchReady = null;
     }
 
     connect() { this.socket = io(); this.setupListeners(); }
@@ -30,15 +31,18 @@ class QuoridorNetwork {
         this.socket.on('join_error', (d) => { if (this.onError) this.onError(d.error); });
         this.socket.on('opponent_disconnected', () => { if (this.onOpponentDisconnected) this.onOpponentDisconnected(); });
         this.socket.on('emote_received', (d) => { if (this.onEmote) this.onEmote(d); });
+        this.socket.on('rematch_ready', (d) => { if (this.onRematchReady) this.onRematchReady(d); });
         this.socket.on('disconnect', () => console.log('Disconnected'));
     }
 
     createRoom(playerName, color, timeControl, userId) { this.socket.emit('create_room', { playerName, color, timeControl, userId }); }
     joinRoom(roomId, playerName, color, userId) { this.socket.emit('join_room', { roomId, playerName, color, userId }); }
+    joinChallenge(roomId, userId) { this.socket.emit('join_challenge', { roomId, userId }); }
     autoMatch(playerName, color, timeControl, userId) { this.socket.emit('auto_match', { playerName, color, timeControl, userId }); }
     botMatch(playerName, color, timeControl, userId) { this.socket.emit('bot_match', { playerName, color, timeControl, userId }); }
     sendMove(move) { this.socket.emit('make_move', move); }
     surrender() { this.socket.emit('surrender'); }
     sendEmote(emoteId) { this.socket.emit('send_emote', { emoteId: emoteId }); }
+    requestRematch() { this.socket.emit('request_rematch'); }
     disconnect() { if (this.socket) this.socket.disconnect(); }
 }

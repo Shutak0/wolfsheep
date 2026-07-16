@@ -6,64 +6,45 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
     <meta http-equiv="Pragma" content="no-cache"/>
     <meta http-equiv="Expires" content="0"/>
-    <!-- Primary Meta Tags -->
-    <title>Player Profile — WolfSheep | ELO Rating & Game Statistics</title>
-    <meta name="description" content="Your WolfSheep profile: view your ELO rating, win/loss statistics, match history, and customize your nickname and favorite player color."/>
-    <meta name="keywords" content="wolf sheep profile, quoridor profile, ELO rating, game statistics, win rate, player stats, board game profile"/>
+    <title>Player Profile — WolfSheep</title>
+    <meta name="description" content="WolfSheep player profile: view ELO rating, win/loss statistics, and match history."/>
+    <meta name="keywords" content="wolf sheep profile, quoridor profile, ELO rating, game statistics, player stats"/>
     <meta name="author" content="WolfSheep"/>
     <meta name="robots" content="noindex, follow, max-snippet:-1, max-image-preview:large"/>
     <meta name="googlebot" content="noindex, follow"/>
-    <meta name="rating" content="general"/>
     <meta name="theme-color" content="#1a1a2e"/>
     <meta name="apple-mobile-web-app-capable" content="yes"/>
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
     <meta name="apple-mobile-web-app-title" content="WolfSheep"/>
     <meta name="mobile-web-app-capable" content="yes"/>
-
-    <!-- Canonical & Alternate -->
-    <link rel="canonical" href="https://wolfsheep.fun/profile.html"/>
-    <link rel="alternate" hreflang="en" href="https://wolfsheep.fun/profile.html"/>
-    <link rel="alternate" hreflang="ru" href="https://wolfsheep.fun/profile.html"/>
-    <link rel="alternate" hreflang="x-default" href="https://wolfsheep.fun/profile.html"/>
-
-    <!-- Icons & PWA -->
+    <link rel="canonical" href="https://wolfsheep.fun/player.html"/>
+    <link rel="alternate" hreflang="en" href="https://wolfsheep.fun/player.html"/>
+    <link rel="alternate" hreflang="ru" href="https://wolfsheep.fun/player.html"/>
+    <link rel="alternate" hreflang="x-default" href="https://wolfsheep.fun/player.html"/>
     <link rel="apple-touch-icon" href="/imgs/icon-192.png"/>
     <link rel="manifest" href="/manifest.json"/>
-
-    <!-- Open Graph -->
-    <meta property="og:title" content="Player Profile — WolfSheep | ELO Rating & Game Statistics"/>
-    <meta property="og:description" content="View your WolfSheep profile: ELO rating, win/loss stats, match history, and customize your player preferences."/>
+    <meta property="og:title" content="Player Profile — WolfSheep"/>
+    <meta property="og:description" content="WolfSheep player profile: ELO rating, win/loss stats, match history."/>
     <meta property="og:type" content="website"/>
-    <meta property="og:url" content="https://wolfsheep.fun/profile.html"/>
+    <meta property="og:url" content="https://wolfsheep.fun/player.html"/>
     <meta property="og:image" content="https://wolfsheep.fun/imgs/Wolf.png"/>
     <meta property="og:image:alt" content="WolfSheep logo"/>
     <meta property="og:image:width" content="512"/>
     <meta property="og:image:height" content="512"/>
     <meta property="og:site_name" content="WolfSheep"/>
     <meta property="og:locale" content="ru_RU"/>
-
-    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary"/>
-    <meta name="twitter:title" content="Player Profile — WolfSheep | ELO Rating & Game Statistics"/>
-    <meta name="twitter:description" content="View your WolfSheep profile: ELO rating, win/loss stats, match history."/>
+    <meta name="twitter:title" content="Player Profile — WolfSheep"/>
+    <meta name="twitter:description" content="WolfSheep player profile: ELO rating, win/loss stats."/>
     <meta name="twitter:image" content="https://wolfsheep.fun/imgs/Wolf.png"/>
-
-    <!-- DNS Prefetch & Preconnect -->
     <link rel="dns-prefetch" href="https://cloud.umami.is"/>
-    <link rel="dns-prefetch" href="https://accounts.google.com"/>
     <link rel="preconnect" href="https://cloud.umami.is"/>
-    <link rel="preconnect" href="https://accounts.google.com"/>
-
-    <!-- Preload critical CSS -->
     <link rel="preload" href="css/style.css" as="style"/>
     <link rel="stylesheet" href="css/style.css"/>
     <script defer src="https://cloud.umami.is/script.js" data-website-id="caed2020-b671-4c7d-94b2-27e9399d4dca"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
-        .google-btn-wrapper { display:flex; justify-content:center; margin:16px 0; }
-        .auth-error { color:#ff3366; font-size:13px; text-align:center; min-height:20px; }
-        .auth-loading { display:none; color:#c084fc; font-size:14px; animation:pulse 1.5s infinite; text-align:center; margin-top:8px; }
-        @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+        .player-loading { text-align:center; color:#94a3b8; padding:40px 20px; font-size:16px; }
+        .player-error { text-align:center; color:#ff3366; padding:40px 20px; font-size:16px; }
         .player-share-section { margin-top:24px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.08); }
         .player-share-label { color:#94a3b8; font-size:12px; margin-bottom:8px; text-align:center; }
         .player-share-url { display:flex; gap:8px; align-items:center; justify-content:center; flex-wrap:wrap; }
@@ -71,33 +52,44 @@
         .player-share-copy { background:#c084fc; color:#fff; border:none; padding:8px 16px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; }
         .player-share-copy:hover { background:#a855f7; }
         .player-share-copy:active { background:#9333ea; }
-    </style>
+        .friend-btn-section { margin-top:16px; text-align:center; }
+        .friend-btn { padding:10px 24px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; }
+        .friend-btn-add { background:#33ff66; color:#0a0a1a; }
+        .friend-btn-add:hover { background:#28cc52; }
+        .friend-btn-remove { background:#ff3366; color:#fff; }
+        .friend-btn-remove:hover { background:#cc2952; }
+        .friend-btn-login { background:#c084fc; color:#fff; }
+        .friend-btn-login:hover { background:#a855f7; }
+        .friend-btn-loading { background:#555; color:#ccc; cursor:wait; }
 
-    <!-- Structured Data: BreadcrumbList -->
+        /* Challenge section */
+        .challenge-section { margin-top:16px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.08); text-align:center; }
+        .challenge-label { color:#94a3b8; font-size:12px; margin-bottom:10px; }
+        .challenge-tc-select { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+        .challenge-tc-btn { padding:8px 14px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:transparent; color:#e0e0e0; font-size:13px; cursor:pointer; transition:all 0.2s; }
+        .challenge-tc-btn:hover { border-color:#c084fc; color:#c084fc; }
+        .challenge-tc-btn.selected { background:#c084fc; color:#fff; border-color:#c084fc; font-weight:700; }
+        .challenge-invite-btn { padding:10px 24px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; background:#ffaa00; color:#0a0a1a; }
+        .challenge-invite-btn:hover { background:#ff8c00; }
+        .challenge-invite-btn:disabled { background:#555; color:#ccc; cursor:not-allowed; }
+    </style>
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       "itemListElement": [
         { "@type": "ListItem", "position": 1, "name": "WolfSheep — Home", "item": "https://wolfsheep.fun/" },
-        { "@type": "ListItem", "position": 2, "name": "Player Profile", "item": "https://wolfsheep.fun/profile.html" }
+        { "@type": "ListItem", "position": 2, "name": "Player Profile", "item": "https://wolfsheep.fun/player.html" }
       ]
     }
     </script>
-
-    <!-- Structured Data: WebPage -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebPage",
       "name": "Player Profile — WolfSheep",
-      "url": "https://wolfsheep.fun/profile.html",
-      "description": "View your WolfSheep profile: ELO rating, win/loss stats, match history.",
-      "isPartOf": {
-        "@type": "WebSite",
-        "name": "WolfSheep",
-        "url": "https://wolfsheep.fun/"
-      }
+      "url": "https://wolfsheep.fun/player.html",
+      "description": "WolfSheep player profile: ELO rating, win/loss stats, match history."
     }
     </script>
 </head>
@@ -107,7 +99,6 @@
         <div class="nav-left" id="nav-left-menu">
             <a class="nav-brand" href="/">🐺<span style="color:#ff3366">Wolf</span><span style="color:#33ff66">Sheep</span></a>
             <a class="nav-link" href="/" data-i18n="nav_home">🏠 Home</a>
-            <a class="nav-link active" href="/profile.html" data-i18n="nav_profile">👤 Profile</a>
         </div>
         <div class="nav-center">
             <span class="nav-players" id="nav-players">🟢 0</span>
@@ -117,26 +108,35 @@
     <div id="nav-overlay"></div>
 
     <div id="main-content">
-        <div class="profile-container" id="profile-view" style="display:none">
+        <div class="profile-container" id="player-loading">
             <div class="profile-avatar">🐺</div>
-            <div class="profile-field">
-                <label data-i18n="profile_name_label">Nickname</label>
-                <input type="text" id="profileName" placeholder="Enter nickname" />
+            <div class="player-loading">Loading profile…</div>
+        </div>
+
+        <div class="profile-container" id="player-view" style="display:none">
+            <div class="profile-avatar" id="player-avatar">🐺</div>
+            <div class="profile-field" style="text-align:center;">
+                <label style="font-size:20px; font-weight:700; color:#fff;" id="player-nick">—</label>
             </div>
-            <div class="profile-field">
-                <label data-i18n="profile_color_label">Favorite color</label>
-                <input type="text" id="profileColor" placeholder="Red / Green / Auto" />
-            </div>
-            <div id="profile-msg" style="min-height:22px; font-size:13px; text-align:center; margin-bottom:12px; color:#94a3b8;"></div>
-            <button class="profile-save" id="profileSaveBtn" data-i18n="profile_save">💾 Save</button>
             <div class="profile-stats">
                 <div class="stat-card"><div class="stat-num" id="stat-rating">1000</div><div class="stat-label" data-i18n="stat_elo">ELO</div></div>
                 <div class="stat-card"><div class="stat-num" id="stat-games">0</div><div class="stat-label" data-i18n="stat_games">Games</div></div>
                 <div class="stat-card"><div class="stat-num" id="stat-wins">0</div><div class="stat-label" data-i18n="stat_wins">Wins</div></div>
                 <div class="stat-card"><div class="stat-num" id="stat-rate">—</div><div class="stat-label" data-i18n="stat_winrate">Winrate</div></div>
             </div>
+            <div class="friend-btn-section" id="friend-btn-container"></div>
+            <!-- Challenge section -->
+            <div class="challenge-section" id="challenge-section">
+                <div class="challenge-label">⚔️ Invite to Battle</div>
+                <div class="challenge-tc-select" id="challenge-tc-select">
+                    <button class="challenge-tc-btn selected" data-tc="1+5">1+5 ⚡</button>
+                    <button class="challenge-tc-btn" data-tc="3+2">3+2 🕐</button>
+                    <button class="challenge-tc-btn" data-tc="5+0">5+0 💎</button>
+                </div>
+                <button class="challenge-invite-btn" id="challenge-invite-btn">⚔️ Invite</button>
+            </div>
             <div class="player-share-section">
-                <div class="player-share-label">📎 Share your profile</div>
+                <div class="player-share-label">📎 Share this profile</div>
                 <div class="player-share-url">
                     <input type="text" class="player-share-input" id="player-share-link" readonly />
                     <button class="player-share-copy" id="player-share-copy">📋 Copy</button>
@@ -144,26 +144,9 @@
             </div>
         </div>
 
-        <div class="profile-container" id="auth-view" style="display:none">
+        <div class="profile-container" id="player-error" style="display:none">
             <div class="profile-avatar">🐺</div>
-            <p style="color:#94a3b8; font-size:14px; margin-bottom:20px; text-align:center;">Sign in with Google to create your profile.</p>
-            <div class="google-btn-wrapper">
-                <div id="g_id_onload_profile"
-                     data-client_id="632162253266-42grlsk3jgboladf7ivb0lsontujrvsi.apps.googleusercontent.com"
-                     data-callback="handleGoogleLoginProfile"
-                     data-auto_prompt="false">
-                </div>
-                <div class="g_id_signin"
-                     data-type="standard"
-                     data-size="large"
-                     data-theme="filled_blue"
-                     data-text="sign_in_with"
-                     data-shape="rectangular"
-                     data-logo_alignment="left">
-                </div>
-            </div>
-            <div class="auth-loading" id="auth-loading">Signing in…</div>
-            <div class="auth-error" id="auth-error"></div>
+            <div class="player-error" id="player-error-msg">Player not found.</div>
         </div>
     </div>
 
@@ -173,12 +156,10 @@
             <a href="/rules.html">Game Rules</a>
             <a href="/privacy.html">Privacy Policy</a>
             <a href="/terms.html">Terms of Service</a>
-            <a href="/delete-account.html" style="color:#ff6b8a;">Delete Account</a>
         </div>
         <div class="footer-copy">© 2025 WolfSheep.fun — All rights reserved</div>
     </footer>
 
-    <!-- Bottom Mobile Navigation -->
     <nav id="bottom-nav" aria-label="Mobile navigation">
         <div class="bn-inner">
             <a href="/" class="bn-link">
@@ -193,7 +174,7 @@
                 <span class="bn-icon">⚡</span>
                 <span>Play</span>
             </a>
-            <a href="/profile.html" class="bn-link active" aria-current="page">
+            <a href="/profile.html" class="bn-link">
                 <span class="bn-icon">👤</span>
                 <span data-i18n="nav_profile">Profile</span>
             </a>
@@ -204,7 +185,7 @@
     <script src="js/i18n.js"></script>
     <script src="js/nav-players.js"></script>
     <script src="js/socket-challenge.js"></script>
-    <script src="js/profile.js"></script>
+    <script src="js/player.js"></script>
     <script src="js/pwa.js"></script>
 </body>
 </html>

@@ -232,6 +232,18 @@ function getProfile(userId) {
     };
 }
 
+function getPublicProfile(userId) {
+    const db = loadDb();
+    const user = findUserById(db, userId);
+    if (!user) return null;
+    return {
+        id: user.id,
+        nick: user.nick,
+        rating: user.rating,
+        stats: user.stats,
+        picture: user.picture,
+    };
+}
 // ==================== Статистика и ELO ====================
 function updateStats(userId, didWin) {
     const db = loadDb();
@@ -304,6 +316,71 @@ function getMyRankAndPosition(userId) {
     };
 }
 
+// ==================== Друзья ====================
+function addFriend(userId, friendId) {
+    if (userId === friendId) return { success: false, error: 'Нельзя добавить себя в друзья.' };
+    const db = loadDb();
+    const user = findUserById(db, userId);
+    const friend = findUserById(db, friendId);
+    if (!user || !friend) return { success: false, error: 'Пользователь не найден.' };
+    if (!user.friends) user.friends = [];
+    if (user.friends.includes(friendId)) return { success: false, error: 'Уже в друзьях.' };
+    user.friends.push(friendId);
+    saveDb(db);
+    return { success: true };
+}
+
+function removeFriend(userId, friendId) {
+    const db = loadDb();
+    const user = findUserById(db, userId);
+    if (!user) return { success: false, error: 'Пользователь не найден.' };
+    if (!user.friends) user.friends = [];
+    const idx = user.friends.indexOf(friendId);
+    if (idx === -1) return { success: false, error: 'Не в друзьях.' };
+    user.friends.splice(idx, 1);
+    saveDb(db);
+    return { success: true };
+}
+
+function getFriends(userId) {
+    const db = loadDb();
+    const user = findUserById(db, userId);
+    if (!user || !user.friends || user.friends.length === 0) return [];
+    return user.friends
+        .map(fid => findUserById(db, fid))
+        .filter(u => u)
+        .map(u => ({
+            id: u.id,
+            nick: u.nick,
+            rating: u.rating || 1000,
+            stats: u.stats,
+            picture: u.picture,
+        }));
+}
+
+function isFriend(userId, friendId) {
+    const db = loadDb();
+    const user = findUserById(db, userId);
+    if (!user || !user.friends) return false;
+    return user.friends.includes(friendId);
+}
+
+function getAllPlayers(searchQuery) {
+    const db = loadDb();
+    let users = db.users;
+    if (searchQuery && searchQuery.trim()) {
+        const q = searchQuery.trim().toLowerCase();
+        users = users.filter(u => (u.nick || u.username || '').toLowerCase().includes(q));
+    }
+    return users.map(u => ({
+        id: u.id,
+        nick: u.nick || u.username,
+        rating: u.rating || 1000,
+        stats: u.stats || { games: 0, wins: 0, losses: 0 },
+        picture: u.picture || '',
+    }));
+}
+
 // ==================== Удаление аккаунта ====================
 function deleteUser(userId) {
     const db = loadDb();
@@ -342,6 +419,12 @@ module.exports = {
     updateBotRating,
     getLeaderboard,
     getMyRankAndPosition,
+    getPublicProfile,
+    addFriend,
+    removeFriend,
+    getFriends,
+    isFriend,
+    getAllPlayers,
     generateNick,
     deleteUser,
     requestDeletion,

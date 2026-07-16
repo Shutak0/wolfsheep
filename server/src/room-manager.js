@@ -12,6 +12,10 @@ class RoomManager {
 
     createRoom(hostSocketId, playerName, colorPreference, timeControlName, userId) {
         const roomId = this.generateRoomId();
+        return this.createRoomWithId(roomId, hostSocketId, playerName, colorPreference, timeControlName, userId);
+    }
+
+    createRoomWithId(roomId, hostSocketId, playerName, colorPreference, timeControlName, userId) {
         const tc = Engine.TIME_PRESETS[timeControlName] || Engine.TIME_PRESETS['1+5'];
         const state = Engine.initState(tc);
         const room = {

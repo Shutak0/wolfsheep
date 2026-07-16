@@ -5,6 +5,7 @@ const http = require('http');
 const socketIO = require('socket.io');
 const RoomManager = require('./room-manager');
 const auth = require('./auth');
+const Engine = require('./engine/quoridor-engine');
 
 const app = express();
 const server = http.createServer(app);
@@ -127,8 +128,11 @@ function buildPlayerAssigned(room, playerIndex) {
         timeControl: room.timeControlName,
         playerName: room.playerNames[playerIndex] || color,
         playerElo: getPlayerElo(playerId),
+        playerId: playerId || null,
         opponentName: room.playerNames[otherIndex] || colorMap[otherIndex] || 'green',
         opponentElo: room.isBotRoom ? getPlayerElo(playerId) : getPlayerElo(otherId),
+        opponentId: room.isBotRoom ? null : (otherId || null),
+        isChallenge: !!room._isChallenge,
     };
 }
 
@@ -195,11 +199,167 @@ app.get('/api/profile/rank', authMiddleware, (req, res) => {
     res.json({ success: true, ...data });
 });
 
+// Публичный профиль — доступен всем (включая неавторизованных)
+app.get('/api/profile/:userId', (req, res) => {
+    const userId = parseInt(req.params.userId);
+    if (!userId || isNaN(userId)) return res.status(400).json({ success: false, error: 'Invalid user ID.' });
+    const profile = auth.getPublicProfile(userId);
+    if (!profile) return res.status(404).json({ success: false, error: 'User not found.' });
+    res.json({ success: true, profile });
+});
+
 app.get('/api/status', (req, res) => res.json({ status: 'ok' }));
 
+// ---------- Друзья ----------
+app.post('/api/friend/add', authMiddleware, (req, res) => {
+    const { friendId } = req.body;
+    if (!friendId) return res.json({ success: false, error: 'No friendId provided.' });
+    const result = auth.addFriend(req.userId, parseInt(friendId));
+    res.json(result);
+});
+
+app.post('/api/friend/remove', authMiddleware, (req, res) => {
+    const { friendId } = req.body;
+    if (!friendId) return res.json({ success: false, error: 'No friendId provided.' });
+    const result = auth.removeFriend(req.userId, parseInt(friendId));
+    res.json(result);
+});
+
+app.get('/api/friends', authMiddleware, (req, res) => {
+    const friends = auth.getFriends(req.userId);
+    res.json({ success: true, friends });
+});
+
+// Публичный список всех игроков (доступен всем)
+app.get('/api/players', (req, res) => {
+    const search = req.query.search || '';
+    const players = auth.getAllPlayers(search);
+    res.json({ success: true, players });
+});
+
 // ---------- Socket.IO ----------
+// Маппинг userId → socket.id для системы вызовов
+const userSocketMap = {};
+// Ожидающие вызовы: roomId → {challengerId, challengerName, accepterId, accepterName, tc}
+const pendingChallenges = new Map();
+
 io.on('connection', (socket) => {
     console.log('Client connected:', socket.id);
+
+    // Регистрация пользователя для приёма вызовов
+    socket.on('register_user', ({ userId }) => {
+        if (userId) {
+            userSocketMap[userId] = socket.id;
+            socket._registeredUserId = userId;
+        }
+    });
+
+    // Вызов на бой
+    socket.on('challenge_player', ({ targetUserId, timeControl, challengerName, challengerId }) => {
+        if (!targetUserId || !challengerId) return;
+        const targetSocketId = userSocketMap[targetUserId];
+        if (!targetSocketId) {
+            socket.emit('challenge_error', { errorKey: 'challenge_player_offline' });
+            return;
+        }
+        io.to(targetSocketId).emit('challenge_received', {
+            fromUserId: challengerId,
+            fromName: challengerName,
+            timeControl: timeControl,
+        });
+        socket.emit('challenge_sent', { targetUserId, timeControl });
+    });
+
+    // Ответ на вызов
+    socket.on('challenge_response', ({ fromUserId, accept, timeControl, myName, myId }) => {
+        const challengerSocketId = userSocketMap[fromUserId];
+        if (!challengerSocketId) {
+            socket.emit('challenge_error', { errorKey: 'challenge_challenger_offline' });
+            return;
+        }
+        if (!accept) {
+            io.to(challengerSocketId).emit('challenge_declined', { fromName: myName });
+            return;
+        }
+        const tc = timeControl || '1+5';
+        const roomId = roomManager.generateRoomId();
+        const challengerProfile = auth.getProfile(fromUserId);
+        const challengerName = (challengerProfile && challengerProfile.nick) || ('Player #' + fromUserId);
+        // Сохраняем challenge данные — комната создастся при заходе на game.html
+        pendingChallenges.set(roomId, {
+            challengerId: fromUserId,
+            challengerName: challengerName,
+            accepterId: myId,
+            accepterName: myName,
+            tc: tc,
+        });
+        // Уведомляем обоих
+        io.to(challengerSocketId).emit('challenge_accepted', { roomId, opponentName: myName, timeControl: tc });
+        socket.emit('challenge_accepted', { roomId, opponentName: challengerName, timeControl: tc });
+    });
+
+    // Игрок зашёл на game.html по приглашению
+    socket.on('join_challenge', ({ roomId, userId }) => {
+        const pending = pendingChallenges.get(roomId);
+        if (!pending) {
+            socket.emit('join_error', { error: 'Challenge expired or not found.' });
+            return;
+        }
+        const uid = userId;
+        let playerIndex = -1;
+        if (uid === pending.challengerId) playerIndex = 0;
+        else if (uid === pending.accepterId) playerIndex = 1;
+        if (playerIndex === -1) {
+            socket.emit('join_error', { error: 'You are not part of this challenge.' });
+            return;
+        }
+        // Ищем существующую комнату
+        let room = roomManager.getRoom(roomId);
+        if (!room) {
+            // Создаём комнату с этим игроком как хостом
+            const name = playerIndex === 0 ? pending.challengerName : pending.accepterName;
+            roomManager.createRoomWithId(roomId, socket.id, name, 'auto', pending.tc, uid);
+            room = roomManager.getRoom(roomId);
+            room._isChallenge = true;
+            room._challengerId = pending.challengerId;
+            room._accepterId = pending.accepterId;
+            room._challengerName = pending.challengerName;
+            room._accepterName = pending.accepterName;
+            socket.join(roomId);
+            room._pendingPlayerIndex = playerIndex;
+            room._pendingOtherReady = false;
+            socket.emit('room_joined', { roomId });
+            socket.emit('player_assigned', buildPlayerAssigned(room, playerIndex));
+            socket.emit('game_state', room.state);
+            return;
+        }
+        // Комната уже существует — присоединяем второго игрока
+        socket.join(roomId);
+        // Ставим флаг challenge на комнату
+        room._isChallenge = true;
+        room._challengerId = pending.challengerId;
+        room._accepterId = pending.accepterId;
+        room._challengerName = pending.challengerName;
+        room._accepterName = pending.accepterName;
+        room.players[1] = socket.id;
+        room.playerNames[1] = playerIndex === 0 ? pending.challengerName : pending.accepterName;
+        room.userIds[1] = uid;
+        room.socketToPlayer.set(socket.id, 1);
+        roomManager.assignColors(room);
+        room.status = 'playing';
+        roomManager.startTimer(roomId);
+        socket.emit('room_joined', { roomId });
+        socket.emit('player_assigned', buildPlayerAssigned(room, 1));
+        socket.emit('game_state', room.state);
+        // Уведомляем первого игрока
+        const otherSocketId = room.players[0];
+        if (otherSocketId) {
+            io.to(otherSocketId).emit('player_assigned', buildPlayerAssigned(room, 0));
+        }
+        io.to(roomId).emit('game_started');
+        io.to(roomId).emit('game_state', room.state);
+        pendingChallenges.delete(roomId);
+    });
 
     socket.on('create_room', ({ playerName, color, timeControl, userId }) => {
         const tc = timeControl || '1+5';
@@ -350,6 +510,44 @@ io.on('connection', (socket) => {
         io.to(roomId).emit('emote_received', { emoteId, fromPlayer: playerIndex });
     });
 
+    // Рематч в challenge-играх
+    socket.on('request_rematch', () => {
+        let roomId = null;
+        for (let [id, room] of roomManager.rooms) {
+            if (room.players.includes(socket.id)) { roomId = id; break; }
+        }
+        if (!roomId) return;
+        const room = roomManager.getRoom(roomId);
+        if (!room || !room._isChallenge || room.status !== 'finished') return;
+        const playerIndex = room.players.indexOf(socket.id);
+        if (playerIndex === -1) return;
+        if (!room._rematchReady) room._rematchReady = {};
+        room._rematchReady[playerIndex] = true;
+        io.to(roomId).emit('rematch_ready', { playerIndex, playersReady: Object.keys(room._rematchReady).length });
+        // Если оба готовы — перезапускаем
+        if (room._rematchReady[0] && room._rematchReady[1]) {
+            const tcName = room.timeControlName || '1+5';
+            const tc = Engine.TIME_PRESETS[tcName] || Engine.TIME_PRESETS['1+5'];
+            room.state = Engine.initState(tc);
+            room.status = 'playing';
+            room.winner = null;
+            room.statsApplied = false;
+            room.eloApplied = false;
+            delete room._rematchReady;
+            roomManager.assignColors(room);
+            roomManager.startTimer(roomId);
+            // Сначала player_assigned (сбрасывает клиент)
+            for (let i = 0; i < 2; i++) {
+                if (room.players[i]) {
+                    io.to(room.players[i]).emit('player_assigned', buildPlayerAssigned(room, i));
+                }
+            }
+            // Затем game_state и game_started
+            io.to(roomId).emit('game_state', room.state);
+            io.to(roomId).emit('game_started');
+        }
+    });
+
     socket.on('surrender', () => {
         let roomId = null;
         for (let [id, room] of roomManager.rooms) { if (room.players.includes(socket.id)) { roomId = id; break; } }
@@ -363,6 +561,11 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
+        // Убираем из маппинга вызовов
+        if (socket._registeredUserId && userSocketMap[socket._registeredUserId] === socket.id) {
+            delete userSocketMap[socket._registeredUserId];
+        }
+        // Обработка отключения из игр
         for (let [roomId, room] of roomManager.rooms) {
             if (room.players.includes(socket.id)) {
                 roomManager.removePlayer(roomId, socket.id);
@@ -407,4 +610,4 @@ app.use((req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`WolfSheep running on http://localhost:${PORT}`));
+server.listen(PORT, () => console.log('WolfSheep running on http://localhost:' + PORT));
