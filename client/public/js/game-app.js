@@ -184,7 +184,8 @@
         myIndex = d.playerIndex;
         isChallengeRoom = !!d.isChallenge;
         rematchReady = false;
-        gameStarted = false; // Сбрасываем для рематча
+        // gameStarted сбрасывается в onGameStarted — не здесь, чтобы избежать гонки событий
+        // при неактивной вкладке (game_started мог прийти раньше player_assigned)
         // Сбрасываем кнопку Play Again
         playAgainBtn.textContent = '🔄 ' + __('play_again');
         playAgainBtn.disabled = false;
@@ -207,6 +208,9 @@
         pendingState = null;
     };
     network.onGameStarted = function () {
+        // Защита от гонки событий: если myIndex ещё не назначен, игнорируем
+        // (сервер пошлёт player_assigned до следующего game_started)
+        if (myIndex === null) return;
         gameStarted = true;
         // Если был получен game_state до старта — используем его как начальную точку
         if (pendingState) {
