@@ -7,7 +7,7 @@
     else { root.QuoridorEngine = factory(); }
 }(typeof self !== 'undefined' ? self : this, function () {
 
-    const SIZE = 9, CELL_SIZE = 54, GAP = 6, OFFSET = (600 - (SIZE * CELL_SIZE + (SIZE - 1) * GAP)) / 2;
+    const SIZE = 9, CELL_SIZE = 58, GAP = 6, OFFSET = 12;
 
     const TIME_PRESETS = {
         '1+5':  { initial:  60000, increment:  5000 },

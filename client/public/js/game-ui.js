@@ -7,8 +7,8 @@
     else { root.QuoridorUI = factory(); }
 }(typeof self !== 'undefined' ? self : this, function () {
 
-    var SIZE = 9, CANVAS_SIZE = 600, CELL_SIZE = 54, GAP = 6, CORNER_RADIUS = 7;
-    var OFFSET = (CANVAS_SIZE - (SIZE * CELL_SIZE + (SIZE - 1) * GAP)) / 2;
+    var SIZE = 9, CANVAS_SIZE = 600, CELL_SIZE = 58, GAP = 6, CORNER_RADIUS = 7;
+    var OFFSET = 12; // 1/5 CELL_SIZE — барьер
     var WALL_THICK = 10, HIT_THRESHOLD = 14, PIECE_RADIUS = 26;
     var COLORS = ['#ff3366', '#33ff66'];
     var COLOR_NAMES = ['Red', 'Green'];
@@ -53,6 +53,20 @@
         ctx.save();
         if (myIdx === 1) { ctx.translate(W / 2, H / 2); ctx.rotate(Math.PI); ctx.translate(-W / 2, -H / 2); }
         ctx.fillStyle = '#050505'; ctx.fillRect(0, 0, W, H);
+
+        // ---- ZOOM / VIEWPORT (для реплея) ----
+        var zLevel = (opt && opt.zoomLevel) || 9;
+        var zRow = (opt && opt.zoomRow != null) ? opt.zoomRow : 0;
+        var zCol = (opt && opt.zoomCol != null) ? opt.zoomCol : 0;
+        if (zLevel < 9) {
+            ctx.save();
+            // Масштаб с учётом барьера (OFFSET): zLevel клеток + барьер с обеих сторон
+            var zScale = CANVAS_SIZE / (zLevel * (CELL_SIZE + GAP) - GAP + 2 * OFFSET);
+            ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.clip();
+            ctx.scale(zScale, zScale);
+            // Сдвиг на начало барьера перед колонкой zCol/zRow
+            ctx.translate(-zCol * (CELL_SIZE + GAP), -zRow * (CELL_SIZE + GAP));
+        }
 
         var winAnim = state.gameOver && state.winner !== null;
         var wc = winAnim ? COLORS[state.winner] : null;
@@ -199,6 +213,9 @@
         //    ctx.fillText('🏆 ' + COLOR_NAMES[state.winner] + ' won!', W / 2, H / 2 - 6); ctx.shadowBlur = 0;
             ctx.restore();
         }
+
+        // Закрываем zoom-блок
+        if (zLevel < 9) ctx.restore();
 
         ctx.restore();
     }

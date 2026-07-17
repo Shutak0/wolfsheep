@@ -11,6 +11,7 @@
     var tcBadge = document.getElementById('tc-badge');
     var myBlock = document.getElementById('my-block'), opBlock = document.getElementById('op-block');
     var playAgainBtn = document.getElementById('playAgainBtn'), recBtn = document.getElementById('recBtn');
+    var downloadVidBtn = document.getElementById('downloadVidBtn');
     var myDot = document.getElementById('my-dot'), opDot = document.getElementById('op-dot');
     var myName = document.getElementById('my-name'), opName = document.getElementById('op-name');
     var myElo = document.getElementById('my-elo'), opElo = document.getElementById('op-elo');
@@ -83,6 +84,7 @@
             }
             surrenderBtn.style.display = 'none';
             recBtn.style.display = 'inline-block';
+            downloadVidBtn.style.display = 'inline-block';
             playAgainBtn.style.display = 'inline-block';
         } else {
             turnBadge.textContent = '⬤ ' + UI.COLOR_NAMES[state.turn] + '\'s turn';
@@ -121,8 +123,16 @@
         }
     }
 
+    var currentZoom = null; // {level, row, col} — текущий зум для render()
+
     function render() {
-        UI.render(canvas, state, playerImages, hoverWall, { playerIndex: myIndex != null ? myIndex : 0, replayMode: replayActive });
+        var opt = { playerIndex: myIndex != null ? myIndex : 0, replayMode: replayActive };
+        if (currentZoom && currentZoom.level < 9) {
+            opt.zoomLevel = currentZoom.level;
+            opt.zoomRow = currentZoom.row;
+            opt.zoomCol = currentZoom.col;
+        }
+        UI.render(canvas, state, playerImages, hoverWall, opt);
         updateUI();
     }
 
@@ -194,6 +204,7 @@
         surrenderBtn.style.display = 'inline-block';
         surrenderBtn.disabled = false;
         recBtn.style.display = 'none';
+        downloadVidBtn.style.display = 'none';
         playAgainBtn.style.display = 'none';
         var mc = d.color === 'red' ? 0 : 1, oc = 1 - mc;
         updateNamesAndElo(d);
@@ -303,6 +314,328 @@
         }
     });
     recBtn.textContent = '▶️ Replay';
+    downloadVidBtn.textContent = '📥 Download Video';
+    var REPLAY_PHRASES = [
+        "That's how I won",
+        "He didn't expect that",
+        "Too easy",
+        "Outplayed",
+        "Wall trap master",
+        "Sheep escaped!",
+        "No escape from the Wolf",
+        "Calculated moves",
+        "Unstoppable",
+        "Watch this comeback",
+        "EZ win",
+        "Best play of the day",
+        "You can't stop me",
+        "Next level strategy",
+        "That ending though!",
+    ];
+
+    downloadVidBtn.addEventListener('click', function () {
+        if (replayActive || moveRecord.length < 1 || state.winner === null) return;
+
+        // Скрываем кнопки на время записи
+        downloadVidBtn.style.display = 'none';
+        recBtn.style.display = 'none';
+        playAgainBtn.style.display = 'none';
+        surrenderBtn.style.display = 'none';
+        resetBtn.style.display = 'none';
+
+        // Выбираем случайную фразу
+        var randomPhrase = REPLAY_PHRASES[Math.floor(Math.random() * REPLAY_PHRASES.length)];
+
+        // Инициализируем звуки
+        ReplaySound.init();
+
+        // Создаём вертикальный canvas (9:16 mobile формата)
+        var vertW = 600, vertH = 1067; // ~9:16
+        var vertCanvas = document.createElement('canvas');
+        vertCanvas.width = vertW;
+        vertCanvas.height = vertH;
+        var vctx = vertCanvas.getContext('2d');
+
+        // Функция отрисовки вертикального кадра
+        function drawVertFrame(showCTA) {
+            // Чёрный фон
+            vctx.fillStyle = '#000000';
+            vctx.fillRect(0, 0, vertW, vertH);
+
+            // Игровой canvas по центру
+            var boardY = Math.round((vertH - 600) / 2) + 20; // чуть ниже центра
+            vctx.drawImage(canvas, 0, boardY);
+
+            // Заголовок сверху (20% от верха)
+            var titleY = Math.round(vertH * 0.18);
+            vctx.fillStyle = '#ffffff';
+            vctx.font = 'bold 46px "Segoe UI", sans-serif';
+            vctx.textAlign = 'center';
+            vctx.textBaseline = 'middle';
+            vctx.shadowColor = '#c084fc';
+            vctx.shadowBlur = 30;
+            vctx.fillText(randomPhrase, vertW / 2, titleY);
+            vctx.shadowBlur = 0;
+
+            // CTA после игры
+            if (showCTA) {
+                var ctaY = boardY + 600 + 50;
+                vctx.fillStyle = 'rgba(0,0,0,0.6)';
+                vctx.fillRect(0, boardY + 600, vertW, vertH - boardY - 600);
+                vctx.fillStyle = '#ffffff';
+                vctx.font = 'bold 28px "Segoe UI", sans-serif';
+                vctx.textAlign = 'center';
+                vctx.textBaseline = 'middle';
+                vctx.shadowColor = '#c084fc';
+                vctx.shadowBlur = 20;
+                vctx.fillText('Play on wolfsheep.fun', vertW / 2, boardY + 620);
+                vctx.shadowBlur = 0;
+            }
+        }
+        drawVertFrame(false);
+
+        // Подготавливаем запись: вертикальный canvas + звук
+        var canvasStream = vertCanvas.captureStream(60);
+        var audioStream = ReplaySound.getAudioStream();
+        var combinedStream;
+        if (audioStream) {
+            var audioTrack = audioStream.getAudioTracks()[0];
+            if (audioTrack) {
+                var videoTrack = canvasStream.getVideoTracks()[0];
+                combinedStream = new MediaStream([videoTrack, audioTrack]);
+            } else {
+                combinedStream = canvasStream;
+            }
+        } else {
+            combinedStream = canvasStream;
+        }
+
+        var chunks = [];
+        var recorder;
+        var recOpts = { mimeType: 'video/webm;codecs=vp9,opus', videoBitsPerSecond: 8000000 };
+        try {
+            recorder = new MediaRecorder(combinedStream, recOpts);
+        } catch (e) {
+            recOpts = { mimeType: 'video/webm', videoBitsPerSecond: 8000000 };
+            recorder = new MediaRecorder(combinedStream, recOpts);
+        }
+        recorder.ondataavailable = function (e) { if (e.data.size > 0) chunks.push(e.data); };
+        recorder.onstop = function () {
+            var blob = new Blob(chunks, { type: 'video/webm' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'wolfsheep-replay.webm';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            // Восстанавливаем кнопки
+            recBtn.style.display = 'inline-block';
+            playAgainBtn.style.display = 'inline-block';
+            resetBtn.style.display = 'inline-block';
+            downloadVidBtn.style.display = 'inline-block';
+            setStatus('📥 Video downloaded!', true);
+        };
+
+        recorder.start();
+
+        // Запускаем реплей (копия логики recBtn, но с остановкой recorder в конце)
+        setStatus('🎬 Recording replay...', false);
+
+        var finalWinner = state.winner;
+        var finalReason = state.winReason || 'target';
+        var total = moveRecord.length;
+
+        var movesOnly = [];
+        for (var mi = 0; mi < moveRecord.length; mi++) {
+            if (moveRecord[mi].type !== 'emote') movesOnly.push(moveRecord[mi]);
+        }
+        var zoomPlan = computeReplayZooms(movesOnly);
+        currentZoom = null;
+
+        function getReplayDelay(moves, mi) {
+            var delay = 500;
+            if (mi < 1) return 500;
+            var p = moves[mi].player, opp = 1 - p;
+            var ourMoves = 0, ourWalls = 0;
+            for (var k = mi; k >= 0; k--) {
+                var mk = moves[k];
+                if (mk.player !== p) break;
+                if (mk.type === 'move') ourMoves++;
+                else if (mk.type === 'wall') ourWalls++;
+            }
+            var ourMixed = (ourMoves > 0 && ourWalls > 0);
+            var oppMoves = 0, oppWalls = 0;
+            for (var j = mi - 1; j >= 0; j--) {
+                var mj = moves[j];
+                if (mj.player !== opp) continue;
+                for (var q = j; q >= 0; q--) {
+                    var mq = moves[q];
+                    if (mq.player !== opp) break;
+                    if (mq.type === 'move') oppMoves++;
+                    else if (mq.type === 'wall') oppWalls++;
+                }
+                break;
+            }
+            var oppMixed = (oppMoves > 0 && oppWalls > 0);
+            if (!ourMixed && !oppMixed && ourMoves >= 6 && oppMoves >= 6) delay = 150;
+            else if (!ourMixed && !oppMixed && ourWalls >= 2 && oppWalls >= 2) delay = 700;
+            else if (!ourMixed && !oppMixed && ourMoves >= 2 && oppMoves >= 2) delay = 300;
+            else delay = 500;
+
+            // С 8-го хода задержки ×1.5
+            if (mi >= 7) delay = Math.round(delay * 1.5);
+            return delay;
+        }
+
+        var replayState = Engine.initState(tc);
+        replayState.gameOver = false;
+        state = replayState;
+        var idx = 0;
+        var soundIdx = 0;
+        replayActive = true;
+        render();
+
+        function playNextStepForRec() {
+            if (idx >= moveRecord.length) {
+                replayActive = false;
+                replayState.gameOver = true;
+                replayState.winner = finalWinner;
+                replayState.winReason = finalReason;
+            state = replayState;
+            render();
+            drawVertFrame(true);
+
+            // Захват 1+ секунды финального кадра с надписью
+            setTimeout(function () {
+                recorder.stop();
+            }, 1200);
+                return;
+            }
+
+            var move = moveRecord[idx];
+
+            if (move.type === 'emote') {
+                playEmoteAnim(move.emoteId, move.fromPlayer);
+                idx++;
+                replayTimer = setTimeout(playNextStepForRec, 500);
+                return;
+            }
+
+            Engine.applyAction(replayState, move);
+            var winPlayer = isWinningMove(move, replayState);
+            if (winPlayer !== null) {
+                replayState.gameOver = true;
+                replayState.winner = winPlayer;
+                replayState.winReason = 'target';
+                finalWinner = winPlayer;
+            } else {
+                Engine.endTurn(replayState);
+                replayState.gameOver = false;
+            }
+
+            // ---- ЗВУК ДО РЕНДЕРА (на 50ms раньше хода) ----
+            if (myIndex !== null) {
+                var snd = ReplaySound.getSoundForMove(move, soundIdx, movesOnly, myIndex, finalWinner);
+                if (snd) ReplaySound.play(snd);
+            }
+
+            if (zoomPlan.length > soundIdx) currentZoom = zoomPlan[soundIdx];
+            soundIdx++;
+
+            state = replayState;
+            render();
+            drawVertFrame(false);
+            idx++;
+
+            var delay = getReplayDelay(movesOnly, soundIdx - 1);
+            replayTimer = setTimeout(playNextStepForRec, delay);
+        }
+
+        replayTimer = setTimeout(playNextStepForRec, 500);
+    });
+
+    // ---- ZOOM PLAN: предвычисление уровней зума для каждого хода реплея ----
+    function computeReplayZooms(movesOnly) {
+        var N = movesOnly.length;
+        if (N === 0) return [];
+
+        // Хелпер: bounding box действий в массиве ходов
+        function bboxOf(moves) {
+            var rMin = 9, rMax = -1, cMin = 9, cMax = -1;
+            var hasWall = false;
+            for (var j = 0; j < moves.length; j++) {
+                var m = moves[j];
+                if (m.type === 'move') {
+                    rMin = Math.min(rMin, m.row); rMax = Math.max(rMax, m.row);
+                    cMin = Math.min(cMin, m.col); cMax = Math.max(cMax, m.col);
+                } else if (m.type === 'wall') {
+                    hasWall = true;
+                    rMin = Math.min(rMin, m.row, m.row + 1);
+                    rMax = Math.max(rMax, m.row, m.row + 1);
+                    cMin = Math.min(cMin, m.col, m.col + 1);
+                    cMax = Math.max(cMax, m.col, m.col + 1);
+                }
+            }
+            // fit в 6×6
+            var fits = (rMax - rMin < 6 && cMax - cMin < 6 && rMin <= rMax && cMin <= cMax);
+            return { fits: fits, hasWall: hasWall, rMin: rMin, rMax: rMax, cMin: cMin, cMax: cMax };
+        }
+
+        var plan = [];
+        var consecutiveInZone = 0;
+        var lockedRow = null, lockedCol = null; // фиксированный угол зума
+        var zoomCooldown = 0; // перерыв между зумами (2 хода)
+
+        for (var i = 0; i < N; i++) {
+            // lookahead: текущий + 2 следующих
+            var lookahead = movesOnly.slice(i, i + 3);
+            var cur = bboxOf(lookahead);
+
+            // lookahead для следующего хода (i+1..i+3) — нужен для проверки выхода и серии 5+
+            var nextLookahead = (i + 1 < N) ? movesOnly.slice(i + 1, i + 4) : [];
+            var nxt = nextLookahead.length > 0 ? bboxOf(nextLookahead) : { fits: false };
+
+            var hasNext = (i + 1 < N);
+            // Выход: следующий lookahead не помещается в 6×6
+            var willExit = hasNext && !nxt.fits;
+
+            var entry = { level: 9, row: 0, col: 0 };
+
+            // Уменьшаем cooldown
+            if (zoomCooldown > 0) zoomCooldown--;
+
+            // Зум только если lookahead подтверждает ≥3 хода в зоне, прошло ≥2 ходов, есть стена, и cooldown=0
+            if (i >= 2 && zoomCooldown <= 0 && cur.fits && cur.hasWall && !willExit && lookahead.length >= 3) {
+                if (consecutiveInZone === 0) {
+                    // Фиксируем угол по первому ходу серии
+                    var bboxCenterR = (cur.rMin + cur.rMax) / 2;
+                    var bboxCenterC = (cur.cMin + cur.cMax) / 2;
+                    lockedRow = Math.max(0, Math.min(1, Math.round(bboxCenterR - 4))); // для 8×8: 9-8=1
+                    lockedCol = Math.max(0, Math.min(1, Math.round(bboxCenterC - 4)));
+                }
+                consecutiveInZone++;
+
+                // Только 8×8, без 7×7
+                entry.level = 8;
+                entry.row = lockedRow;
+                entry.col = lockedCol;
+            } else {
+                // Сброс: действие не в зоне или следующий ход выходит
+                if (consecutiveInZone > 0) {
+                    zoomCooldown = 2; // перерыв 2 хода после серии зума
+                }
+                consecutiveInZone = 0;
+                lockedRow = null;
+                lockedCol = null;
+            }
+
+            plan.push(entry);
+        }
+
+        return plan;
+    }
 
     recBtn.addEventListener('click', function () {
         if (replayActive) return;
@@ -313,32 +646,91 @@
         surrenderBtn.style.display = 'none';
         resetBtn.style.display = 'none';
 
+        // Инициализируем звуки реплея
+        ReplaySound.init();
+
         var finalWinner = state.winner;
         var finalReason = state.winReason || 'target';
         var total = moveRecord.length;
+
+        // Отфильтрованный массив без emotes — для правил звуков
+        var movesOnly = [];
+        for (var mi = 0; mi < moveRecord.length; mi++) {
+            if (moveRecord[mi].type !== 'emote') movesOnly.push(moveRecord[mi]);
+        }
+
+        // Предвычисляем zoom-план
+        var zoomPlan = computeReplayZooms(movesOnly);
+        currentZoom = null;
+
+        // Функция расчёта задержки между ходами реплея
+        function getReplayDelay(moves, mi) {
+            if (mi < 1) return 500; // первый ход — стандартная задержка
+
+            var p = moves[mi].player;
+            var opp = 1 - p;
+
+            // Считаем подряд идущие действия текущего игрока (начиная с хода mi)
+            var ourMoves = 0, ourWalls = 0;
+            for (var k = mi; k >= 0; k--) {
+                var mk = moves[k];
+                if (mk.player !== p) break;
+                if (mk.type === 'move') ourMoves++;
+                else if (mk.type === 'wall') ourWalls++;
+                // если оба типа встречаются — mixed
+            }
+            var ourMixed = (ourMoves > 0 && ourWalls > 0);
+
+            // Считаем подряд идущие действия оппонента (начиная с его последнего хода перед mi)
+            var oppMoves = 0, oppWalls = 0;
+            for (var j = mi - 1; j >= 0; j--) {
+                var mj = moves[j];
+                if (mj.player !== opp) continue; // ищем первый ход оппонента
+                // Считаем его серию
+                for (var q = j; q >= 0; q--) {
+                    var mq = moves[q];
+                    if (mq.player !== opp) break;
+                    if (mq.type === 'move') oppMoves++;
+                    else if (mq.type === 'wall') oppWalls++;
+                }
+                break;
+            }
+            var oppMixed = (oppMoves > 0 && oppWalls > 0);
+
+            // Правила:
+            // Оба ≥6 move подряд → 150ms (длинные серии)
+            if (!ourMixed && !oppMixed && ourMoves >= 6 && oppMoves >= 6) return 150;
+            // Оба ≥2 стен подряд → 700ms
+            if (!ourMixed && !oppMixed && ourWalls >= 2 && oppWalls >= 2) return 700;
+            // Оба ≥2 move подряд → 300ms
+            if (!ourMixed && !oppMixed && ourMoves >= 2 && oppMoves >= 2) return 300;
+            // Иначе → 500ms
+            return 500;
+        }
 
         var replayState = Engine.initState(tc);
         replayState.gameOver = false;
         state = replayState;
         var idx = 0;
+        var soundIdx = 0; // счётчик ходов в movesOnly
         render();
         setStatus('⏯ Replay 0/' + total, false);
 
-        replayTimer = setInterval(function () {
-            if (!replayActive) { clearInterval(replayTimer); return; }
+        function playNextStep() {
+            if (!replayActive) return;
 
             if (idx >= moveRecord.length) {
-                clearInterval(replayTimer);
                 replayTimer = null;
                 replayState.gameOver = true;
                 replayState.winner = finalWinner;
                 replayState.winReason = finalReason;
                 state = replayState;
-                replayActive = false; // replay завершён — показываем финал
+                replayActive = false;
                 if (finalWinner !== null && finalWinner !== undefined) {
                     showReplayCTA();
                     startWinAnimation(function () {
                         recBtn.style.display = 'inline-block';
+                        downloadVidBtn.style.display = 'inline-block';
                         playAgainBtn.style.display = 'inline-block';
                         resetBtn.style.display = 'inline-block';
                     });
@@ -346,6 +738,7 @@
                     render();
                     setStatus('⏯ ' + __('game_draw'), true);
                     recBtn.style.display = 'inline-block';
+                    downloadVidBtn.style.display = 'inline-block';
                     playAgainBtn.style.display = 'inline-block';
                     resetBtn.style.display = 'inline-block';
                 }
@@ -355,32 +748,50 @@
             var move = moveRecord[idx];
 
             if (move.type === 'emote') {
-                // Проигрываем анимацию смайлика без изменения состояния доски
                 playEmoteAnim(move.emoteId, move.fromPlayer);
                 setStatus('⏯ Replay ' + (idx + 1) + '/' + total + ' 😀', false);
                 idx++;
+                replayTimer = setTimeout(playNextStep, 500);
                 return;
             }
 
             Engine.applyAction(replayState, move);
 
-            // Детект победного хода сразу после applyAction
             var winPlayer = isWinningMove(move, replayState);
             if (winPlayer !== null) {
                 replayState.gameOver = true;
                 replayState.winner = winPlayer;
                 replayState.winReason = 'target';
-                // НЕ вызываем endTurn — оставляем финальное состояние
+                finalWinner = winPlayer;
             } else {
                 Engine.endTurn(replayState);
                 replayState.gameOver = false;
             }
 
+            // ---- ZOOM РЕПЛЕЯ ----
+            if (zoomPlan.length > soundIdx) {
+                currentZoom = zoomPlan[soundIdx];
+            }
+
+            // ---- ЗВУК РЕПЛЕЯ ----
+            if (myIndex !== null) {
+                var soundName = ReplaySound.getSoundForMove(move, soundIdx, movesOnly, myIndex, finalWinner);
+                if (soundName) ReplaySound.play(soundName);
+            }
+            soundIdx++;
+
             state = replayState;
             render();
             setStatus('⏯ Replay ' + (idx + 1) + '/' + total, false);
             idx++;
-        }, 2000);
+
+            // Задержка до следующего хода
+            var delay = getReplayDelay(movesOnly, soundIdx - 1);
+            replayTimer = setTimeout(playNextStep, delay);
+        }
+
+        // Запуск с небольшой начальной задержкой
+        replayTimer = setTimeout(playNextStep, 500);
     });
 
     document.querySelector('.wait-text').textContent = __('game_searching');

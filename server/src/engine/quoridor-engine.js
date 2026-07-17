@@ -9,9 +9,9 @@
 }(typeof self !== 'undefined' ? self : this, function () {
 
     const SIZE = 9;
-    const CELL_SIZE = 54;
+    const CELL_SIZE = 58;
     const GAP = 6;
-    const OFFSET = (600 - (SIZE * CELL_SIZE + (SIZE - 1) * GAP)) / 2;
+    const OFFSET = 12;
 
     // Пресеты временного контроля
     const TIME_PRESETS = {
