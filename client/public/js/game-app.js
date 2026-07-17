@@ -392,8 +392,6 @@
                 vctx.shadowBlur = 0;
             }
         }
-        drawVertFrame(false);
-
         // Подготавливаем запись: вертикальный canvas + звук
         var canvasStream = vertCanvas.captureStream(60);
         var audioStream = ReplaySound.getAudioStream();
@@ -455,8 +453,8 @@
         currentZoom = null;
 
         function getReplayDelay(moves, mi) {
-            var delay = 500;
-            if (mi < 1) return 500;
+            var delay = 750;
+            if (mi < 1) return 750;
             var p = moves[mi].player, opp = 1 - p;
             var ourMoves = 0, ourWalls = 0;
             for (var k = mi; k >= 0; k--) {
@@ -482,7 +480,7 @@
             if (!ourMixed && !oppMixed && ourMoves >= 6 && oppMoves >= 6) delay = 150;
             else if (!ourMixed && !oppMixed && ourWalls >= 2 && oppWalls >= 2) delay = 700;
             else if (!ourMixed && !oppMixed && ourMoves >= 2 && oppMoves >= 2) delay = 300;
-            else delay = 500;
+            else delay = 750;
 
             // С 8-го хода задержки ×1.5
             if (mi >= 7) delay = Math.round(delay * 1.5);
@@ -496,6 +494,7 @@
         var soundIdx = 0;
         replayActive = true;
         render();
+        drawVertFrame(false);
 
         function playNextStepForRec() {
             if (idx >= moveRecord.length) {
@@ -535,7 +534,7 @@
                 replayState.gameOver = false;
             }
 
-            // ---- ЗВУК ДО РЕНДЕРА (на 50ms раньше хода) ----
+            // ---- ЗВУК ДО РЕНДЕРА (на 100ms раньше хода) ----
             if (myIndex !== null) {
                 var snd = ReplaySound.getSoundForMove(move, soundIdx, movesOnly, myIndex, finalWinner);
                 if (snd) ReplaySound.play(snd);
@@ -545,8 +544,11 @@
             soundIdx++;
 
             state = replayState;
-            render();
-            drawVertFrame(false);
+            // Небольшая задержка рендера чтобы звук опережал видео
+            setTimeout(function () {
+                render();
+                drawVertFrame(false);
+            }, 120);
             idx++;
 
             var delay = getReplayDelay(movesOnly, soundIdx - 1);
@@ -704,8 +706,8 @@
             if (!ourMixed && !oppMixed && ourWalls >= 2 && oppWalls >= 2) return 700;
             // Оба ≥2 move подряд → 300ms
             if (!ourMixed && !oppMixed && ourMoves >= 2 && oppMoves >= 2) return 300;
-            // Иначе → 500ms
-            return 500;
+            // Иначе → 750ms
+            return 750;
         }
 
         var replayState = Engine.initState(tc);
