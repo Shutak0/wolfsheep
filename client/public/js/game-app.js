@@ -20,8 +20,7 @@
     var myTimeText = document.getElementById('my-time-text'), opTimeText = document.getElementById('op-time-text');
 
     var Engine = window.QuoridorEngine, UI = window.QuoridorUI;
-    var isChallengeRoom = false;
-    var rematchReady = false;
+    var isChallengeRoom = false, rematchReady = false;
     var state = null, playerImages = [null, null], hoverWall = null;
     var moveRecord = [], prevState = null, pendingState = null, replayTimer = null, replayActive = false;
     var winAnimTimer = null, winStartTime = 0;
@@ -36,169 +35,78 @@
         if (!bar) return false;
         return window.getComputedStyle(bar).display !== 'none';
     }
-
-    function preloadDefaultImages() {
-        var wolfImg = new Image();
-        wolfImg.onload = function () { playerImages[0] = wolfImg; render(); };
-        wolfImg.src = '/imgs/Wolf.png';
-        var sheepImg = new Image();
-        sheepImg.onload = function () { playerImages[1] = sheepImg; render(); };
-        sheepImg.src = '/imgs/Sheep.png';
-    }
-
+    function preloadDefaultImages() { var wolfImg=new Image();wolfImg.onload=function(){playerImages[0]=wolfImg;render();};wolfImg.src='/imgs/Wolf.png';var sheepImg=new Image();sheepImg.onload=function(){playerImages[1]=sheepImg;render();};sheepImg.src='/imgs/Sheep.png'; }
     var tcName = sessionStorage.getItem('ws_tc') || '1+5';
     var playerName = sessionStorage.getItem('ws_name') || 'Player';
     var playerColor = sessionStorage.getItem('ws_color') || 'auto';
     var userId = sessionStorage.getItem('ws_userId') ? parseInt(sessionStorage.getItem('ws_userId')) : null;
     var tc = Engine.TIME_PRESETS[tcName] || Engine.TIME_PRESETS['1+5'];
-    state = Engine.initState(tc);
-    tcBadge.textContent = tcName;
-
+    state = Engine.initState(tc); tcBadge.textContent = tcName;
     function formatTime(ms) { if (ms < 0) ms = 0; var s = Math.ceil(ms / 1000); return Math.floor(s/60)+':'+(s%60).toString().padStart(2,'0'); }
     function updateTimeDisplay() {
         if (!state || myIndex === null) return;
-        var mt = state.players[myIndex].timeLeft, ot = state.players[1 - myIndex].timeLeft;
-        myTimeText.textContent = formatTime(mt); opTimeText.textContent = formatTime(ot);
-        [myTimeEl, opTimeEl].forEach(function(e){e.classList.remove('warning','danger');});
-        if (mt <= 10000) myTimeEl.classList.add('danger'); else if (mt <= 20000) myTimeEl.classList.add('warning');
-        if (ot <= 10000) opTimeEl.classList.add('danger'); else if (ot <= 20000) opTimeEl.classList.add('warning');
-        myTimeEl.style.borderColor = state.turn === myIndex ? (mt<=10000?'#ff3366':mt<=20000?'#ffaa00':'#c084fc') : '#2a1a5a';
-        opTimeEl.style.borderColor = state.turn === (1-myIndex) ? (ot<=10000?'#ff3366':ot<=20000?'#ffaa00':'#c084fc') : '#2a1a5a';
+        var mt=state.players[myIndex].timeLeft,ot=state.players[1-myIndex].timeLeft;
+        myTimeText.textContent=formatTime(mt);opTimeText.textContent=formatTime(ot);
+        [myTimeEl,opTimeEl].forEach(function(e){e.classList.remove('warning','danger');});
+        if(mt<=10000)myTimeEl.classList.add('danger');else if(mt<=20000)myTimeEl.classList.add('warning');
+        if(ot<=10000)opTimeEl.classList.add('danger');else if(ot<=20000)opTimeEl.classList.add('warning');
+        myTimeEl.style.borderColor=state.turn===myIndex?(mt<=10000?'#ff3366':mt<=20000?'#ffaa00':'#c084fc'):'#2a1a5a';
+        opTimeEl.style.borderColor=state.turn===(1-myIndex)?(ot<=10000?'#ff3366':ot<=20000?'#ffaa00':'#c084fc'):'#2a1a5a';
     }
     function updateUI() {
-        if (!state || myIndex === null) return;
-        if (myIndex === 0) { myWalls.textContent = state.players[0].walls; opWalls.textContent = state.players[1].walls; }
-        else { myWalls.textContent = state.players[1].walls; opWalls.textContent = state.players[0].walls; }
-        myBlock.classList.toggle('active', state.turn === myIndex && !state.gameOver && gameStarted);
-        opBlock.classList.toggle('active', state.turn === (1-myIndex) && !state.gameOver && gameStarted);
-        if (state.gameOver) {
-            var rt = getReason(state.winReason);
-            if (state.winner !== null && state.winner !== undefined) {
-                turnBadge.textContent = '🏆 ' + UI.COLOR_NAMES[state.winner] + ' ' + __('game_win_target');
-                if (rt) turnBadge.textContent = '🏆 ' + UI.COLOR_NAMES[state.winner] + ' ' + __('game_win_target') + ' ' + rt;
-            } else { turnBadge.textContent = '🤝 ' + __('game_draw') + (rt ? ' ' + rt : ''); }
-            surrenderBtn.style.display = 'none';
-            recBtn.style.display = 'inline-block';
-            downloadVidBtn.style.display = 'inline-block';
-            playAgainBtn.style.display = 'inline-block';
-        } else {
-            turnBadge.textContent = '⬤ ' + UI.COLOR_NAMES[state.turn] + '\'s turn';
-            turnBadge.style.color = UI.COLORS[state.turn]; turnBadge.style.textShadow = '0 0 20px ' + UI.COLORS[state.turn];
-        }
+        if(!state||myIndex===null)return;
+        if(myIndex===0){myWalls.textContent=state.players[0].walls;opWalls.textContent=state.players[1].walls;}
+        else{myWalls.textContent=state.players[1].walls;opWalls.textContent=state.players[0].walls;}
+        myBlock.classList.toggle('active',state.turn===myIndex&&!state.gameOver&&gameStarted);
+        opBlock.classList.toggle('active',state.turn===(1-myIndex)&&!state.gameOver&&gameStarted);
+        if(state.gameOver){
+            var rt=getReason(state.winReason);
+            if(state.winner!==null&&state.winner!==undefined){turnBadge.textContent='🏆 '+UI.COLOR_NAMES[state.winner]+' '+__('game_win_target');if(rt)turnBadge.textContent='🏆 '+UI.COLOR_NAMES[state.winner]+' '+__('game_win_target')+' '+rt;}
+            else{turnBadge.textContent='🤝 '+__('game_draw')+(rt?' '+rt:'');}
+            surrenderBtn.style.display='none';recBtn.style.display='inline-block';downloadVidBtn.style.display='inline-block';playAgainBtn.style.display='inline-block';
+        }else{turnBadge.textContent='⬤ '+UI.COLOR_NAMES[state.turn]+'\'s turn';turnBadge.style.color=UI.COLORS[state.turn];turnBadge.style.textShadow='0 0 20px '+UI.COLORS[state.turn];}
         updateTimeDisplay();
     }
-    function diffMove(oldS, newS) {
-        if (!oldS || !newS) return null;
-        var ow = (oldS.walls && Array.isArray(oldS.walls)) ? oldS.walls.length : 0;
-        var nw = (newS.walls && Array.isArray(newS.walls)) ? newS.walls.length : 0;
-        if (nw > ow) { var w = newS.walls[nw - 1]; return { type: 'wall', player: oldS.turn, row: w.row, col: w.col, orient: w.orient }; }
-        for (var p = 0; p < 2; p++) {
-            if (oldS.players[p].row !== newS.players[p].row || oldS.players[p].col !== newS.players[p].col)
-                return { type: 'move', player: oldS.turn, row: newS.players[p].row, col: newS.players[p].col };
-        }
+    function diffMove(oldS,newS){
+        if(!oldS||!newS)return null;
+        var ow=(oldS.walls&&Array.isArray(oldS.walls))?oldS.walls.length:0,nw=(newS.walls&&Array.isArray(newS.walls))?newS.walls.length:0;
+        if(nw>ow){var w=newS.walls[nw-1];return{type:'wall',player:oldS.turn,row:w.row,col:w.col,orient:w.orient};}
+        for(var p=0;p<2;p++){if(oldS.players[p].row!==newS.players[p].row||oldS.players[p].col!==newS.players[p].col)return{type:'move',player:oldS.turn,row:newS.players[p].row,col:newS.players[p].col};}
         return null;
     }
-    function getReason(r) {
-        switch(r){
-            case 'timeout': return __('game_win_timeout');
-            case 'surrender': return __('game_win_surrender');
-            case 'disconnect': return __('game_win_disconnect');
-            case 'repetition': return __('game_draw_repetition');
-            default: return '';
-        }
-    }
-    var currentZoom = null;
-    function render() {
-        var opt = { playerIndex: myIndex != null ? myIndex : 0, replayMode: replayActive };
-        if (currentZoom && currentZoom.level < 9) { opt.zoomLevel = currentZoom.level; opt.zoomRow = currentZoom.row; opt.zoomCol = currentZoom.col; }
-        UI.render(canvas, state, playerImages, hoverWall, opt); updateUI();
-    }
-    function setStatus(msg, isWin) { statusMsg.textContent = msg; statusMsg.className = isWin ? 'win' : ''; }
-    function showReplayCTA() {
-        var boardWrapper = document.getElementById('board-wrapper'), overlay = document.getElementById('replay-cta');
-        if (!overlay) { overlay = document.createElement('div'); overlay.id = 'replay-cta'; overlay.className = 'replay-cta-overlay'; overlay.innerHTML = '<div class="replay-cta-text">Play on wolfsheep.fun</div>'; boardWrapper.appendChild(overlay); }
-        overlay.classList.remove('show'); void overlay.offsetWidth; overlay.classList.add('show');
-    }
-    function startWinAnimation(onDone) {
-        if (winAnimTimer) clearInterval(winAnimTimer); state._winTime = 0; winStartTime = Date.now();
-        winAnimTimer = setInterval(function () { if (!state.gameOver) { clearInterval(winAnimTimer); winAnimTimer = null; if (onDone) onDone(); return; } state._winTime = Date.now() - winStartTime; render(); if (state._winTime >= 1200) { clearInterval(winAnimTimer); winAnimTimer = null; state._winTime = 9999; render(); if (onDone) onDone(); } }, 30);
-    }
-    function isWinningMove(move, rs) { if (move.type !== 'move') return null; if (move.player === 0 && move.row === rs.players[1].row && move.col === rs.players[1].col) return 0; if (move.player === 1 && move.row === 8) return 1; return null; }
+    function getReason(r){switch(r){case'timeout':return__('game_win_timeout');case'surrender':return__('game_win_surrender');case'disconnect':return__('game_win_disconnect');case'repetition':return__('game_draw_repetition');default:return'';}}
+    var currentZoom=null;
+    function render(){var opt={playerIndex:myIndex!=null?myIndex:0,replayMode:replayActive};if(currentZoom&&currentZoom.level<9){opt.zoomLevel=currentZoom.level;opt.zoomRow=currentZoom.row;opt.zoomCol=currentZoom.col;}UI.render(canvas,state,playerImages,hoverWall,opt);updateUI();}
+    function setStatus(msg,isWin){statusMsg.textContent=msg;statusMsg.className=isWin?'win':'';}
+    function showReplayCTA(){var boardWrapper=document.getElementById('board-wrapper'),overlay=document.getElementById('replay-cta');if(!overlay){overlay=document.createElement('div');overlay.id='replay-cta';overlay.className='replay-cta-overlay';overlay.innerHTML='<div class="replay-cta-text">Play on wolfsheep.fun</div>';boardWrapper.appendChild(overlay);}overlay.classList.remove('show');void overlay.offsetWidth;overlay.classList.add('show');}
+    function startWinAnimation(onDone){if(winAnimTimer)clearInterval(winAnimTimer);state._winTime=0;winStartTime=Date.now();winAnimTimer=setInterval(function(){if(!state.gameOver){clearInterval(winAnimTimer);winAnimTimer=null;if(onDone)onDone();return;}state._winTime=Date.now()-winStartTime;render();if(state._winTime>=1200){clearInterval(winAnimTimer);winAnimTimer=null;state._winTime=9999;render();if(onDone)onDone();}},30);}
+    function isWinningMove(move,rs){if(move.type!=='move')return null;if(move.player===0&&move.row===rs.players[1].row&&move.col===rs.players[1].col)return 0;if(move.player===1&&move.row===8)return 1;return null;}
 
-    network.onRoomCreated = function (d) { waitingOverlay.classList.add('show'); waitRoomId.textContent = 'ID: ' + d.roomId; setStatus(__('game_room_created'), false); };
-    network.onRoomJoined = function (d) { setStatus(__('game_joined'), false); waitingOverlay.classList.remove('show'); };
-    network.onPlayerAssigned = function (d) { myIndex = d.playerIndex; isChallengeRoom = !!d.isChallenge; rematchReady = false; playAgainBtn.textContent = '🔄 ' + __('play_again'); playAgainBtn.disabled = false; playAgainBtn.style.background = ''; playAgainBtn.style.color = ''; surrenderBtn.style.display = 'inline-block'; surrenderBtn.disabled = false; recBtn.style.display = 'none'; downloadVidBtn.style.display = 'none'; playAgainBtn.style.display = 'none'; var mc = d.color === 'red' ? 0 : 1, oc = 1 - mc; updateNamesAndElo(d); myDot.className = 'dot ' + DOT_CLASSES[mc]; opDot.className = 'dot ' + DOT_CLASSES[oc]; var myAnimal = d.color === 'red' ? 'Wolf' : 'Sheep', opAnimal = d.color === 'red' ? 'Sheep' : 'Wolf'; myDot.innerHTML = '<img src="/imgs/' + myAnimal + '.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'; opDot.innerHTML = '<img src="/imgs/' + opAnimal + '.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'; if (d.timeControl) tcBadge.textContent = d.timeControl; moveRecord = []; prevState = null; pendingState = null; };
-    network.onGameStarted = function () { if (myIndex === null) return; gameStarted = true; if (pendingState) { prevState = pendingState; pendingState = null; } waitingOverlay.classList.remove('show'); setStatus(__('game_started'), false); hoverWall = null; render(); };
-    network.onGameState = function (newState) { if (replayActive) return; if (!gameStarted) { if (pendingState) { var pm2 = diffMove(pendingState, newState); if (pm2) moveRecord.push(pm2); } pendingState = Engine.deepClone(newState); state = newState; render(); return; } if (!prevState) { if (pendingState) { prevState = pendingState; pendingState = null; } else { prevState = Engine.deepClone(newState); } state = newState; render(); return; } var m2 = diffMove(prevState, newState); if (m2) moveRecord.push(m2); state = newState; prevState = Engine.deepClone(newState); if (newState.gameOver && newState.winner !== null && newState.winner !== undefined) startWinAnimation(); render(); };
-    network.onGameOver = function (data) { state.gameOver = true; state.winner = data.winner; state.winReason = data.winReason || 'target'; if (state.winner !== null && state.winner !== undefined) startWinAnimation(); render(); setStatus('🏆 ' + data.winnerName + ' ' + __('game_win_target') + ' ' + getReason(state.winReason), true); };
-    network.onError = function (msg) { setStatus(__('game_error') + msg, false); };
-    network.onOpponentDisconnected = function () { setStatus(__('game_opponent_left'), true); state.gameOver = true; render(); };
-    network.onEmote = function (d) { if (!replayActive) moveRecord.push({ type: 'emote', emoteId: d.emoteId, fromPlayer: d.fromPlayer }); playEmoteAnim(d.emoteId, d.fromPlayer); };
-    network.onRematchReady = function (d) { if (d.playerIndex !== myIndex) { setStatus('🔄 Opponent wants a rematch!', false); if (!rematchReady) { playAgainBtn.textContent = '🔄 Accept Rematch'; playAgainBtn.style.background = '#33ff66'; playAgainBtn.style.color = '#0a0a1a'; } } if (d.playersReady >= 2) setStatus('⚡ Rematch starting!', false); };
+    network.onRoomCreated=function(d){waitingOverlay.classList.add('show');waitRoomId.textContent='ID: '+d.roomId;setStatus(__('game_room_created'),false);};
+    network.onRoomJoined=function(d){setStatus(__('game_joined'),false);waitingOverlay.classList.remove('show');};
+    network.onPlayerAssigned=function(d){myIndex=d.playerIndex;isChallengeRoom=!!d.isChallenge;rematchReady=false;playAgainBtn.textContent='🔄 '+__('play_again');playAgainBtn.disabled=false;playAgainBtn.style.background='';playAgainBtn.style.color='';surrenderBtn.style.display='inline-block';surrenderBtn.disabled=false;recBtn.style.display='none';downloadVidBtn.style.display='none';playAgainBtn.style.display='none';var mc=d.color==='red'?0:1,oc=1-mc;updateNamesAndElo(d);myDot.className='dot '+DOT_CLASSES[mc];opDot.className='dot '+DOT_CLASSES[oc];var myAnimal=d.color==='red'?'Wolf':'Sheep',opAnimal=d.color==='red'?'Sheep':'Wolf';myDot.innerHTML='<img src="/imgs/'+myAnimal+'.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';opDot.innerHTML='<img src="/imgs/'+opAnimal+'.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';if(d.timeControl)tcBadge.textContent=d.timeControl;moveRecord=[];prevState=null;pendingState=null;};
+    network.onGameStarted=function(){if(myIndex===null)return;gameStarted=true;if(pendingState){prevState=pendingState;pendingState=null;}waitingOverlay.classList.remove('show');setStatus(__('game_started'),false);hoverWall=null;render();};
+    network.onGameState=function(newState){if(replayActive)return;if(!gameStarted){if(pendingState){var pm2=diffMove(pendingState,newState);if(pm2)moveRecord.push(pm2);}pendingState=Engine.deepClone(newState);state=newState;render();return;}if(!prevState){if(pendingState){prevState=pendingState;pendingState=null;}else{prevState=Engine.deepClone(newState);}state=newState;render();return;}var m2=diffMove(prevState,newState);if(m2)moveRecord.push(m2);state=newState;prevState=Engine.deepClone(newState);if(newState.gameOver&&newState.winner!==null&&newState.winner!==undefined)startWinAnimation();render();};
+    network.onGameOver=function(data){state.gameOver=true;state.winner=data.winner;state.winReason=data.winReason||'target';if(state.winner!==null&&state.winner!==undefined)startWinAnimation();render();setStatus('🏆 '+data.winnerName+' '+__('game_win_target')+' '+getReason(state.winReason),true);};
+    network.onError=function(msg){setStatus(__('game_error')+msg,false);};
+    network.onOpponentDisconnected=function(){setStatus(__('game_opponent_left'),true);state.gameOver=true;render();};
+    network.onEmote=function(d){if(!replayActive)moveRecord.push({type:'emote',emoteId:d.emoteId,fromPlayer:d.fromPlayer});playEmoteAnim(d.emoteId,d.fromPlayer);};
+    network.onRematchReady=function(d){if(d.playerIndex!==myIndex){setStatus('🔄 Opponent wants a rematch!',false);if(!rematchReady){playAgainBtn.textContent='🔄 Accept Rematch';playAgainBtn.style.background='#33ff66';playAgainBtn.style.color='#0a0a1a';}}if(d.playersReady>=2)setStatus('⚡ Rematch starting!',false);};
 
-    surrenderBtn.addEventListener('click', function () { if (gameStarted && !state.gameOver) network.surrender(); }); surrenderBtn.textContent = __('game_surrender');
-    resetBtn.textContent = __('game_leave'); resetBtn.addEventListener('click', function () { if (replayTimer) clearInterval(replayTimer); if (winAnimTimer) clearInterval(winAnimTimer); replayActive = false; window.location.href = '/'; });
-    playAgainBtn.textContent = '🔄 ' + __('play_again'); playAgainBtn.addEventListener('click', function () { if (isChallengeRoom && !rematchReady) { rematchReady = true; playAgainBtn.textContent = '⏳ Waiting for opponent…'; playAgainBtn.disabled = true; network.requestRematch(); } else { window.location.reload(); } });
-    recBtn.textContent = '▶️ Replay';
-    downloadVidBtn.textContent = '📥 Download Video';
-    var REPLAY_PHRASES = ["That's how I won","He didn't expect that","Too easy","Outplayed","Wall trap master","Sheep escaped!","No escape from the Wolf","Calculated moves","Unstoppable","Watch this comeback","EZ win","Best play of the day","You can't stop me","Next level strategy","That ending though!"];
+    surrenderBtn.addEventListener('click',function(){if(gameStarted&&!state.gameOver)network.surrender();});surrenderBtn.textContent=__('game_surrender');
+    resetBtn.textContent=__('game_leave');resetBtn.addEventListener('click',function(){if(replayTimer)clearInterval(replayTimer);if(winAnimTimer)clearInterval(winAnimTimer);replayActive=false;window.location.href='/';});
+    playAgainBtn.textContent='🔄 '+__('play_again');playAgainBtn.addEventListener('click',function(){if(isChallengeRoom&&!rematchReady){rematchReady=true;playAgainBtn.textContent='⏳ Waiting for opponent…';playAgainBtn.disabled=true;network.requestRematch();}else{window.location.reload();}});
+    recBtn.textContent='▶️ Replay';
+    downloadVidBtn.textContent='📥 Download Video';
+    var REPLAY_PHRASES=["That's how I won","He didn't expect that","Too easy","Outplayed","Wall trap master","Sheep escaped!","No escape from the Wolf","Calculated moves","Unstoppable","Watch this comeback","EZ win","Best play of the day","You can't stop me","Next level strategy","That ending though!"];
+    function computeReplayZooms(movesOnly){var N=movesOnly.length;if(N===0)return[];function bboxOf(moves){var rMin=9,rMax=-1,cMin=9,cMax=-1,hasWall=false;for(var j=0;j<moves.length;j++){var m=moves[j];if(m.type==='move'){rMin=Math.min(rMin,m.row);rMax=Math.max(rMax,m.row);cMin=Math.min(cMin,m.col);cMax=Math.max(cMax,m.col);}else if(m.type==='wall'){hasWall=true;rMin=Math.min(rMin,m.row,m.row+1);rMax=Math.max(rMax,m.row,m.row+1);cMin=Math.min(cMin,m.col,m.col+1);cMax=Math.max(cMax,m.col,m.col+1);}}var fits=(rMax-rMin<6&&cMax-cMin<6&&rMin<=rMax&&cMin<=cMax);return{fits:fits,hasWall:hasWall,rMin:rMin,rMax:rMax,cMin:cMin,cMax:cMax};}var plan=[],consecutiveInZone=0,lockedRow=null,lockedCol=null,zoomCooldown=0;for(var i=0;i<N;i++){var lookahead=movesOnly.slice(i,i+3),cur=bboxOf(lookahead);var nextLookahead=(i+1<N)?movesOnly.slice(i+1,i+4):[],nxt=nextLookahead.length>0?bboxOf(nextLookahead):{fits:false};var hasNext=(i+1<N),willExit=hasNext&&!nxt.fits;var entry={level:9,row:0,col:0};if(zoomCooldown>0)zoomCooldown--;if(i>=2&&zoomCooldown<=0&&cur.fits&&cur.hasWall&&!willExit&&lookahead.length>=3){if(consecutiveInZone===0){var bboxCenterR=(cur.rMin+cur.rMax)/2,bboxCenterC=(cur.cMin+cur.cMax)/2;lockedRow=Math.max(0,Math.min(1,Math.round(bboxCenterR-4)));lockedCol=Math.max(0,Math.min(1,Math.round(bboxCenterC-4)));}consecutiveInZone++;entry.level=8;entry.row=lockedRow;entry.col=lockedCol;}else{if(consecutiveInZone>0)zoomCooldown=2;consecutiveInZone=0;lockedRow=null;lockedCol=null;}plan.push(entry);}return plan;}
+    function getReplayDelay(moves,mi){var baseDelay;var isMoveSeries=false;if(mi<1){baseDelay=333;}else{var p=moves[mi].player,opp=1-p;var ourMoves=0,ourWalls=0;for(var k=mi;k>=0;k--){var mk=moves[k];if(mk.player!==p)break;if(mk.type==='move')ourMoves++;else if(mk.type==='wall')ourWalls++;}var ourMixed=(ourMoves>0&&ourWalls>0);var oppMoves=0,oppWalls=0;for(var j=mi-1;j>=0;j--){var mj=moves[j];if(mj.player!==opp)continue;for(var q=j;q>=0;q--){var mq=moves[q];if(mq.player!==opp)break;if(mq.type==='move')oppMoves++;else if(mq.type==='wall')oppWalls++;}break;}var oppMixed=(oppMoves>0&&oppWalls>0);if(!ourMixed&&!oppMixed&&ourMoves>=6&&oppMoves>=6){baseDelay=100;isMoveSeries=true;}else if(!ourMixed&&!oppMixed&&ourWalls>=2&&oppWalls>=2)baseDelay=467;else if(!ourMixed&&!oppMixed&&ourMoves>=2&&oppMoves>=2){baseDelay=200;isMoveSeries=true;}else baseDelay=500;}var mult;if(mi<6)mult=2.2;else if(isMoveSeries)mult=2.0;else mult=1.5;return Math.round(baseDelay/mult);}
 
-    function computeReplayZooms(movesOnly) { var N=movesOnly.length;if(N===0)return[];function bboxOf(moves){var rMin=9,rMax=-1,cMin=9,cMax=-1,hasWall=false;for(var j=0;j<moves.length;j++){var m=moves[j];if(m.type==='move'){rMin=Math.min(rMin,m.row);rMax=Math.max(rMax,m.row);cMin=Math.min(cMin,m.col);cMax=Math.max(cMax,m.col);}else if(m.type==='wall'){hasWall=true;rMin=Math.min(rMin,m.row,m.row+1);rMax=Math.max(rMax,m.row,m.row+1);cMin=Math.min(cMin,m.col,m.col+1);cMax=Math.max(cMax,m.col,m.col+1);}}var fits=(rMax-rMin<6&&cMax-cMin<6&&rMin<=rMax&&cMin<=cMax);return{fits:fits,hasWall:hasWall,rMin:rMin,rMax:rMax,cMin:cMin,cMax:cMax};}var plan=[],consecutiveInZone=0,lockedRow=null,lockedCol=null,zoomCooldown=0;for(var i=0;i<N;i++){var lookahead=movesOnly.slice(i,i+3),cur=bboxOf(lookahead);var nextLookahead=(i+1<N)?movesOnly.slice(i+1,i+4):[],nxt=nextLookahead.length>0?bboxOf(nextLookahead):{fits:false};var hasNext=(i+1<N),willExit=hasNext&&!nxt.fits;var entry={level:9,row:0,col:0};if(zoomCooldown>0)zoomCooldown--;if(i>=2&&zoomCooldown<=0&&cur.fits&&cur.hasWall&&!willExit&&lookahead.length>=3){if(consecutiveInZone===0){var bboxCenterR=(cur.rMin+cur.rMax)/2,bboxCenterC=(cur.cMin+cur.cMax)/2;lockedRow=Math.max(0,Math.min(1,Math.round(bboxCenterR-4)));lockedCol=Math.max(0,Math.min(1,Math.round(bboxCenterC-4)));}consecutiveInZone++;entry.level=8;entry.row=lockedRow;entry.col=lockedCol;}else{if(consecutiveInZone>0)zoomCooldown=2;consecutiveInZone=0;lockedRow=null;lockedCol=null;}plan.push(entry);}return plan;}
-
-    function getReplayDelay(moves, mi) {
-        var baseDelay; var isMoveSeries = false;
-        if (mi < 1) { baseDelay = 333; }
-        else { var p=moves[mi].player,opp=1-p; var ourMoves=0,ourWalls=0; for(var k=mi;k>=0;k--){var mk=moves[k];if(mk.player!==p)break;if(mk.type==='move')ourMoves++;else if(mk.type==='wall')ourWalls++;} var ourMixed=(ourMoves>0&&ourWalls>0); var oppMoves=0,oppWalls=0; for(var j=mi-1;j>=0;j--){var mj=moves[j];if(mj.player!==opp)continue;for(var q=j;q>=0;q--){var mq=moves[q];if(mq.player!==opp)break;if(mq.type==='move')oppMoves++;else if(mq.type==='wall')oppWalls++;}break;} var oppMixed=(oppMoves>0&&oppWalls>0); if(!ourMixed&&!oppMixed&&ourMoves>=6&&oppMoves>=6){baseDelay=100;isMoveSeries=true;} else if(!ourMixed&&!oppMixed&&ourWalls>=2&&oppWalls>=2)baseDelay=467; else if(!ourMixed&&!oppMixed&&ourMoves>=2&&oppMoves>=2){baseDelay=200;isMoveSeries=true;} else baseDelay=500; }
-        var mult; if (mi < 6) mult = 2.2; else if (isMoveSeries) mult = 2.0; else mult = 1.5;
-        return Math.round(baseDelay / mult);
-    }
-
-    // ---- FFmpeg конвертация WebM → MP4 (H.264) ----
-    var ffmpegLoaded = false, ffmpeg = null;
-    function initFFmpeg() {
-        if (ffmpegLoaded) return Promise.resolve(ffmpeg);
-        if (!window.FFmpeg) return Promise.reject(new Error('FFmpeg not available'));
-        ffmpeg = new FFmpeg(); ffmpegLoaded = true;
-        return ffmpeg.load({ coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/umd/ffmpeg-core.js' }).then(function () { setStatus('🔄 Converting to MP4...', false); return ffmpeg; });
-    }
-    function convertToMP4(webmBlob) {
-        initFFmpeg().then(function (ff) {
-            var reader = new FileReader();
-            reader.onload = function () {
-                var inputData = new Uint8Array(reader.result);
-                ff.writeFile('input.webm', inputData).then(function () {
-                    return ff.exec(['-i', 'input.webm', '-c:v', 'libx264', '-preset', 'fast', '-crf', '22', '-c:a', 'aac', '-b:a', '128k', '-movflags', '+faststart', '-pix_fmt', 'yuv420p', 'output.mp4']);
-                }).then(function () {
-                    return ff.readFile('output.mp4');
-                }).then(function (data) {
-                    var mp4Blob = new Blob([data.buffer], { type: 'video/mp4' });
-                    downloadBlob(mp4Blob, 'wolfsheep-replay.mp4');
-                    setStatus('📥 MP4 Video downloaded!', true);
-                }).catch(function (err) {
-                    console.error('FFmpeg conversion failed:', err);
-                    setStatus('⚠️ MP4 conversion failed, downloading WebM instead...', false);
-                    downloadBlob(webmBlob, 'wolfsheep-replay.webm');
-                });
-            };
-            reader.readAsArrayBuffer(webmBlob);
-        }).catch(function (err) {
-            console.error('FFmpeg init failed:', err);
-            setStatus('⚠️ FFmpeg not available, downloading WebM...', false);
-            downloadBlob(webmBlob, 'wolfsheep-replay.webm');
-        });
-    }
-    function downloadBlob(blob, filename) {
-        var url = URL.createObjectURL(blob), a = document.createElement('a'); a.href = url; a.download = filename;
-        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-        recBtn.style.display = 'inline-block'; playAgainBtn.style.display = 'inline-block';
-        resetBtn.style.display = 'inline-block'; downloadVidBtn.style.display = 'inline-block';
-    }
-
-    // ---- Download Video (→ WebM → FFmpeg → MP4) ----
-    downloadVidBtn.addEventListener('click', function () {
-        if (replayActive || moveRecord.length < 1 || state.winner === null) return;
+    // ---- Download WebM Video ----
+    downloadVidBtn.addEventListener('click',function(){
+        if(replayActive||moveRecord.length<1||state.winner===null)return;
         downloadVidBtn.style.display='none';recBtn.style.display='none';playAgainBtn.style.display='none';surrenderBtn.style.display='none';resetBtn.style.display='none';
-        var randomPhrase=REPLAY_PHRASES[Math.floor(Math.random()*REPLAY_PHRASES.length)]; ReplaySound.init();
+        var randomPhrase=REPLAY_PHRASES[Math.floor(Math.random()*REPLAY_PHRASES.length)];ReplaySound.init();
         var vertW=600,vertH=1067,vertCanvas=document.createElement('canvas');vertCanvas.width=vertW;vertCanvas.height=vertH;var vctx=vertCanvas.getContext('2d');
         function drawVertFrame(showCTA){vctx.fillStyle='#000000';vctx.fillRect(0,0,vertW,vertH);var boardY=Math.round((vertH-600)/2)+20;vctx.drawImage(canvas,0,boardY);var titleY=Math.round(vertH*0.18);vctx.fillStyle='#ffffff';vctx.font='bold 46px "Segoe UI", sans-serif';vctx.textAlign='center';vctx.textBaseline='middle';vctx.shadowColor='#c084fc';vctx.shadowBlur=30;vctx.fillText(randomPhrase,vertW/2,titleY);vctx.shadowBlur=0;if(showCTA){vctx.fillStyle='rgba(0,0,0,0.6)';vctx.fillRect(0,boardY+600,vertW,vertH-boardY-600);vctx.fillStyle='#ffffff';vctx.font='bold 28px "Segoe UI", sans-serif';vctx.textAlign='center';vctx.textBaseline='middle';vctx.shadowColor='#c084fc';vctx.shadowBlur=20;vctx.fillText('Play on wolfsheep.fun',vertW/2,boardY+620);vctx.shadowBlur=0;}}
         var canvasStream=vertCanvas.captureStream(60),audioStream=ReplaySound.getAudioStream(),combinedStream;
@@ -206,18 +114,18 @@
         var chunks=[],recorder,recOpts={mimeType:'video/webm;codecs=vp9,opus',videoBitsPerSecond:8000000};
         try{recorder=new MediaRecorder(combinedStream,recOpts);}catch(e){recorder=new MediaRecorder(combinedStream,{mimeType:'video/webm',videoBitsPerSecond:8000000});}
         recorder.ondataavailable=function(e){if(e.data.size>0)chunks.push(e.data);};
-        recorder.onstop=function(){var webmBlob=new Blob(chunks,{type:'video/webm'});convertToMP4(webmBlob);};
+        recorder.onstop=function(){var blob=new Blob(chunks,{type:'video/webm'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='wolfsheep-replay.webm';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);recBtn.style.display='inline-block';playAgainBtn.style.display='inline-block';resetBtn.style.display='inline-block';downloadVidBtn.style.display='inline-block';setStatus('📥 Video downloaded!',true);};
         recorder.start();setStatus('🎬 Recording replay...',false);
         var finalWinner=state.winner,finalReason=state.winReason||'target',movesOnly=[];
         for(var mi=0;mi<moveRecord.length;mi++){if(moveRecord[mi].type!=='emote')movesOnly.push(moveRecord[mi]);}
         var zoomPlan=computeReplayZooms(movesOnly);currentZoom=null;
         var replayState=Engine.initState(tc);replayState.gameOver=false;state=replayState;var idx=0,soundIdx=0;replayActive=true;render();drawVertFrame(false);
-        function playNextStepForRec(){if(idx>=moveRecord.length){replayActive=false;replayState.gameOver=true;replayState.winner=finalWinner;replayState.winReason=finalReason;state=replayState;render();drawVertFrame(true);setTimeout(function(){recorder.stop();},1200);return;}var move=moveRecord[idx];if(move.type==='emote'){playEmoteAnim(move.emoteId,move.fromPlayer);idx++;replayTimer=setTimeout(playNextStepForRec,500);return;}Engine.applyAction(replayState,move);var winPlayer=isWinningMove(move,replayState);if(winPlayer!==null){replayState.gameOver=true;replayState.winner=winPlayer;replayState.winReason='target';finalWinner=winPlayer;}else{Engine.endTurn(replayState);replayState.gameOver=false;}if(myIndex!==null){var snd=ReplaySound.getSoundForMove(move,soundIdx,movesOnly,myIndex,finalWinner);if(snd)ReplaySound.play(snd);}if(zoomPlan.length>soundIdx)currentZoom=zoomPlan[soundIdx];soundIdx++;state=replayState;setTimeout(function(){render();drawVertFrame(false);},120);idx++;var delay=getReplayDelay(movesOnly,soundIdx-1);replayTimer=setTimeout(playNextStepForRec,delay);}
+        function playNextStepForRec(){if(idx>=moveRecord.length){replayActive=false;replayState.gameOver=true;replayState.winner=finalWinner;replayState.winReason=finalReason;state=replayState;render();drawVertFrame(true);setTimeout(function(){recorder.stop();},1200);return;}var move=moveRecord[idx];if(move.type==='emote'){playEmoteAnim(move.emoteId,move.fromPlayer);idx++;replayTimer=setTimeout(playNextStepForRec,500);return;}Engine.applyAction(replayState,move);var winPlayer=isWinningMove(move,replayState);if(winPlayer!==null){replayState.gameOver=true;replayState.winner=winPlayer;replayState.winReason='target';finalWinner=winPlayer;}else{Engine.endTurn(replayState);replayState.gameOver=false;}if(myIndex!==null){var snd=ReplaySound.getSoundForMove(move,soundIdx,movesOnly,myIndex,finalWinner);if(snd)ReplaySound.play(snd);}if(zoomPlan.length>soundIdx)currentZoom=zoomPlan[soundIdx];soundIdx++;state=replayState;render();drawVertFrame(false);idx++;var delay=getReplayDelay(movesOnly,soundIdx-1);replayTimer=setTimeout(playNextStepForRec,delay);}
         replayTimer=setTimeout(playNextStepForRec,500);
     });
 
     // ---- Replay ----
-    recBtn.addEventListener('click', function () {
+    recBtn.addEventListener('click',function(){
         if(replayActive)return;if(moveRecord.length<1)return;replayActive=true;recBtn.style.display='none';playAgainBtn.style.display='none';surrenderBtn.style.display='none';resetBtn.style.display='none';
         ReplaySound.init();var finalWinner=state.winner,finalReason=state.winReason||'target',total=moveRecord.length,movesOnly=[];
         for(var mi=0;mi<moveRecord.length;mi++){if(moveRecord[mi].type!=='emote')movesOnly.push(moveRecord[mi]);}
