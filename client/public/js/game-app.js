@@ -29,6 +29,7 @@
     var DOT_CLASSES = ['p1', 'p2'];
     var emoteCooldown = 0;
     var wallMode = null;
+    var wallDrag = null; // {orient:'horizontal'|'vertical'} when dragging from wall button
 
     function isMobile() {
         var bar = document.getElementById('wall-mode-bar');
@@ -63,7 +64,7 @@
             var rt=getReason(state.winReason);
             if(state.winner!==null&&state.winner!==undefined){turnBadge.textContent='🏆 '+UI.COLOR_NAMES[state.winner]+' '+__('game_win_target');if(rt)turnBadge.textContent='🏆 '+UI.COLOR_NAMES[state.winner]+' '+__('game_win_target')+' '+rt;}
             else{turnBadge.textContent='🤝 '+__('game_draw')+(rt?' '+rt:'');}
-            surrenderBtn.style.display='none';recBtn.style.display='inline-block';downloadVidBtn.style.display='inline-block';playAgainBtn.style.display='inline-block';
+            if(!replayActive){surrenderBtn.style.display='none';recBtn.style.display='inline-block';downloadVidBtn.style.display='inline-block';playAgainBtn.style.display='inline-block';}
         }else{turnBadge.textContent='⬤ '+UI.COLOR_NAMES[state.turn]+'\'s turn';turnBadge.style.color=UI.COLORS[state.turn];turnBadge.style.textShadow='0 0 20px '+UI.COLORS[state.turn];}
         updateTimeDisplay();
     }
@@ -105,8 +106,9 @@
 
     // ---- Download WebM Video ----
     downloadVidBtn.addEventListener('click',function(){
-        if(replayActive||moveRecord.length<1||state.winner===null)return;
+        if(replayActive||!state.gameOver||state.winner===null)return;
         if(winAnimTimer){clearInterval(winAnimTimer);winAnimTimer=null;}
+        var savedState=state;
         downloadVidBtn.style.display='none';recBtn.style.display='none';playAgainBtn.style.display='none';surrenderBtn.style.display='none';resetBtn.style.display='none';
         var randomPhrase=REPLAY_PHRASES[Math.floor(Math.random()*REPLAY_PHRASES.length)];ReplaySound.init();
         var vertW=600,vertH=1067,vertCanvas=document.createElement('canvas');vertCanvas.width=vertW;vertCanvas.height=vertH;var vctx=vertCanvas.getContext('2d');
@@ -116,13 +118,13 @@
         var chunks=[],recorder,recOpts={mimeType:'video/webm;codecs=vp9,opus',videoBitsPerSecond:8000000};
         try{recorder=new MediaRecorder(combinedStream,recOpts);}catch(e){recorder=new MediaRecorder(combinedStream,{mimeType:'video/webm',videoBitsPerSecond:8000000});}
         recorder.ondataavailable=function(e){if(e.data.size>0)chunks.push(e.data);};
-        recorder.onstop=function(){var blob=new Blob(chunks,{type:'video/webm'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='wolfsheep-replay.webm';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);recBtn.style.display='inline-block';playAgainBtn.style.display='inline-block';resetBtn.style.display='inline-block';downloadVidBtn.style.display='inline-block';setStatus('📥 Video downloaded!',true);};
+        recorder.onstop=function(){replayActive=false;state=savedState;render();var blob=new Blob(chunks,{type:'video/webm'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='wolfsheep-replay.webm';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);recBtn.style.display='inline-block';playAgainBtn.style.display='inline-block';resetBtn.style.display='inline-block';downloadVidBtn.style.display='inline-block';setStatus('📥 Video downloaded!',true);};
         recorder.start();setStatus('🎬 Recording replay...',false);
         var finalWinner=state.winner,finalReason=state.winReason||'target',movesOnly=[];
         for(var mi=0;mi<moveRecord.length;mi++){if(moveRecord[mi].type!=='emote')movesOnly.push(moveRecord[mi]);}
         var zoomPlan=computeReplayZooms(movesOnly);currentZoom=null;
         var replayState=Engine.initState(tc);replayState.gameOver=false;state=replayState;var idx=0,soundIdx=0;replayActive=true;render();drawVertFrame(false);
-        function playNextStepForRec(){if(idx>=moveRecord.length){replayActive=false;replayState.gameOver=true;replayState.winner=finalWinner;replayState.winReason=finalReason;state=replayState;render();drawVertFrame(true);setTimeout(function(){recorder.stop();},1200);return;}var move=moveRecord[idx];if(move.type==='emote'){playEmoteAnim(move.emoteId,move.fromPlayer);idx++;replayTimer=setTimeout(playNextStepForRec,500);return;}Engine.applyAction(replayState,move);var winPlayer=isWinningMove(move,replayState);if(winPlayer!==null){replayState.gameOver=true;replayState.winner=winPlayer;replayState.winReason='target';finalWinner=winPlayer;}else{Engine.endTurn(replayState);replayState.gameOver=false;}if(myIndex!==null){var snd=ReplaySound.getSoundForMove(move,soundIdx,movesOnly,myIndex,finalWinner);if(snd)ReplaySound.play(snd);}if(zoomPlan.length>soundIdx)currentZoom=zoomPlan[soundIdx];soundIdx++;state=replayState;render();drawVertFrame(false);idx++;var delay=getReplayDelay(movesOnly,soundIdx-1);replayTimer=setTimeout(playNextStepForRec,delay);}
+        function playNextStepForRec(){if(idx>=moveRecord.length){replayState.gameOver=true;replayState.winner=finalWinner;replayState.winReason=finalReason;state=replayState;render();drawVertFrame(true);setTimeout(function(){recorder.stop();},1200);return;}var move=moveRecord[idx];if(move.type==='emote'){playEmoteAnim(move.emoteId,move.fromPlayer);idx++;replayTimer=setTimeout(playNextStepForRec,500);return;}Engine.applyAction(replayState,move);var winPlayer=isWinningMove(move,replayState);if(winPlayer!==null){replayState.gameOver=true;replayState.winner=winPlayer;replayState.winReason='target';finalWinner=winPlayer;}else{Engine.endTurn(replayState);replayState.gameOver=false;}if(myIndex!==null){var snd=ReplaySound.getSoundForMove(move,soundIdx,movesOnly,myIndex,finalWinner);if(snd)ReplaySound.play(snd);}if(zoomPlan.length>soundIdx)currentZoom=zoomPlan[soundIdx];soundIdx++;state=replayState;render();drawVertFrame(false);idx++;var delay=getReplayDelay(movesOnly,soundIdx-1);replayTimer=setTimeout(playNextStepForRec,delay);}
         replayTimer=setTimeout(playNextStepForRec,500);
     });
 
@@ -144,12 +146,21 @@
     function sendEmote(emoteId){if(!gameStarted||!state||state.gameOver)return;var now=Date.now();if(now<emoteCooldown)return;emoteCooldown=now+2000;toggleFlyout(false);network.sendEmote(emoteId);if(myIndex!==null)playEmoteAnim(emoteId,myIndex);emoteBtns.forEach(function(b){b.disabled=true;});emoteToggleBtn.disabled=true;setTimeout(function(){emoteBtns.forEach(function(b){b.disabled=false;});emoteToggleBtn.disabled=false;},2000);}
     emoteBtns.forEach(function(btn){btn.addEventListener('click',function(e){e.stopPropagation();var id=parseInt(btn.getAttribute('data-emote'));if(id)sendEmote(id);});});
     function handleCanvasClick(e){if(replayActive||!gameStarted||state.gameOver||myIndex!==state.turn)return;var pos=UI.getBoardPos(canvas,e.clientX,e.clientY,myIndex!=null?myIndex:0);if(!pos)return;if(wallMode){var wh=UI.findWallHit(canvas,pos.x,pos.y,state);if(wh){network.sendMove({type:'wall',row:wh.row,col:wh.col,orient:wallMode});setWallMode(null);}return;}if(!isMobile()){var wh=UI.findWallHit(canvas,pos.x,pos.y,state);if(wh){network.sendMove({type:'wall',row:wh.row,col:wh.col,orient:wh.orient});return;}}var cell=UI.findCellHit(canvas,pos.x,pos.y);if(cell){network.sendMove({type:'move',row:cell.row,col:cell.col});return;}}
-    function handleMouseMove(e){if(!gameStarted){hoverWall=null;render();return;}var pos=UI.getBoardPos(canvas,e.clientX,e.clientY,myIndex!=null?myIndex:0);if(!pos){hoverWall=null;render();return;}if(!state.gameOver&&state.turn===myIndex){var wh=UI.findWallHit(canvas,pos.x,pos.y,state);if(wallMode&&wh&&wh.orient!==wallMode){hoverWall=null;}else{hoverWall=wh||null;}}else{hoverWall=null;}render();}
+    function updateHoverWallFromPos(pos){if(!pos||!state||state.gameOver||state.turn!==myIndex){hoverWall=null;return;}var wh=UI.findWallHit(canvas,pos.x,pos.y,state);if(wallMode&&wh&&wh.orient!==wallMode){hoverWall=null;}else if(wallDrag&&wh&&wh.orient!==wallDrag.orient){hoverWall=null;}else{hoverWall=wh||null;}}
+    function handleMouseMove(e){if(!gameStarted){hoverWall=null;render();return;}var pos=UI.getBoardPos(canvas,e.clientX,e.clientY,myIndex!=null?myIndex:0);updateHoverWallFromPos(pos);render();}
+    // Drag-to-place для мобильных: зажать кнопку стены → тянуть на доску → отпустить
+    function handleTouchStartWall(orient,e){e.preventDefault();e.stopPropagation();if(!gameStarted||state.gameOver||myIndex!==state.turn)return;if(state.players[state.turn].walls<=0)return;wallDrag={orient:orient};wallMode=orient;setWallBtnActive();}
+    function handleTouchMoveWall(e){if(!wallDrag)return;var t=e.touches[0];if(!t)return;var pos=UI.getBoardPos(canvas,t.clientX,t.clientY,myIndex!=null?myIndex:0);updateHoverWallFromPos(pos);render();}
+    function handleTouchEndWall(e){if(!wallDrag)return;e.preventDefault();var orient=wallDrag.orient;wallDrag=null;wallMode=null;setWallBtnActive();var pos=null;if(e.changedTouches&&e.changedTouches[0]){var t=e.changedTouches[0];pos=UI.getBoardPos(canvas,t.clientX,t.clientY,myIndex!=null?myIndex:0);}if(pos){var wh=UI.findWallHit(canvas,pos.x,pos.y,state);if(wh&&wh.orient===orient){network.sendMove({type:'wall',row:wh.row,col:wh.col,orient:orient});}}hoverWall=null;render();}
     var wallBtnH=document.getElementById('wall-btn-h'),wallBtnV=document.getElementById('wall-btn-v'),wallBtnClear=document.getElementById('wall-btn-clear');
-    function setWallMode(mode){wallMode=mode;if(wallBtnH)wallBtnH.classList.toggle('active',mode==='horizontal');if(wallBtnV)wallBtnV.classList.toggle('active',mode==='vertical');hoverWall=null;render();}
-    if(wallBtnH)wallBtnH.addEventListener('click',function(e){e.stopPropagation();if(!gameStarted||state.gameOver||myIndex!==state.turn)return;if(state.players[state.turn].walls<=0)return;setWallMode(wallMode==='horizontal'?null:'horizontal');});
-    if(wallBtnV)wallBtnV.addEventListener('click',function(e){e.stopPropagation();if(!gameStarted||state.gameOver||myIndex!==state.turn)return;if(state.players[state.turn].walls<=0)return;setWallMode(wallMode==='vertical'?null:'vertical');});
+    function setWallBtnActive(){if(wallBtnH)wallBtnH.classList.toggle('active',wallMode==='horizontal');if(wallBtnV)wallBtnV.classList.toggle('active',wallMode==='vertical');}
+    function setWallMode(mode){wallMode=mode;wallDrag=null;setWallBtnActive();hoverWall=null;render();}
+    if(wallBtnH){wallBtnH.addEventListener('click',function(e){e.stopPropagation();if(!gameStarted||state.gameOver||myIndex!==state.turn)return;if(state.players[state.turn].walls<=0)return;setWallMode(wallMode==='horizontal'?null:'horizontal');});wallBtnH.addEventListener('touchstart',function(e){handleTouchStartWall('horizontal',e);},{passive:false});}
+    if(wallBtnV){wallBtnV.addEventListener('click',function(e){e.stopPropagation();if(!gameStarted||state.gameOver||myIndex!==state.turn)return;if(state.players[state.turn].walls<=0)return;setWallMode(wallMode==='vertical'?null:'vertical');});wallBtnV.addEventListener('touchstart',function(e){handleTouchStartWall('vertical',e);},{passive:false});}
     if(wallBtnClear)wallBtnClear.addEventListener('click',function(e){e.stopPropagation();setWallMode(null);});
+    canvas.addEventListener('touchmove',function(e){if(wallDrag){e.preventDefault();handleTouchMoveWall(e);}},{passive:false});
+    canvas.addEventListener('touchend',function(e){handleTouchEndWall(e);});
+    canvas.addEventListener('touchcancel',function(e){if(wallDrag){wallDrag=null;wallMode=null;setWallBtnActive();hoverWall=null;render();}});
     function updateNamesAndElo(d){var mc=d.color==='red'?0:1,oc=1-mc;if(d.playerName){myName.innerHTML=d.playerId?'<a href="/player.html?id='+d.playerId+'" target="_blank" style="color:#c084fc;text-decoration:none;cursor:pointer;">'+d.playerName+'</a>':d.playerName;}else{myName.textContent=UI.COLOR_NAMES[mc];}if(d.opponentName){opName.innerHTML=d.opponentId?'<a href="/player.html?id='+d.opponentId+'" target="_blank" style="color:#c084fc;text-decoration:none;cursor:pointer;">'+d.opponentName+'</a>':d.opponentName;}else{opName.textContent=UI.COLOR_NAMES[oc];}if(d.playerElo!==undefined)myElo.textContent='🏆 '+d.playerElo;else myElo.textContent='';if(d.opponentElo!==undefined)opElo.textContent='🏆 '+d.opponentElo;else opElo.textContent='';if(d.playerId){myDot.style.cursor='pointer';myDot.title='View profile';myDot.onclick=function(e){e.stopPropagation();window.open('/player.html?id='+d.playerId,'_blank');};}if(d.opponentId){opDot.style.cursor='pointer';opDot.title='View profile';opDot.onclick=function(e){e.stopPropagation();window.open('/player.html?id='+d.opponentId,'_blank');};}}
     window.addEventListener('beforeunload',function(){if(gameStarted&&!state.gameOver)network.disconnect();});
     canvas.addEventListener('click',handleCanvasClick);canvas.addEventListener('mousemove',handleMouseMove);canvas.addEventListener('mouseleave',function(){hoverWall=null;render();});
