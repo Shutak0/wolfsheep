@@ -55,7 +55,6 @@
     tcBadge.textContent = tcName;
 
     function formatTime(ms) { if (ms < 0) ms = 0; var s = Math.ceil(ms / 1000); return Math.floor(s/60)+':'+(s%60).toString().padStart(2,'0'); }
-
     function updateTimeDisplay() {
         if (!state || myIndex === null) return;
         var mt = state.players[myIndex].timeLeft, ot = state.players[1 - myIndex].timeLeft;
@@ -66,7 +65,6 @@
         myTimeEl.style.borderColor = state.turn === myIndex ? (mt<=10000?'#ff3366':mt<=20000?'#ffaa00':'#c084fc') : '#2a1a5a';
         opTimeEl.style.borderColor = state.turn === (1-myIndex) ? (ot<=10000?'#ff3366':ot<=20000?'#ffaa00':'#c084fc') : '#2a1a5a';
     }
-
     function updateUI() {
         if (!state || myIndex === null) return;
         if (myIndex === 0) { myWalls.textContent = state.players[0].walls; opWalls.textContent = state.players[1].walls; }
@@ -78,9 +76,7 @@
             if (state.winner !== null && state.winner !== undefined) {
                 turnBadge.textContent = '🏆 ' + UI.COLOR_NAMES[state.winner] + ' ' + __('game_win_target');
                 if (rt) turnBadge.textContent = '🏆 ' + UI.COLOR_NAMES[state.winner] + ' ' + __('game_win_target') + ' ' + rt;
-            } else {
-                turnBadge.textContent = '🤝 ' + __('game_draw') + (rt ? ' ' + rt : '');
-            }
+            } else { turnBadge.textContent = '🤝 ' + __('game_draw') + (rt ? ' ' + rt : ''); }
             surrenderBtn.style.display = 'none';
             recBtn.style.display = 'inline-block';
             downloadVidBtn.style.display = 'inline-block';
@@ -91,23 +87,17 @@
         }
         updateTimeDisplay();
     }
-
     function diffMove(oldS, newS) {
         if (!oldS || !newS) return null;
         var ow = (oldS.walls && Array.isArray(oldS.walls)) ? oldS.walls.length : 0;
         var nw = (newS.walls && Array.isArray(newS.walls)) ? newS.walls.length : 0;
-        if (nw > ow) {
-            var w = newS.walls[nw - 1];
-            return { type: 'wall', player: oldS.turn, row: w.row, col: w.col, orient: w.orient };
-        }
+        if (nw > ow) { var w = newS.walls[nw - 1]; return { type: 'wall', player: oldS.turn, row: w.row, col: w.col, orient: w.orient }; }
         for (var p = 0; p < 2; p++) {
-            if (oldS.players[p].row !== newS.players[p].row || oldS.players[p].col !== newS.players[p].col) {
+            if (oldS.players[p].row !== newS.players[p].row || oldS.players[p].col !== newS.players[p].col)
                 return { type: 'move', player: oldS.turn, row: newS.players[p].row, col: newS.players[p].col };
-            }
         }
         return null;
     }
-
     function getReason(r) {
         switch(r){
             case 'timeout': return __('game_win_timeout');
@@ -117,7 +107,6 @@
             default: return '';
         }
     }
-
     var currentZoom = null;
     function render() {
         var opt = { playerIndex: myIndex != null ? myIndex : 0, replayMode: replayActive };
@@ -152,7 +141,6 @@
     playAgainBtn.textContent = '🔄 ' + __('play_again'); playAgainBtn.addEventListener('click', function () { if (isChallengeRoom && !rematchReady) { rematchReady = true; playAgainBtn.textContent = '⏳ Waiting for opponent…'; playAgainBtn.disabled = true; network.requestRematch(); } else { window.location.reload(); } });
     recBtn.textContent = '▶️ Replay';
     downloadVidBtn.textContent = '📥 Download Video';
-
     var REPLAY_PHRASES = ["That's how I won","He didn't expect that","Too easy","Outplayed","Wall trap master","Sheep escaped!","No escape from the Wolf","Calculated moves","Unstoppable","Watch this comeback","EZ win","Best play of the day","You can't stop me","Next level strategy","That ending though!"];
 
     function computeReplayZooms(movesOnly) { var N=movesOnly.length;if(N===0)return[];function bboxOf(moves){var rMin=9,rMax=-1,cMin=9,cMax=-1,hasWall=false;for(var j=0;j<moves.length;j++){var m=moves[j];if(m.type==='move'){rMin=Math.min(rMin,m.row);rMax=Math.max(rMax,m.row);cMin=Math.min(cMin,m.col);cMax=Math.max(cMax,m.col);}else if(m.type==='wall'){hasWall=true;rMin=Math.min(rMin,m.row,m.row+1);rMax=Math.max(rMax,m.row,m.row+1);cMin=Math.min(cMin,m.col,m.col+1);cMax=Math.max(cMax,m.col,m.col+1);}}var fits=(rMax-rMin<6&&cMax-cMin<6&&rMin<=rMax&&cMin<=cMax);return{fits:fits,hasWall:hasWall,rMin:rMin,rMax:rMax,cMin:cMin,cMax:cMax};}var plan=[],consecutiveInZone=0,lockedRow=null,lockedCol=null,zoomCooldown=0;for(var i=0;i<N;i++){var lookahead=movesOnly.slice(i,i+3),cur=bboxOf(lookahead);var nextLookahead=(i+1<N)?movesOnly.slice(i+1,i+4):[],nxt=nextLookahead.length>0?bboxOf(nextLookahead):{fits:false};var hasNext=(i+1<N),willExit=hasNext&&!nxt.fits;var entry={level:9,row:0,col:0};if(zoomCooldown>0)zoomCooldown--;if(i>=2&&zoomCooldown<=0&&cur.fits&&cur.hasWall&&!willExit&&lookahead.length>=3){if(consecutiveInZone===0){var bboxCenterR=(cur.rMin+cur.rMax)/2,bboxCenterC=(cur.cMin+cur.cMax)/2;lockedRow=Math.max(0,Math.min(1,Math.round(bboxCenterR-4)));lockedCol=Math.max(0,Math.min(1,Math.round(bboxCenterC-4)));}consecutiveInZone++;entry.level=8;entry.row=lockedRow;entry.col=lockedCol;}else{if(consecutiveInZone>0)zoomCooldown=2;consecutiveInZone=0;lockedRow=null;lockedCol=null;}plan.push(entry);}return plan;}
@@ -165,12 +153,52 @@
         return Math.round(baseDelay / mult);
     }
 
-    // ---- Download Video (.mp4 для YouTube Shorts) ----
+    // ---- FFmpeg конвертация WebM → MP4 (H.264) ----
+    var ffmpegLoaded = false, ffmpeg = null;
+    function initFFmpeg() {
+        if (ffmpegLoaded) return Promise.resolve(ffmpeg);
+        if (!window.FFmpeg) return Promise.reject(new Error('FFmpeg not available'));
+        ffmpeg = new FFmpeg(); ffmpegLoaded = true;
+        return ffmpeg.load({ coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/umd/ffmpeg-core.js' }).then(function () { setStatus('🔄 Converting to MP4...', false); return ffmpeg; });
+    }
+    function convertToMP4(webmBlob) {
+        initFFmpeg().then(function (ff) {
+            var reader = new FileReader();
+            reader.onload = function () {
+                var inputData = new Uint8Array(reader.result);
+                ff.writeFile('input.webm', inputData).then(function () {
+                    return ff.exec(['-i', 'input.webm', '-c:v', 'libx264', '-preset', 'fast', '-crf', '22', '-c:a', 'aac', '-b:a', '128k', '-movflags', '+faststart', '-pix_fmt', 'yuv420p', 'output.mp4']);
+                }).then(function () {
+                    return ff.readFile('output.mp4');
+                }).then(function (data) {
+                    var mp4Blob = new Blob([data.buffer], { type: 'video/mp4' });
+                    downloadBlob(mp4Blob, 'wolfsheep-replay.mp4');
+                    setStatus('📥 MP4 Video downloaded!', true);
+                }).catch(function (err) {
+                    console.error('FFmpeg conversion failed:', err);
+                    setStatus('⚠️ MP4 conversion failed, downloading WebM instead...', false);
+                    downloadBlob(webmBlob, 'wolfsheep-replay.webm');
+                });
+            };
+            reader.readAsArrayBuffer(webmBlob);
+        }).catch(function (err) {
+            console.error('FFmpeg init failed:', err);
+            setStatus('⚠️ FFmpeg not available, downloading WebM...', false);
+            downloadBlob(webmBlob, 'wolfsheep-replay.webm');
+        });
+    }
+    function downloadBlob(blob, filename) {
+        var url = URL.createObjectURL(blob), a = document.createElement('a'); a.href = url; a.download = filename;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+        recBtn.style.display = 'inline-block'; playAgainBtn.style.display = 'inline-block';
+        resetBtn.style.display = 'inline-block'; downloadVidBtn.style.display = 'inline-block';
+    }
+
+    // ---- Download Video (→ WebM → FFmpeg → MP4) ----
     downloadVidBtn.addEventListener('click', function () {
         if (replayActive || moveRecord.length < 1 || state.winner === null) return;
         downloadVidBtn.style.display='none';recBtn.style.display='none';playAgainBtn.style.display='none';surrenderBtn.style.display='none';resetBtn.style.display='none';
-        var randomPhrase=REPLAY_PHRASES[Math.floor(Math.random()*REPLAY_PHRASES.length)];
-        ReplaySound.init();
+        var randomPhrase=REPLAY_PHRASES[Math.floor(Math.random()*REPLAY_PHRASES.length)]; ReplaySound.init();
         var vertW=600,vertH=1067,vertCanvas=document.createElement('canvas');vertCanvas.width=vertW;vertCanvas.height=vertH;var vctx=vertCanvas.getContext('2d');
         function drawVertFrame(showCTA){vctx.fillStyle='#000000';vctx.fillRect(0,0,vertW,vertH);var boardY=Math.round((vertH-600)/2)+20;vctx.drawImage(canvas,0,boardY);var titleY=Math.round(vertH*0.18);vctx.fillStyle='#ffffff';vctx.font='bold 46px "Segoe UI", sans-serif';vctx.textAlign='center';vctx.textBaseline='middle';vctx.shadowColor='#c084fc';vctx.shadowBlur=30;vctx.fillText(randomPhrase,vertW/2,titleY);vctx.shadowBlur=0;if(showCTA){vctx.fillStyle='rgba(0,0,0,0.6)';vctx.fillRect(0,boardY+600,vertW,vertH-boardY-600);vctx.fillStyle='#ffffff';vctx.font='bold 28px "Segoe UI", sans-serif';vctx.textAlign='center';vctx.textBaseline='middle';vctx.shadowColor='#c084fc';vctx.shadowBlur=20;vctx.fillText('Play on wolfsheep.fun',vertW/2,boardY+620);vctx.shadowBlur=0;}}
         var canvasStream=vertCanvas.captureStream(60),audioStream=ReplaySound.getAudioStream(),combinedStream;
@@ -178,7 +206,7 @@
         var chunks=[],recorder,recOpts={mimeType:'video/webm;codecs=vp9,opus',videoBitsPerSecond:8000000};
         try{recorder=new MediaRecorder(combinedStream,recOpts);}catch(e){recorder=new MediaRecorder(combinedStream,{mimeType:'video/webm',videoBitsPerSecond:8000000});}
         recorder.ondataavailable=function(e){if(e.data.size>0)chunks.push(e.data);};
-        recorder.onstop=function(){var blob=new Blob(chunks,{type:'video/mp4'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='wolfsheep-replay.mp4';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);recBtn.style.display='inline-block';playAgainBtn.style.display='inline-block';resetBtn.style.display='inline-block';downloadVidBtn.style.display='inline-block';setStatus('📥 Video downloaded!',true);};
+        recorder.onstop=function(){var webmBlob=new Blob(chunks,{type:'video/webm'});convertToMP4(webmBlob);};
         recorder.start();setStatus('🎬 Recording replay...',false);
         var finalWinner=state.winner,finalReason=state.winReason||'target',movesOnly=[];
         for(var mi=0;mi<moveRecord.length;mi++){if(moveRecord[mi].type!=='emote')movesOnly.push(moveRecord[mi]);}
@@ -199,25 +227,20 @@
     });
 
     document.querySelector('.wait-text').textContent = __('game_searching');
-
     var emoteWrapper=document.getElementById('emote-toggle-wrapper'),emoteToggleBtn=document.getElementById('emote-toggle-btn'),emoteFlyout=document.getElementById('emote-flyout'),emoteBackdrop=document.getElementById('emote-backdrop'),boardWrapper=document.getElementById('board-wrapper'),emoteBtns=emoteFlyout.querySelectorAll('.emote-btn'),flyoutOpen=false;
     function toggleFlyout(show){flyoutOpen=typeof show==='boolean'?show:!flyoutOpen;if(flyoutOpen){emoteFlyout.classList.add('open');emoteToggleBtn.classList.add('active');emoteBackdrop.classList.add('show');}else{emoteFlyout.classList.remove('open');emoteToggleBtn.classList.remove('active');emoteBackdrop.classList.remove('show');}}
     emoteToggleBtn.addEventListener('click',function(e){e.stopPropagation();toggleFlyout();});emoteBackdrop.addEventListener('click',function(e){toggleFlyout(false);});document.addEventListener('click',function(e){if(flyoutOpen&&!emoteWrapper.contains(e.target))toggleFlyout(false);});
     function playEmoteAnim(emoteId,fromPlayer){if(!state||myIndex===null)return;var pp=state.players[fromPlayer];if(!pp)return;var pieceX=UI.cellCenterX(pp.col),pieceY=UI.cellCenterY(pp.row);var canvasRect=canvas.getBoundingClientRect(),wrapperRect=boardWrapper.getBoundingClientRect();var scaleX=canvasRect.width/canvas.width,scaleY=canvasRect.height/canvas.height;var sx=pieceX,sy=pieceY;if(myIndex===1){sx=canvas.width-pieceX;sy=canvas.height-pieceY;}var relX=(canvasRect.left-wrapperRect.left)+sx*scaleX,relY=(canvasRect.top-wrapperRect.top)+sy*scaleY;var offsetX=-38*scaleX,offsetY=-38*scaleY;var emoteEl=document.createElement('img');emoteEl.src='/emotes/emote-'+emoteId+'.webp';emoteEl.className='emote-anim';emoteEl.style.left=(relX+offsetX)+'px';emoteEl.style.top=(relY+offsetY)+'px';boardWrapper.appendChild(emoteEl);emoteEl.addEventListener('animationend',function(){if(emoteEl.parentNode)emoteEl.parentNode.removeChild(emoteEl);});}
     function sendEmote(emoteId){if(!gameStarted||!state||state.gameOver)return;var now=Date.now();if(now<emoteCooldown)return;emoteCooldown=now+2000;toggleFlyout(false);network.sendEmote(emoteId);if(myIndex!==null)playEmoteAnim(emoteId,myIndex);emoteBtns.forEach(function(b){b.disabled=true;});emoteToggleBtn.disabled=true;setTimeout(function(){emoteBtns.forEach(function(b){b.disabled=false;});emoteToggleBtn.disabled=false;},2000);}
     emoteBtns.forEach(function(btn){btn.addEventListener('click',function(e){e.stopPropagation();var id=parseInt(btn.getAttribute('data-emote'));if(id)sendEmote(id);});});
-
     function handleCanvasClick(e){if(replayActive||!gameStarted||state.gameOver||myIndex!==state.turn)return;var pos=UI.getBoardPos(canvas,e.clientX,e.clientY,myIndex!=null?myIndex:0);if(!pos)return;if(wallMode){var wh=UI.findWallHit(canvas,pos.x,pos.y,state);if(wh){network.sendMove({type:'wall',row:wh.row,col:wh.col,orient:wallMode});setWallMode(null);}return;}if(!isMobile()){var wh=UI.findWallHit(canvas,pos.x,pos.y,state);if(wh){network.sendMove({type:'wall',row:wh.row,col:wh.col,orient:wh.orient});return;}}var cell=UI.findCellHit(canvas,pos.x,pos.y);if(cell){network.sendMove({type:'move',row:cell.row,col:cell.col});return;}}
     function handleMouseMove(e){if(!gameStarted){hoverWall=null;render();return;}var pos=UI.getBoardPos(canvas,e.clientX,e.clientY,myIndex!=null?myIndex:0);if(!pos){hoverWall=null;render();return;}if(!state.gameOver&&state.turn===myIndex){var wh=UI.findWallHit(canvas,pos.x,pos.y,state);if(wallMode&&wh&&wh.orient!==wallMode){hoverWall=null;}else{hoverWall=wh||null;}}else{hoverWall=null;}render();}
-
     var wallBtnH=document.getElementById('wall-btn-h'),wallBtnV=document.getElementById('wall-btn-v'),wallBtnClear=document.getElementById('wall-btn-clear');
     function setWallMode(mode){wallMode=mode;if(wallBtnH)wallBtnH.classList.toggle('active',mode==='horizontal');if(wallBtnV)wallBtnV.classList.toggle('active',mode==='vertical');hoverWall=null;render();}
     if(wallBtnH)wallBtnH.addEventListener('click',function(e){e.stopPropagation();if(!gameStarted||state.gameOver||myIndex!==state.turn)return;if(state.players[state.turn].walls<=0)return;setWallMode(wallMode==='horizontal'?null:'horizontal');});
     if(wallBtnV)wallBtnV.addEventListener('click',function(e){e.stopPropagation();if(!gameStarted||state.gameOver||myIndex!==state.turn)return;if(state.players[state.turn].walls<=0)return;setWallMode(wallMode==='vertical'?null:'vertical');});
     if(wallBtnClear)wallBtnClear.addEventListener('click',function(e){e.stopPropagation();setWallMode(null);});
-
     function updateNamesAndElo(d){var mc=d.color==='red'?0:1,oc=1-mc;if(d.playerName){myName.innerHTML=d.playerId?'<a href="/player.html?id='+d.playerId+'" target="_blank" style="color:#c084fc;text-decoration:none;cursor:pointer;">'+d.playerName+'</a>':d.playerName;}else{myName.textContent=UI.COLOR_NAMES[mc];}if(d.opponentName){opName.innerHTML=d.opponentId?'<a href="/player.html?id='+d.opponentId+'" target="_blank" style="color:#c084fc;text-decoration:none;cursor:pointer;">'+d.opponentName+'</a>':d.opponentName;}else{opName.textContent=UI.COLOR_NAMES[oc];}if(d.playerElo!==undefined)myElo.textContent='🏆 '+d.playerElo;else myElo.textContent='';if(d.opponentElo!==undefined)opElo.textContent='🏆 '+d.opponentElo;else opElo.textContent='';if(d.playerId){myDot.style.cursor='pointer';myDot.title='View profile';myDot.onclick=function(e){e.stopPropagation();window.open('/player.html?id='+d.playerId,'_blank');};}if(d.opponentId){opDot.style.cursor='pointer';opDot.title='View profile';opDot.onclick=function(e){e.stopPropagation();window.open('/player.html?id='+d.opponentId,'_blank');};}}
-
     window.addEventListener('beforeunload',function(){if(gameStarted&&!state.gameOver)network.disconnect();});
     canvas.addEventListener('click',handleCanvasClick);canvas.addEventListener('mousemove',handleMouseMove);canvas.addEventListener('mouseleave',function(){hoverWall=null;render();});
     network.connect();
