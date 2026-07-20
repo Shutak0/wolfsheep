@@ -237,20 +237,32 @@
         return plan;
     }
 
-    // Универсальная задержка
+    // Универсальная задержка (с ускорениями)
     function getReplayDelay(moves, mi) {
-        if (mi < 1) return 333; // 500/1.5
-        var p = moves[mi].player, opp = 1 - p;
-        var ourMoves = 0, ourWalls = 0;
-        for (var k = mi; k >= 0; k--) { var mk = moves[k]; if (mk.player !== p) break; if (mk.type === 'move') ourMoves++; else if (mk.type === 'wall') ourWalls++; }
-        var ourMixed = (ourMoves > 0 && ourWalls > 0);
-        var oppMoves = 0, oppWalls = 0;
-        for (var j = mi - 1; j >= 0; j--) { var mj = moves[j]; if (mj.player !== opp) continue; for (var q = j; q >= 0; q--) { var mq = moves[q]; if (mq.player !== opp) break; if (mq.type === 'move') oppMoves++; else if (mq.type === 'wall') oppWalls++; } break; }
-        var oppMixed = (oppMoves > 0 && oppWalls > 0);
-        if (!ourMixed && !oppMixed && ourMoves >= 6 && oppMoves >= 6) return 100;
-        if (!ourMixed && !oppMixed && ourWalls >= 2 && oppWalls >= 2) return 467;
-        if (!ourMixed && !oppMixed && ourMoves >= 2 && oppMoves >= 2) return 200;
-        return 500;
+        var baseDelay;
+        var isMoveSeries = false;
+        if (mi < 1) { baseDelay = 333; }
+        else {
+            var p = moves[mi].player, opp = 1 - p;
+            var ourMoves = 0, ourWalls = 0;
+            for (var k = mi; k >= 0; k--) { var mk = moves[k]; if (mk.player !== p) break; if (mk.type === 'move') ourMoves++; else if (mk.type === 'wall') ourWalls++; }
+            var ourMixed = (ourMoves > 0 && ourWalls > 0);
+            var oppMoves = 0, oppWalls = 0;
+            for (var j = mi - 1; j >= 0; j--) { var mj = moves[j]; if (mj.player !== opp) continue; for (var q = j; q >= 0; q--) { var mq = moves[q]; if (mq.player !== opp) break; if (mq.type === 'move') oppMoves++; else if (mq.type === 'wall') oppWalls++; } break; }
+            var oppMixed = (oppMoves > 0 && oppWalls > 0);
+            if (!ourMixed && !oppMixed && ourMoves >= 6 && oppMoves >= 6) { baseDelay = 100; isMoveSeries = true; }
+            else if (!ourMixed && !oppMixed && ourWalls >= 2 && oppWalls >= 2) baseDelay = 467;
+            else if (!ourMixed && !oppMixed && ourMoves >= 2 && oppMoves >= 2) { baseDelay = 200; isMoveSeries = true; }
+            else baseDelay = 500;
+        }
+
+        // Применяем множитель ускорения
+        var mult;
+        if (mi < 8) mult = 2.0;
+        else if (isMoveSeries) mult = 2.0;
+        else mult = 1.7;
+
+        return Math.round(baseDelay / mult);
     }
 
     // ---- Download Video ----
