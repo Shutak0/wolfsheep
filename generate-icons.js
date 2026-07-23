@@ -1,5 +1,5 @@
 // Генератор PWA-иконок на чистом Node.js (zlib + buffer)
-// Создаёт icon-192.png и icon-512.png в стиле WolfSheep
+// Создаёт logo-192.png и logo-512.png в стиле WolfSheep
 const zlib = require('zlib');
 const fs = require('fs');
 const path = require('path');
@@ -137,7 +137,7 @@ if (!fs.existsSync(outDir)) {
 
 sizes.forEach(size => {
   const png = createPNG(size, size, wolfSheepPixel);
-  const filePath = path.join(outDir, `icon-${size}.png`);
+  const filePath = path.join(outDir, `logo-${size}.png`);
   fs.writeFileSync(filePath, png);
   console.log(`Created ${filePath} (${png.length} bytes)`);
 });

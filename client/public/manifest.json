@@ -5,10 +5,10 @@
   "start_url": "/?utm_source=pwa",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui", "window-controls-overlay"],
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "any",
   "background_color": "#0a0a0f",
-  "theme_color": "#1a1a2e",
+  "theme_color": "#0d0d1a",
   "lang": "en",
   "categories": ["games", "strategy", "multiplayer"],
   "iarc_rating_id": "e58c82f8-8ed2-4053-8ef6-7a3d7b60d09a",
@@ -49,8 +49,14 @@
       "purpose": "any maskable"
     }
   ],
-  "prefer_related_applications": false,
-  "related_applications": [],
+  "prefer_related_applications": true,
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=fun.wolfsheep.app",
+      "id": "fun.wolfsheep.app"
+    }
+  ],
   "shortcuts": [
     {
       "name": "Play Game",

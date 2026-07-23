@@ -244,12 +244,15 @@
         if (pi === 1) { x = canvas.width - x; y = canvas.height - y; }
         return { x: x, y: y };
     }
-    function findWallHit(canvas, x, y, state) {
+    function findWallHit(canvas, x, y, state, wallOrientation) {
+        // When wall mode is active, expand hitboxes to half of adjacent cells
+        var hHitY = wallOrientation === 'horizontal' ? HIT_THRESHOLD + CELL_SIZE * 0.4 : HIT_THRESHOLD;
+        var vHitX = wallOrientation === 'vertical' ? HIT_THRESHOLD + CELL_SIZE * 0.4 : HIT_THRESHOLD;
         for (var r = 0; r < 8; r++) for (var c = 0; c < 8; c++) {
-            var ly = cy(r + 1); if (Math.abs(y - ly) < HIT_THRESHOLD && x >= cx(c) - 3 && x <= cx(c + 2) + 3 && !state.vEdge[r][c] && !state.vEdge[r][c + 1]) return { row: r, col: c, orient: 'horizontal' };
+            var ly = cy(r + 1); if (Math.abs(y - ly) < hHitY && x >= cx(c) - 3 && x <= cx(c + 2) + 3 && !state.vEdge[r][c] && !state.vEdge[r][c + 1]) return { row: r, col: c, orient: 'horizontal' };
         }
         for (var r = 0; r < 8; r++) for (var c = 0; c < 8; c++) {
-            var lx = cx(c + 1); if (Math.abs(x - lx) < HIT_THRESHOLD && y >= cy(r) - 3 && y <= cy(r + 2) + 3 && !state.hEdge[r][c] && !state.hEdge[r + 1][c]) return { row: r, col: c, orient: 'vertical' };
+            var lx = cx(c + 1); if (Math.abs(x - lx) < vHitX && y >= cy(r) - 3 && y <= cy(r + 2) + 3 && !state.hEdge[r][c] && !state.hEdge[r + 1][c]) return { row: r, col: c, orient: 'vertical' };
         }
         return null;
     }

@@ -180,13 +180,6 @@
     navLeft.querySelectorAll('.nav-link').forEach(function (l) { l.addEventListener('click', closeMenu); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && isMenuOpen) closeMenu(); });
 
-    var touchStartX = 0;
-    document.addEventListener('touchstart', function (e) { if (e.touches.length === 1) touchStartX = e.touches[0].clientX; }, { passive: true });
-    document.addEventListener('touchend', function (e) { if (!isMenuOpen && touchStartX < 20 && e.changedTouches[0].clientX - touchStartX > 80) openMenu(); });
-    if (navLeft) {
-      navLeft.addEventListener('touchstart', function (e) { if (e.touches.length === 1) touchStartX = e.touches[0].clientX; }, { passive: true });
-      navLeft.addEventListener('touchend', function (e) { if (isMenuOpen && touchStartX - e.changedTouches[0].clientX > 80) closeMenu(); });
-    }
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initMobileNav);
