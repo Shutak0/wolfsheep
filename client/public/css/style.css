@@ -1292,3 +1292,4 @@ button, .mode-card, .tc-btn, .game-btn, .wall-mode-btn, .emote-btn {
   }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
