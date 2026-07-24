@@ -332,9 +332,11 @@
         }).catch(function(){waitingOverlay.classList.remove('show');setStatus('❌ Failed to load',true);});
     }else{
         network.connect();
-        if(!isChallenge&&urlRoom){isChallenge=true;challengeRoomId=urlRoom;var urlTc=urlParams.get('tc');if(urlTc){tcName=urlTc;sessionStorage.setItem('ws_tc',urlTc);}}
         if(!userId){var lsUserId=localStorage.getItem('ws_userId');if(lsUserId)userId=parseInt(lsUserId);}
+        // Challenge-комната: игроки договорились через систему вызовов
         if(isChallenge&&challengeRoomId){sessionStorage.removeItem('ws_challenge');network.joinChallenge(challengeRoomId,userId||null);}
+        // Shared link: игрок поделился ссылкой ?room=XXX — присоединяемся через join_room
+        else if(urlRoom && !isChallenge){network.joinRoom(urlRoom,playerName,playerColor,userId||null);}
         else if(isBot){network.botMatch(playerName,playerColor,tcName,userId?parseInt(userId):null);}
         else{network.autoMatch(playerName,playerColor,tcName,userId?parseInt(userId):null);}
     }

@@ -136,6 +136,7 @@ class RoomManager {
         if (!result.success) return { success: false, error: result.message };
         room.state = stateCopy;
         room._moveRecord = room._moveRecord || [];
+        move.player = playerIndex;
         room._moveRecord.push(move);
         if (room.state.gameOver) { room.status = 'finished'; room.winner = room.state.winner; this.stopTimer(roomId); }
         return { success: true, newState: room.state };
@@ -217,6 +218,7 @@ class RoomManager {
             statsApplied: false,
             isGuestRoom: false,
             isBotRoom: true,
+            _moveRecord: [],
             _saved: false,
             gameId: crypto.randomUUID().slice(0, 8),
         };
@@ -248,6 +250,9 @@ class RoomManager {
         else if (move.type === 'wall') { result = Engine.tryPlaceWall(stateCopy, move.row, move.col, move.orient); if (result.success) Engine.endTurn(stateCopy); }
         if (!result.success) return null;
         room.state = stateCopy;
+        room._moveRecord = room._moveRecord || [];
+        move.player = botIndex;
+        room._moveRecord.push(move);
         if (room.state.gameOver) { room.status = 'finished'; room.winner = room.state.winner; this.stopTimer(roomId); }
         return { newState: room.state, move: move, success: true };
     }

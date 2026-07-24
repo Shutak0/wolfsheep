@@ -20,7 +20,9 @@ function handleGameEnd(roomId) {
     if (elo) auth.updateElo(elo.winnerId, elo.loserId);
     const room = roomManager.getRoom(roomId);
     // Сохранить партию при любом завершении (не только захватом цели)
-    if (room && !room._saved && room.winner !== null && room.winner !== undefined) {
+    // Пропускаем игры без ходов (0 moves)
+    const hasMoves = room._moveRecord && room._moveRecord.some(m => m.type === 'move' || m.type === 'wall');
+    if (room && !room._saved && room.winner !== null && room.winner !== undefined && hasMoves) {
         room._saved = true;
         const players = [
             { name: room.playerNames[0] || 'Player 1', userId: room.userIds[0] || null, color: 'red' },
