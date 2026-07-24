@@ -15,6 +15,7 @@ class QuoridorNetwork {
         this.onRoomJoined = null;
         this.onEmote = null;
         this.onRematchReady = null;
+        this.onGameSaved = null;
     }
 
     connect() { this.socket = io(); this.setupListeners(); }
@@ -28,10 +29,11 @@ class QuoridorNetwork {
         this.socket.on('game_started', () => { if (this.onGameStarted) this.onGameStarted(); });
         this.socket.on('game_over', (d) => { if (this.onGameOver) this.onGameOver(d); });
         this.socket.on('move_error', (d) => { if (this.onError) this.onError(d.error); });
-        this.socket.on('join_error', (d) => { if (this.onError) this.onError(d.error); });
+        this.socket.on('join_error', (d) => { if (this.onError) this.onError(d); });
         this.socket.on('opponent_disconnected', () => { if (this.onOpponentDisconnected) this.onOpponentDisconnected(); });
         this.socket.on('emote_received', (d) => { if (this.onEmote) this.onEmote(d); });
         this.socket.on('rematch_ready', (d) => { if (this.onRematchReady) this.onRematchReady(d); });
+        this.socket.on('game_saved', (d) => { if (this.onGameSaved) this.onGameSaved(d); });
         this.socket.on('disconnect', () => console.log('Disconnected'));
     }
 

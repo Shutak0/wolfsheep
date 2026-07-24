@@ -31,6 +31,9 @@ class RoomManager {
             eloApplied: false,
             statsApplied: false,
             isGuestRoom: !userId,
+            _moveRecord: [],
+            _saved: false,
+            gameId: crypto.randomUUID().slice(0, 8),
         };
         room.socketToPlayer.set(hostSocketId, 0);
         this.rooms.set(roomId, room);
@@ -107,7 +110,7 @@ class RoomManager {
             room.winner = room.state.winner;
         }
         this.stopTimer(roomId);
-        setTimeout(() => this.rooms.delete(roomId), 60000);
+        // Не удаляем завершённые комнаты — они доступны по URL game.html?id=GAME_ID
     }
 
     surrender(roomId, socketId) {
@@ -132,6 +135,8 @@ class RoomManager {
         else if (move.type === 'wall') { result = Engine.tryPlaceWall(stateCopy, move.row, move.col, move.orient); if (result.success) Engine.endTurn(stateCopy); }
         if (!result.success) return { success: false, error: result.message };
         room.state = stateCopy;
+        room._moveRecord = room._moveRecord || [];
+        room._moveRecord.push(move);
         if (room.state.gameOver) { room.status = 'finished'; room.winner = room.state.winner; this.stopTimer(roomId); }
         return { success: true, newState: room.state };
     }
@@ -212,6 +217,8 @@ class RoomManager {
             statsApplied: false,
             isGuestRoom: false,
             isBotRoom: true,
+            _saved: false,
+            gameId: crypto.randomUUID().slice(0, 8),
         };
         room.socketToPlayer.set(socketId, 0);
         if (Math.random() < 0.5) {

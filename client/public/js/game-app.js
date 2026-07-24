@@ -100,13 +100,14 @@
     function isWinningMove(move,rs){if(move.type!=='move')return null;if(move.player===0&&move.row===rs.players[1].row&&move.col===rs.players[1].col)return 0;if(move.player===1&&move.row===8)return 1;return null;}
     function handleGameOver(s){if(!s||!s.gameOver||s.winner===null||s.winner===undefined)return false;startWinAnimation();surrenderBtn.style.display='none';recBtn.style.display='inline-block';downloadVidBtn.style.display='inline-block';playAgainBtn.style.display='inline-block';return true;}
 
-    network.onRoomCreated=function(d){waitingOverlay.classList.add('show');waitRoomId.textContent='ID: '+d.roomId;setStatus(__('game_room_created'),false);};
-    network.onRoomJoined=function(d){setStatus(__('game_joined'),false);waitingOverlay.classList.remove('show');};
+    network.onRoomCreated=function(d){waitingOverlay.classList.add('show');waitRoomId.textContent='ID: '+d.roomId;setStatus(__('game_room_created'),false);history.replaceState(null,'','/game.html?room='+d.roomId);};
+    network.onRoomJoined=function(d){setStatus(__('game_joined'),false);waitingOverlay.classList.remove('show');history.replaceState(null,'','/game.html?room='+d.roomId);};
     network.onPlayerAssigned=function(d){myIndex=d.playerIndex;isChallengeRoom=!!d.isChallenge;rematchReady=false;playAgainBtn.textContent='🔄 '+__('play_again');playAgainBtn.disabled=false;playAgainBtn.style.background='';playAgainBtn.style.color='';surrenderBtn.style.display='inline-block';surrenderBtn.disabled=false;recBtn.style.display='none';downloadVidBtn.style.display='none';playAgainBtn.style.display='none';var mc=d.color==='red'?0:1,oc=1-mc;updateNamesAndElo(d);myDot.className='dot '+DOT_CLASSES[mc];opDot.className='dot '+DOT_CLASSES[oc];var myAnimal=d.color==='red'?'Wolf':'Sheep',opAnimal=d.color==='red'?'Sheep':'Wolf';myDot.innerHTML='<img src="/imgs/'+myAnimal+'.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';opDot.innerHTML='<img src="/imgs/'+opAnimal+'.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';if(d.timeControl)tcBadge.textContent=d.timeControl;moveRecord=[];prevState=null;pendingState=null;};
     network.onGameStarted=function(){if(myIndex===null)return;gameStarted=true;if(pendingState){prevState=pendingState;pendingState=null;}waitingOverlay.classList.remove('show');setStatus(__('game_started'),false);hoverWall=null;render();};
     network.onGameState=function(newState){if(replayActive)return;if(!gameStarted){if(pendingState){var pm2=diffMove(pendingState,newState);if(pm2)moveRecord.push(pm2);}pendingState=Engine.deepClone(newState);state=newState;handleGameOver(newState);render();return;}if(!prevState){if(pendingState){prevState=pendingState;pendingState=null;}else{prevState=Engine.deepClone(newState);}state=newState;handleGameOver(newState);render();return;}var m2=diffMove(prevState,newState);if(m2)moveRecord.push(m2);state=newState;prevState=Engine.deepClone(newState);handleGameOver(newState);render();};
     network.onGameOver=function(data){if(replayActive)return;state.gameOver=true;state.winner=data.winner;state.winReason=data.winReason||'target';surrenderBtn.style.display='none';recBtn.style.display='inline-block';downloadVidBtn.style.display='inline-block';playAgainBtn.style.display='inline-block';if(state.winner!==null&&state.winner!==undefined)startWinAnimation();render();setStatus('🏆 '+data.winnerName+' '+__('game_win_target')+' '+getReason(state.winReason),true);};
-    network.onError=function(msg){setStatus(__('game_error')+msg,false);};
+    network.onGameSaved=function(d){history.replaceState(null,'','/game.html?id='+d.gameId);var oldBtn=document.getElementById('shareBtn');if(oldBtn)oldBtn.remove();var shareBtn=document.createElement('button');shareBtn.id='shareBtn';shareBtn.className='game-btn play-again';shareBtn.style.cssText='color:#00ffff;border-color:#00ffff;display:inline-block;';shareBtn.textContent='🔗 Share';shareBtn.addEventListener('click',function(){var url=window.location.href;navigator.clipboard.writeText(url).then(function(){setStatus('📋 Link copied!',true);shareBtn.textContent='✅ Copied!';setTimeout(function(){shareBtn.textContent='🔗 Share';},2000);}).catch(function(){var input=document.createElement('input');input.value=url;document.body.appendChild(input);input.select();document.execCommand('copy');document.body.removeChild(input);setStatus('📋 Link copied!',true);});});playAgainBtn.parentNode.insertBefore(shareBtn,playAgainBtn.nextSibling);};
+    network.onError=function(msg){waitingOverlay.classList.remove('show');if(typeof msg==='object'&&msg.gameId){window.location.href='/game.html?id='+msg.gameId;return;}setStatus(__('game_error')+(msg.error||msg),false);};
     network.onOpponentDisconnected=function(){setStatus(__('game_opponent_left'),true);state.gameOver=true;surrenderBtn.style.display='none';recBtn.style.display='inline-block';downloadVidBtn.style.display='inline-block';playAgainBtn.style.display='inline-block';render();};
     network.onEmote=function(d){if(!replayActive)moveRecord.push({type:'emote',emoteId:d.emoteId,fromPlayer:d.fromPlayer});playEmoteAnim(d.emoteId,d.fromPlayer);};
     network.onRematchReady=function(d){if(d.playerIndex!==myIndex){setStatus('🔄 Opponent wants a rematch!',false);if(!rematchReady){playAgainBtn.textContent='🔄 Accept Rematch';playAgainBtn.style.background='#33ff66';playAgainBtn.style.color='#0a0a1a';}}if(d.playersReady>=2)setStatus('⚡ Rematch starting!',false);};
@@ -166,7 +167,6 @@
                 vctx.textAlign='center';vctx.textBaseline='middle';
                 vctx.shadowColor='#c084fc';vctx.shadowBlur=30;
                 vctx.fillText(randomPhrase,vertW/2,tY);vctx.shadowBlur=0;
-                // CTA: icons + Wolfsheep in one row, website below, pure black bg, GPlay 56x56, logo-192 40x40 rounded with border
                 var ctaTop=bY+600,ctaH=vertH-ctaTop,cy=ctaTop+16,ctaX=Math.round(vertW*0.2);
                 vctx.fillStyle='#000000';vctx.fillRect(0,ctaTop,vertW,ctaH);
                 var gplaySz=56,logoSz=40,iconGap=16;
@@ -293,14 +293,51 @@
     function updateNamesAndElo(d){var mc=d.color==='red'?0:1,oc=1-mc;if(d.playerName){myName.innerHTML=d.playerId?'<a href="/player.html?id='+d.playerId+'" target="_blank" style="color:#c084fc;text-decoration:none;cursor:pointer;">'+d.playerName+'</a>':d.playerName;}else{myName.textContent=UI.COLOR_NAMES[mc];}if(d.opponentName){opName.innerHTML=d.opponentId?'<a href="/player.html?id='+d.opponentId+'" target="_blank" style="color:#c084fc;text-decoration:none;cursor:pointer;">'+d.opponentName+'</a>':d.opponentName;}else{opName.textContent=UI.COLOR_NAMES[oc];}if(d.playerElo!==undefined)myElo.textContent='🏆 '+d.playerElo;else myElo.textContent='';if(d.opponentElo!==undefined)opElo.textContent='🏆 '+d.opponentElo;else opElo.textContent='';if(d.playerId){myDot.style.cursor='pointer';myDot.title='View profile';myDot.onclick=function(e){e.stopPropagation();window.open('/player.html?id='+d.playerId,'_blank');};}if(d.opponentId){opDot.style.cursor='pointer';opDot.title='View profile';opDot.onclick=function(e){e.stopPropagation();window.open('/player.html?id='+d.opponentId,'_blank');};}}
     window.addEventListener('beforeunload',function(){if(gameStarted&&!state.gameOver)network.disconnect();});
     canvas.addEventListener('click',handleCanvasClick);canvas.addEventListener('mousemove',handleMouseMove);canvas.addEventListener('mouseleave',function(){hoverWall=null;render();});
-    network.connect();
     var isBot=sessionStorage.getItem('ws_bot')==='1',isChallenge=sessionStorage.getItem('ws_challenge')==='1',challengeRoomId=sessionStorage.getItem('ws_room');
-    var urlParams=new URLSearchParams(window.location.search),urlRoom=urlParams.get('room');
-    if(!isChallenge&&urlRoom){isChallenge=true;challengeRoomId=urlRoom;var urlTc=urlParams.get('tc');if(urlTc){tcName=urlTc;sessionStorage.setItem('ws_tc',urlTc);}}
-    if(!userId){var lsUserId=localStorage.getItem('ws_userId');if(lsUserId)userId=parseInt(lsUserId);}
-    if(isChallenge&&challengeRoomId){sessionStorage.removeItem('ws_challenge');network.joinChallenge(challengeRoomId,userId||null);}
-    else if(isBot){network.botMatch(playerName,playerColor,tcName,userId?parseInt(userId):null);}
-    else{network.autoMatch(playerName,playerColor,tcName,userId?parseInt(userId):null);}
+    var urlParams=new URLSearchParams(window.location.search),urlRoom=urlParams.get('room'),replayGameId=urlParams.get('id');
+    // Режим реплея: ?id=GAME_ID
+    if(replayGameId){
+        waitingOverlay.classList.remove('show');
+        // Загружаем и проигрываем
+        fetch('/api/games/'+replayGameId).then(function(r){return r.json();}).then(function(data){
+            if(!data.success||!data.game){setStatus('❌ Game not found',true);return;}
+            var game=data.game;
+            var finalTc=Engine.TIME_PRESETS[game.timeControl]||Engine.TIME_PRESETS['1+5'];
+            state=Engine.initState(finalTc);
+            moveRecord=game.moves||[];
+            gameStarted=true;
+            state.gameOver=true;state.winner=game.winner;state.winReason='target';
+            myWalls.textContent=state.players[0].walls;opWalls.textContent=state.players[1].walls;
+            // Применяем все ходы
+            var rs=Engine.initState(finalTc);
+            for(var mi=0;mi<moveRecord.length;mi++){
+                var mv=moveRecord[mi];
+                if(mv.type!=='emote'){if(mv.player===undefined)mv.player=rs.turn;Engine.applyAction(rs,mv);Engine.endTurn(rs);}
+            }
+            state=rs;state.gameOver=true;state.winner=game.winner;state.winReason='target';
+            myIndex=0;
+            // Отображаем имена
+            var p0=game.players[0]||{},p1=game.players[1]||{};
+            myName.textContent=p0.name||'Red';
+            opName.textContent=p1.name||'Green';
+            tcBadge.textContent=game.timeControl||'1+5';
+            surrenderBtn.style.display='none';
+            recBtn.style.display='inline-block';
+            downloadVidBtn.style.display='inline-block';
+            playAgainBtn.style.display='inline-block';
+            turnBadge.textContent='🏆 '+(game.winner===0?p0.name:p1.name)+' won!';
+            setStatus('Replay of '+p0.name+' vs '+p1.name,true);
+            render();
+            preloadDefaultImages();
+        }).catch(function(){waitingOverlay.classList.remove('show');setStatus('❌ Failed to load',true);});
+    }else{
+        network.connect();
+        if(!isChallenge&&urlRoom){isChallenge=true;challengeRoomId=urlRoom;var urlTc=urlParams.get('tc');if(urlTc){tcName=urlTc;sessionStorage.setItem('ws_tc',urlTc);}}
+        if(!userId){var lsUserId=localStorage.getItem('ws_userId');if(lsUserId)userId=parseInt(lsUserId);}
+        if(isChallenge&&challengeRoomId){sessionStorage.removeItem('ws_challenge');network.joinChallenge(challengeRoomId,userId||null);}
+        else if(isBot){network.botMatch(playerName,playerColor,tcName,userId?parseInt(userId):null);}
+        else{network.autoMatch(playerName,playerColor,tcName,userId?parseInt(userId):null);}
+    }
     preloadDefaultImages();var labels=document.querySelectorAll('.time-label');if(labels[0])labels[0].textContent=__('game_opponent');if(labels[1])labels[1].textContent=__('game_you');
     setStatus(__('game_status'),false);turnBadge.textContent=__('game_turn');render();
 })();

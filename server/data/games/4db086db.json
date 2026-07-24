@@ -1,0 +1,93 @@
+{
+  "id": "4db086db",
+  "createdAt": "2026-07-24T18:30:08.846Z",
+  "timeControl": "1+5",
+  "players": [
+    {
+      "name": "Player",
+      "userId": null,
+      "color": "red"
+    },
+    {
+      "name": "Player",
+      "userId": null,
+      "color": "green"
+    }
+  ],
+  "winner": 1,
+  "winReason": "target",
+  "winnerName": "Player",
+  "moves": [
+    {
+      "type": "move",
+      "row": 7,
+      "col": 4
+    },
+    {
+      "type": "move",
+      "row": 1,
+      "col": 4
+    },
+    {
+      "type": "move",
+      "row": 6,
+      "col": 4
+    },
+    {
+      "type": "move",
+      "row": 2,
+      "col": 4
+    },
+    {
+      "type": "move",
+      "row": 5,
+      "col": 4
+    },
+    {
+      "type": "move",
+      "row": 3,
+      "col": 4
+    },
+    {
+      "type": "move",
+      "row": 4,
+      "col": 4
+    },
+    {
+      "type": "move",
+      "row": 5,
+      "col": 4
+    },
+    {
+      "type": "move",
+      "row": 3,
+      "col": 4
+    },
+    {
+      "type": "move",
+      "row": 6,
+      "col": 4
+    },
+    {
+      "type": "move",
+      "row": 4,
+      "col": 4
+    },
+    {
+      "type": "move",
+      "row": 7,
+      "col": 4
+    },
+    {
+      "type": "move",
+      "row": 5,
+      "col": 4
+    },
+    {
+      "type": "move",
+      "row": 8,
+      "col": 4
+    }
+  ],
+  "totalMoves": 14
+}

@@ -1,0 +1,139 @@
+{
+  "id": "a40e4f00",
+  "createdAt": "2026-07-24T17:40:44.039Z",
+  "timeControl": "1+5",
+  "players": [
+    {
+      "name": "Player",
+      "userId": null,
+      "color": "red"
+    },
+    {
+      "name": "Rex563",
+      "userId": null,
+      "color": "green"
+    }
+  ],
+  "winner": 0,
+  "winReason": "target",
+  "winnerName": "Player",
+  "moves": [
+    {
+      "type": "move",
+      "row": 7,
+      "col": 4
+    },
+    {
+      "type": "move",
+      "row": 7,
+      "col": 3
+    },
+    {
+      "type": "wall",
+      "row": 7,
+      "col": 2,
+      "orient": "horizontal"
+    },
+    {
+      "type": "wall",
+      "row": 7,
+      "col": 0,
+      "orient": "horizontal"
+    },
+    {
+      "type": "wall",
+      "row": 0,
+      "col": 4,
+      "orient": "vertical"
+    },
+    {
+      "type": "wall",
+      "row": 2,
+      "col": 4,
+      "orient": "vertical"
+    },
+    {
+      "type": "move",
+      "row": 7,
+      "col": 2
+    },
+    {
+      "type": "move",
+      "row": 7,
+      "col": 3
+    },
+    {
+      "type": "move",
+      "row": 6,
+      "col": 3
+    },
+    {
+      "type": "move",
+      "row": 7,
+      "col": 3
+    },
+    {
+      "type": "move",
+      "row": 7,
+      "col": 2
+    },
+    {
+      "type": "move",
+      "row": 7,
+      "col": 1
+    },
+    {
+      "type": "wall",
+      "row": 3,
+      "col": 3,
+      "orient": "horizontal"
+    },
+    {
+      "type": "wall",
+      "row": 3,
+      "col": 1,
+      "orient": "horizontal"
+    },
+    {
+      "type": "move",
+      "row": 7,
+      "col": 0
+    },
+    {
+      "type": "move",
+      "row": 6,
+      "col": 0
+    },
+    {
+      "type": "move",
+      "row": 5,
+      "col": 0
+    },
+    {
+      "type": "move",
+      "row": 5,
+      "col": 1
+    },
+    {
+      "type": "move",
+      "row": 5,
+      "col": 2
+    },
+    {
+      "type": "move",
+      "row": 4,
+      "col": 2
+    },
+    {
+      "type": "move",
+      "row": 4,
+      "col": 1
+    },
+    {
+      "type": "move",
+      "row": 4,
+      "col": 2
+    }
+  ],
+  "totalMoves": 22
+}

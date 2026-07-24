@@ -1,0 +1,22 @@
+{
+  "id": "471eec1128",
+  "createdAt": "2026-07-24T16:58:58.568Z",
+  "timeControl": "1+5",
+  "players": [
+    {
+      "name": "Player",
+      "userId": null,
+      "color": "red"
+    },
+    {
+      "name": "Player",
+      "userId": null,
+      "color": "green"
+    }
+  ],
+  "winner": 0,
+  "winReason": "target",
+  "winnerName": "Player",
+  "moves": [],
+  "totalMoves": 0
+}

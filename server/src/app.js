@@ -6,6 +6,7 @@ const socketIO = require('socket.io');
 const RoomManager = require('./room-manager');
 const auth = require('./auth');
 const Engine = require('./engine/quoridor-engine');
+const gameStore = require('./game-store');
 
 const app = express();
 const server = http.createServer(app);
@@ -17,6 +18,28 @@ function handleGameEnd(roomId) {
     roomManager.clearBotEmote(roomId);
     const elo = roomManager.tryApplyStatsAndElo(roomId);
     if (elo) auth.updateElo(elo.winnerId, elo.loserId);
+    const room = roomManager.getRoom(roomId);
+    // Сохранить партию при любом завершении (не только захватом цели)
+    if (room && !room._saved && room.winner !== null && room.winner !== undefined) {
+        room._saved = true;
+        const players = [
+            { name: room.playerNames[0] || 'Player 1', userId: room.userIds[0] || null, color: 'red' },
+            { name: room.playerNames[1] || 'Player 2', userId: room.userIds[1] || null, color: 'green' }
+        ];
+        const savedId = gameStore.saveGame({
+            gameId: room.gameId || gameStore.generateGameId(),
+            players: players,
+            winner: room.winner,
+            winReason: room.state.winReason || 'target',
+            timeControl: room.timeControlName,
+            winnerName: room.playerNames[room.winner] || 'Unknown',
+            moves: room._moveRecord || []
+        });
+        if (savedId) {
+            room._savedGameId = savedId;
+            io.to(roomId).emit('game_saved', { gameId: savedId });
+        }
+    }
 }
 
 // Ускоренная задержка хода бота (×2 быстрее)
@@ -302,6 +325,20 @@ io.on('connection', (socket) => {
     socket.on('join_challenge', ({ roomId, userId }) => {
         const pending = pendingChallenges.get(roomId);
         if (!pending) {
+            // Проверяем: может это завершённая комната с сохранённой игрой?
+            const finishedRoom = roomManager.getRoom(roomId);
+            if (finishedRoom && finishedRoom.status === 'finished' && finishedRoom._savedGameId) {
+                socket.emit('join_error', { error: 'Game finished', gameId: finishedRoom._savedGameId });
+                return;
+            }
+            // Комнаты нет в памяти — может игра сохранена на диске?
+            if (!finishedRoom) {
+                const savedGame = gameStore.loadGame(roomId);
+                if (savedGame) {
+                    socket.emit('join_error', { error: 'Game finished', gameId: roomId });
+                    return;
+                }
+            }
             socket.emit('join_error', { error: 'Challenge expired or not found.' });
             return;
         }
@@ -356,7 +393,7 @@ io.on('connection', (socket) => {
         if (otherSocketId) {
             io.to(otherSocketId).emit('player_assigned', buildPlayerAssigned(room, 0));
         }
-        io.to(roomId).emit('game_started');
+        io.to(roomId).emit('game_started', { gameId: room.gameId || null });
         io.to(roomId).emit('game_state', room.state);
         pendingChallenges.delete(roomId);
     });
@@ -596,6 +633,24 @@ app.post('/api/account/request-deletion', authMiddleware, (req, res) => {
 app.delete('/api/account/delete', authMiddleware, (req, res) => {
     const result = auth.deleteUser(req.userId);
     res.json(result);
+});
+
+// ==================== Публичная база партий ====================
+app.get('/api/games/recent', (req, res) => {
+    const limit = parseInt(req.query.limit) || 20;
+    res.json({ success: true, games: gameStore.getRecentGames(limit) });
+});
+
+app.get('/api/games/all', (req, res) => {
+    const sort = req.query.sort || 'date';
+    const games = gameStore.getAllGames(sort);
+    res.json({ success: true, games });
+});
+
+app.get('/api/games/:gameId', (req, res) => {
+    const game = gameStore.loadGame(req.params.gameId);
+    if (!game) return res.status(404).json({ success: false, error: 'Game not found' });
+    res.json({ success: true, game });
 });
 
 // ---- Custom 404 handler (MUST be last, after ALL routes) ----

@@ -1,0 +1,22 @@
+{
+  "id": "cdb6cf74",
+  "createdAt": "2026-07-24T18:49:23.325Z",
+  "timeControl": "1+5",
+  "players": [
+    {
+      "name": "Shadow914",
+      "userId": null,
+      "color": "red"
+    },
+    {
+      "name": "Player",
+      "userId": null,
+      "color": "green"
+    }
+  ],
+  "winner": 0,
+  "winReason": "disconnect",
+  "winnerName": "Shadow914",
+  "moves": [],
+  "totalMoves": 0
+}

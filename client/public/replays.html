@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0"/>
+    <style>html{background:#0a0a0f}body{background:#0a0a0f;margin:0}</style>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+    <meta http-equiv="Pragma" content="no-cache"/>
+    <meta http-equiv="Expires" content="0"/>
+    <title>Game Replays — WolfSheep</title>
+    <meta name="description" content="Browse all completed WolfSheep games. Sort by moves, watch replays."/>
+    <meta name="robots" content="index, follow"/>
+    <meta name="theme-color" content="#1a1a2e"/>
+    <link rel="canonical" href="https://wolfsheep.fun/replays.html"/>
+    <link rel="stylesheet" href="css/style.css"/>
+    <style>
+        .replays-page { max-width: 800px; margin: 0 auto; padding: 20px 16px 100px; }
+        .replays-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+        .replays-header h1 { color: #c084fc; font-size: 24px; margin: 0; }
+        .sort-controls { display: flex; gap: 8px; flex-wrap: wrap; }
+        .sort-btn { padding: 8px 16px; border: 2px solid #2a1a5a; border-radius: 10px; background: #0d0d1a; color: #94a3b8; cursor: pointer; font-size: 13px; font-family: inherit; transition: all 0.2s; }
+        .sort-btn:hover { border-color: #c084fc; color: #c084fc; }
+        .sort-btn.active { border-color: #c084fc; background: #1a1030; color: #c084fc; }
+        .replay-card { background: #0d0d1a; border: 2px solid #2a1a5a; border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all 0.2s; }
+        .replay-card:hover { border-color: #c084fc; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(192,132,252,0.15); }
+        .replay-card-left { flex: 1; min-width: 0; }
+        .replay-card-players { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+        .replay-card-name { color: #e0e0f0; font-size: 15px; font-weight: 600; }
+        .replay-card-vs { color: #555; font-size: 13px; }
+        .replay-card-winner { color: #33ff66; font-size: 11px; font-weight: 600; }
+        .replay-card-meta { display: flex; gap: 16px; flex-wrap: wrap; }
+        .replay-card-meta span { color: #94a3b8; font-size: 12px; }
+        .replay-card-meta .moves { color: #00ffff; font-weight: 600; }
+        .replay-card-right { color: #c084fc; font-size: 20px; flex-shrink: 0; }
+        .replay-empty { text-align: center; color: #555; padding: 60px 20px; font-size: 16px; }
+        .replay-loading { text-align: center; color: #94a3b8; padding: 40px; }
+    </style>
+</head>
+<body>
+    <nav id="navbar">
+        <button id="hamburger-btn" aria-label="Menu">☰</button>
+        <div class="nav-left" id="nav-left-menu">
+            <a class="nav-brand" href="/">🐺<span style="color:#ff3366">Wolf</span><span style="color:#33ff66">Sheep</span></a>
+            <a class="nav-link" href="/">🏠 Home</a>
+            <a class="nav-link" href="/players.html">👥 Players</a>
+            <a class="nav-link active" href="/replays.html">🎬 Replays</a>
+            <a class="nav-link" href="/profile.html">👤 Profile</a>
+        </div>
+        <div class="nav-center">
+            <span class="nav-players" id="nav-players">🟢 0</span>
+        </div>
+        <div class="nav-right" id="nav-right"></div>
+    </nav>
+    <div id="nav-overlay"></div>
+
+    <div id="main-content">
+        <div class="replays-page">
+            <div class="replays-header">
+                <h1>🎬 Game Replays</h1>
+                <div class="sort-controls">
+                    <button class="sort-btn active" data-sort="date">🕐 Latest</button>
+                    <button class="sort-btn" data-sort="moves-desc">🧩 Most moves</button>
+                    <button class="sort-btn" data-sort="moves-asc">⚡ Fewest moves</button>
+                </div>
+            </div>
+            <div id="replays-list">
+                <div class="replay-loading">Loading replays...</div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-links">
+            <a href="/">Home</a>
+            <a href="/game.html">Play</a>
+            <a href="/replays.html">Replays</a>
+            <a href="/about.html">About Us</a>
+            <a href="/rules.html">Game Rules</a>
+            <a href="/privacy.html">Privacy Policy</a>
+            <a href="/terms.html">Terms of Service</a>
+        </div>
+        <div class="footer-copy">© 2025 WolfSheep.fun — All rights reserved</div>
+    </footer>
+
+    <!-- Bottom Mobile Navigation -->
+    <nav id="bottom-nav" aria-label="Mobile navigation">
+        <div class="bn-inner">
+            <a href="/" class="bn-link">
+                <span class="bn-icon">🏠</span>
+                <span>Home</span>
+            </a>
+            <a href="/players.html" class="bn-link">
+                <span class="bn-icon">👥</span>
+                <span>Players</span>
+            </a>
+            <a href="/replays.html" class="bn-link active" aria-current="page">
+                <span class="bn-icon">🎬</span>
+                <span>Replays</span>
+            </a>
+            <a href="/profile.html" class="bn-link">
+                <span class="bn-icon">👤</span>
+                <span>Profile</span>
+            </a>
+        </div>
+    </nav>
+
+    <script src="js/nav-players.js"></script>
+    <script>
+    (function(){
+        var list = document.getElementById('replays-list');
+        var sortBtns = document.querySelectorAll('.sort-btn');
+        var currentSort = 'date';
+
+        function escapeHtml(text) {
+            var div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatDate(iso) {
+            var d = new Date(iso);
+            var now = new Date();
+            var diff = now - d;
+            if (diff < 86400000) return 'Today ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+            if (diff < 172800000) return 'Yesterday ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+            return d.toLocaleDateString([], {month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+        }
+
+        function loadReplays(sort) {
+            list.innerHTML = '<div class="replay-loading">Loading replays...</div>';
+            fetch('/api/games/all?sort=' + sort)
+                .then(function(r){return r.json();})
+                .then(function(data){
+                    if (!data.success || !data.games || !data.games.length) {
+                        list.innerHTML = '<div class="replay-empty">No replays found yet.<br>Play a game to create one! 🎮</div>';
+                        return;
+                    }
+                    var html = '';
+                    data.games.forEach(function(g){
+                        var p0 = (g.players && g.players[0]) ? g.players[0].name : 'Red';
+                        var p1 = (g.players && g.players[1]) ? g.players[1].name : 'Green';
+                        var winnerName = g.winnerName || ((g.winner === 0) ? p0 : p1);
+                        var tcLabel = g.timeControl || '1+5';
+                        html += '<div class="replay-card" onclick="location.href=\'/game.html?id=' + g.id + '\'">' +
+                            '<div class="replay-card-left">' +
+                                '<div class="replay-card-players">' +
+                                    '<span class="replay-card-name">' + escapeHtml(p0) + '</span>' +
+                                    '<span class="replay-card-vs">vs</span>' +
+                                    '<span class="replay-card-name">' + escapeHtml(p1) + '</span>' +
+                                    '<span class="replay-card-winner">🏆 ' + escapeHtml(winnerName) + '</span>' +
+                                '</div>' +
+                                '<div class="replay-card-meta">' +
+                                    '<span>' + formatDate(g.createdAt) + '</span>' +
+                                    '<span>' + tcLabel + '</span>' +
+                                    '<span class="moves">' + (g.totalMoves || 0) + ' moves</span>' +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="replay-card-right">▶</div>' +
+                        '</div>';
+                    });
+                    list.innerHTML = html;
+                })
+                .catch(function(){
+                    list.innerHTML = '<div class="replay-empty">Failed to load replays. Try again later.</div>';
+                });
+        }
+
+        sortBtns.forEach(function(btn){
+            btn.addEventListener('click', function(){
+                sortBtns.forEach(function(b){b.classList.remove('active');});
+                btn.classList.add('active');
+                currentSort = btn.dataset.sort;
+                loadReplays(currentSort);
+            });
+        });
+
+        loadReplays(currentSort);
+    })();
+    </script>
+</body>
+</html>

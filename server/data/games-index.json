@@ -1,0 +1,325 @@
+[
+  {
+    "id": "cdb6cf74",
+    "createdAt": "2026-07-24T18:49:23.325Z",
+    "timeControl": "1+5",
+    "players": [
+      {
+        "name": "Shadow914",
+        "userId": null
+      },
+      {
+        "name": "Player",
+        "userId": null
+      }
+    ],
+    "winnerName": "Shadow914",
+    "totalMoves": 0
+  },
+  {
+    "id": "4db086db",
+    "createdAt": "2026-07-24T18:30:08.846Z",
+    "timeControl": "1+5",
+    "players": [
+      {
+        "name": "Player",
+        "userId": null
+      },
+      {
+        "name": "Player",
+        "userId": null
+      }
+    ],
+    "winnerName": "Player",
+    "totalMoves": 14
+  },
+  {
+    "id": "b7905590",
+    "createdAt": "2026-07-24T18:01:22.268Z",
+    "timeControl": "1+5",
+    "players": [
+      {
+        "name": "Player",
+        "userId": null
+      },
+      {
+        "name": "Player",
+        "userId": null
+      }
+    ],
+    "winnerName": "Player",
+    "totalMoves": 9
+  },
+  {
+    "id": "5f4fe79a",
+    "createdAt": "2026-07-24T17:56:44.026Z",
+    "timeControl": "1+5",
+    "players": [
+      {
+        "name": "Player",
+        "userId": null
+      },
+      {
+        "name": "Player",
+        "userId": null
+      }
+    ],
+    "winnerName": "Player",
+    "totalMoves": 11
+  },
+  {
+    "id": "a3c70d03",
+    "createdAt": "2026-07-24T17:53:05.844Z",
+    "timeControl": "1+5",
+    "players": [
+      {
+        "name": "Player",
+        "userId": null
+      },
+      {
+        "name": "Player",
+        "userId": null
+      }
+    ],
+    "winnerName": "Player",
+    "totalMoves": 9
+  },
+  {
+    "id": "036ae0a4",
+    "createdAt": "2026-07-24T17:49:44.253Z",
+    "timeControl": "1+5",
+    "players": [
+      {
+        "name": "Player",
+        "userId": null
+      },
+      {
+        "name": "Player",
+        "userId": null
+      }
+    ],
+    "winnerName": "Player",
+    "totalMoves": 13
+  },
+  {
+    "id": "362818bc",
+    "createdAt": "2026-07-24T17:47:34.693Z",
+    "timeControl": "1+5",
+    "players": [
+      {
+        "name": "Player",
+        "userId": null
+      },
+      {
+        "name": "Player",
+        "userId": null
+      }
+    ],
+    "winnerName": "Player",
+    "totalMoves": 9
+  },
+  {
+    "id": "a40e4f00",
+    "createdAt": "2026-07-24T17:40:44.039Z",
+    "timeControl": "1+5",
+    "players": [
+      {
+        "name": "Player",
+        "userId": null
+      },
+      {
+        "name": "Rex563",
+        "userId": null
+      }
+    ],
+    "winnerName": "Player",
+    "totalMoves": 22
+  },
+  {
+    "id": "daca0047",
+    "createdAt": "2026-07-24T17:22:07.596Z",
+    "timeControl": "1+5",
+    "players": [
+      {
+        "name": "Player",
+        "userId": null
+      },
+      {
+        "name": "Player",
+        "userId": null
+      }
+    ],
+    "winnerName": "Player",
+    "totalMoves": 9
+  },
+  {
+    "id": "e072753015",
+    "createdAt": "2026-07-24T17:18:10.449Z",
+    "timeControl": "1+5",
+    "players": [
+      {
+        "name": "Player",
+        "userId": null
+      },
+      {
+        "name": "Player",
+        "userId": null
+      }
+    ],
+    "winnerName": "Player",
+    "totalMoves": 9
+  },
+  {
+    "id": "f66d195791",
+    "createdAt": "2026-07-24T17:13:02.920Z",
+    "timeControl": "1+5",
+    "players": [
+      {
+        "name": "Player",
+        "userId": null
+      },
+      {
+        "name": "Wolf395",
+        "userId": null
+      }
+    ],
+    "winnerName": "Player",
+    "totalMoves": 24
+  },
+  {
+    "id": "1b5fcc2173",
+    "createdAt": "2026-07-24T17:11:56.264Z",
+    "timeControl": "1+5",
+    "players": [
+      {
+        "name": "Player",
+        "userId": null
+      },
+      {
+        "name": "Player",
+        "userId": null
+      }
+    ],
+    "winnerName": "Player",
+    "totalMoves": 11
+  },
+  {
+    "id": "94f8205e84",
+    "createdAt": "2026-07-24T17:06:08.401Z",
+    "timeControl": "1+5",
+    "players": [
+      {
+        "name": "Player",
+        "userId": null
+      },
+      {
+        "name": "Player",
+        "userId": null
+      }
+    ],
+    "winnerName": "Player",
+    "totalMoves": 9
+  },
+  {
+    "id": "082bce6f27",
+    "createdAt": "2026-07-24T16:59:39.446Z",
+    "timeControl": "1+5",
+    "players": [
+      {
+        "name": "Player",
+        "userId": null
+      },
+      {
+        "name": "Player",
+        "userId": null
+      }
+    ],
+    "winnerName": "Player",
+    "totalMoves": 0
+  },
+  {
+    "id": "471eec1128",
+    "createdAt": "2026-07-24T16:58:58.568Z",
+    "timeControl": "1+5",
+    "players": [
+      {
+        "name": "Player",
+        "userId": null
+      },
+      {
+        "name": "Player",
+        "userId": null
+      }
+    ],
+    "winnerName": "Player",
+    "totalMoves": 0
+  },
+  {
+    "id": "67be1fc45d",
+    "createdAt": "2026-07-24T16:45:52.049Z",
+    "timeControl": "3+2",
+    "players": [
+      {
+        "name": "Player",
+        "userId": null
+      },
+      {
+        "name": "Player",
+        "userId": null
+      }
+    ],
+    "winnerName": "Player",
+    "totalMoves": 0
+  },
+  {
+    "id": "953abc9274",
+    "createdAt": "2026-07-24T16:24:41.793Z",
+    "timeControl": "3+2",
+    "players": [
+      {
+        "name": "Player",
+        "userId": null
+      },
+      {
+        "name": "Player",
+        "userId": null
+      }
+    ],
+    "winnerName": "Player",
+    "totalMoves": 0
+  },
+  {
+    "id": "e9a4677ef0",
+    "createdAt": "2026-07-24T16:14:43.788Z",
+    "timeControl": "1+5",
+    "players": [
+      {
+        "name": "Player",
+        "userId": null
+      },
+      {
+        "name": "Player",
+        "userId": null
+      }
+    ],
+    "winnerName": "Player",
+    "totalMoves": 0
+  },
+  {
+    "id": "9455446ef0",
+    "createdAt": "2026-07-24T16:13:44.967Z",
+    "timeControl": "1+5",
+    "players": [
+      {
+        "name": "Player",
+        "userId": null
+      },
+      {
+        "name": "Player",
+        "userId": null
+      }
+    ],
+    "winnerName": "Player",
+    "totalMoves": 0
+  }
+]
