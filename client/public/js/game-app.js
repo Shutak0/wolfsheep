@@ -125,6 +125,27 @@
     var exportSpeedInput=document.getElementById('export-speed'),exportSpeedVal=document.getElementById('speed-val');
     var exportPhraseInput=document.getElementById('export-phrase'),exportSettings=document.getElementById('export-settings');
     var exportStartBtn=document.getElementById('export-start'),exportCancelBtn=document.getElementById('export-cancel');
+    var exportFmtWebm=document.getElementById('export-fmt-webm'),exportFmtMp4=document.getElementById('export-fmt-mp4');
+    var exportFormat='webm'; // default: webm (fast), 'mp4' = slow (for mobile YT)
+    if(exportFmtWebm&&exportFmtMp4){
+        function setFmtActive(active){
+            if(active==='webm'){
+                exportFormat='webm';
+                exportFmtWebm.style.borderColor='#33ff66';
+                exportFmtWebm.style.color='#33ff66';
+                exportFmtMp4.style.borderColor='#2a1a5a';
+                exportFmtMp4.style.color='#94a3b8';
+            }else{
+                exportFormat='mp4';
+                exportFmtMp4.style.borderColor='#33ff66';
+                exportFmtMp4.style.color='#33ff66';
+                exportFmtWebm.style.borderColor='#2a1a5a';
+                exportFmtWebm.style.color='#94a3b8';
+            }
+        }
+        exportFmtWebm.addEventListener('click',function(){setFmtActive('webm');});
+        exportFmtMp4.addEventListener('click',function(){setFmtActive('mp4');});
+    }
     downloadVidBtn.addEventListener('click',function(e){
         e.stopPropagation();
         if(exportSettings)exportSettings.style.display='flex';
@@ -197,32 +218,42 @@
             rec.onstop=function(){
                 replayActive=false;state=savedState;render();
                 var blob=new Blob(chunks,{type:'video/webm'});
-                // Upload WebM to server for ffmpeg stream-copy to MP4
-                setStatus('🎬 Converting to MP4...',false);
-                var formData=new FormData();
-                formData.append('video',blob,'replay.webm');
-                fetch('/api/export/convert-mp4',{method:'POST',body:formData})
-                    .then(function(r){
-                        if(!r.ok)throw new Error('Conversion failed ('+r.status+')');
-                        return r.blob();
-                    })
-                    .then(function(mp4Blob){
-                        var url=URL.createObjectURL(mp4Blob);var a=document.createElement('a');
-                        a.href=url;a.download='wolfsheep-replay.mp4';
-                        document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
-                        recBtn.style.display='inline-block';playAgainBtn.style.display='inline-block';
-                        resetBtn.style.display='inline-block';downloadVidBtn.style.display='inline-block';
-                        setStatus('📥 MP4 downloaded!',true);
-                    })
-                    .catch(function(e){
-                        // Fallback: download as WebM if conversion fails
-                        var url=URL.createObjectURL(blob);var a=document.createElement('a');
-                        a.href=url;a.download='wolfsheep-replay.webm';
-                        document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
-                        recBtn.style.display='inline-block';playAgainBtn.style.display='inline-block';
-                        resetBtn.style.display='inline-block';downloadVidBtn.style.display='inline-block';
-                        setStatus('⚠ MP4 conversion failed — downloaded WebM',true);
-                    });
+                if(exportFormat==='webm'){
+                    // Download WebM directly (fast)
+                    var url2=URL.createObjectURL(blob);var a2=document.createElement('a');
+                    a2.href=url2;a2.download='wolfsheep-replay.webm';
+                    document.body.appendChild(a2);a2.click();document.body.removeChild(a2);URL.revokeObjectURL(url2);
+                    recBtn.style.display='inline-block';playAgainBtn.style.display='inline-block';
+                    resetBtn.style.display='inline-block';downloadVidBtn.style.display='inline-block';
+                    setStatus('📥 WebM downloaded!',true);
+                }else{
+                    // Upload WebM to server for ffmpeg conversion to MP4 (slow)
+                    setStatus('🎬 Converting to MP4...',false);
+                    var formData=new FormData();
+                    formData.append('video',blob,'replay.webm');
+                    fetch('/api/export/convert-mp4',{method:'POST',body:formData})
+                        .then(function(r){
+                            if(!r.ok)throw new Error('Conversion failed ('+r.status+')');
+                            return r.blob();
+                        })
+                        .then(function(mp4Blob){
+                            var url=URL.createObjectURL(mp4Blob);var a=document.createElement('a');
+                            a.href=url;a.download='wolfsheep-replay.mp4';
+                            document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+                            recBtn.style.display='inline-block';playAgainBtn.style.display='inline-block';
+                            resetBtn.style.display='inline-block';downloadVidBtn.style.display='inline-block';
+                            setStatus('📥 MP4 downloaded!',true);
+                        })
+                        .catch(function(e){
+                            // Fallback: download as WebM if conversion fails
+                            var url=URL.createObjectURL(blob);var a=document.createElement('a');
+                            a.href=url;a.download='wolfsheep-replay.webm';
+                            document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+                            recBtn.style.display='inline-block';playAgainBtn.style.display='inline-block';
+                            resetBtn.style.display='inline-block';downloadVidBtn.style.display='inline-block';
+                            setStatus('⚠ MP4 conversion failed — downloaded WebM',true);
+                        });
+                }
             };
             rec.start();setStatus('🎬 Recording WebM...',false);
             var fw=state.winner,fr=state.winReason||'target',mo=[];

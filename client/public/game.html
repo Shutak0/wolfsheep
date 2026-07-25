@@ -181,6 +181,10 @@
                         <input type="range" id="export-speed" min="1" max="50" value="10" step="1" style="flex:1; accent-color:#8a2be2;">
                     </label>
                     <input type="text" id="export-phrase" placeholder="Custom phrase (optional)" style="width:100%; padding:8px 12px; border-radius:10px; background:#1a1a30; border:2px solid #2a1a5a; color:#e0e0f0; font-size:13px; font-family:inherit; outline:none;">
+                    <div style="display:flex; gap:6px; justify-content:center; align-items:center; flex-wrap:wrap;">
+                        <button type="button" id="export-fmt-webm" class="fmt-toggle-btn active" style="padding:8px 14px; border:2px solid #33ff66; border-radius:10px; background:#0d0d1a; color:#33ff66; cursor:pointer; font-size:12px; font-family:inherit; transition:all 0.2s; white-space:nowrap;">⚡ WebM (fast)</button>
+                        <button type="button" id="export-fmt-mp4" class="fmt-toggle-btn" style="padding:8px 14px; border:2px solid #2a1a5a; border-radius:10px; background:#0d0d1a; color:#94a3b8; cursor:pointer; font-size:12px; font-family:inherit; transition:all 0.2s; white-space:nowrap;">🎬 MP4 (for mobile YT)</button>
+                    </div>
                     <div style="display:flex; gap:8px; justify-content:center;">
                         <button id="export-start" class="game-btn play-again" style="color:#00ffff; border-color:#00ffff;">⚡ Export</button>
                         <button id="export-cancel" class="game-btn danger" style="font-size:12px;">Cancel</button>

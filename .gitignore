@@ -39,6 +39,9 @@ filelist.txt
 server/uploads/
 server/imgs/avatars/
 
+# Saved game replays (server/data/)
+server/data/
+
 # Runtime
 *.pid
 *.seed
