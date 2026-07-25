@@ -215,7 +215,7 @@
             if (isMoveSeries) mult = 5.0;
             else if (mi < 4) mult = 2.0;
             else mult = 1.0;
-            return Math.round(baseDelay*100 / mult);
+            return Math.round(baseDelay / mult);
         }
 
         function getSoundForMove(move, moveIndex, myIdx, fWinner) {
