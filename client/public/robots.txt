@@ -4,11 +4,17 @@ Disallow: /api/
 Disallow: /socket.io/
 Crawl-delay: 5
 
+# Рекламный бот Google AdSense (КРИТИЧНО ДЛЯ МОДЕРАЦИИ)
+User-agent: Mediapartners-Google
+Allow: /
+Disallow: /api/
+Disallow: /socket.io/
+
+# Поисковый бот Google
 User-agent: Googlebot
 Allow: /
 Disallow: /api/
 Disallow: /socket.io/
-Crawl-delay: 1
 
 User-agent: Bingbot
 Allow: /
