@@ -207,9 +207,9 @@
                 }
                 var oppMixed = (oppMoves > 0 && oppWalls > 0);
                 if (!ourMixed && !oppMixed && ourMoves >= 6 && oppMoves >= 6) { baseDelay = 100; isMoveSeries = true; }
-                else if (!ourMixed && !oppMixed && ourWalls >= 2 && oppWalls >= 2) baseDelay = 467;
+                else if (!ourMixed && !oppMixed && ourWalls >= 2 && oppWalls >= 2) baseDelay = 400;
                 else if (!ourMixed && !oppMixed && ourMoves >= 2 && oppMoves >= 2) { baseDelay = 200; isMoveSeries = true; }
-                else baseDelay = 500;
+                else baseDelay = 200;
             }
             var mult;
             if (isMoveSeries) mult = 5.0;
