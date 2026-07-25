@@ -32,5 +32,6 @@ Allow: /
 User-agent: CCBot
 Allow: /
 
+# Host and Sitemaps
 Host: https://wolfsheep.fun
 Sitemap: https://wolfsheep.fun/sitemap.xml

@@ -1,0 +1,35 @@
+{
+  "id": "79704508",
+  "createdAt": "2026-07-25T01:32:50.928Z",
+  "timeControl": "1+5",
+  "players": [
+    {
+      "name": "Player",
+      "userId": null,
+      "color": "red"
+    },
+    {
+      "name": "Player",
+      "userId": null,
+      "color": "green"
+    }
+  ],
+  "winner": 0,
+  "winReason": "surrender",
+  "winnerName": "Player",
+  "moves": [
+    {
+      "type": "move",
+      "player": 0,
+      "row": 7,
+      "col": 4
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "row": 1,
+      "col": 4
+    }
+  ],
+  "totalMoves": 2
+}

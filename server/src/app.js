@@ -7,6 +7,16 @@ const RoomManager = require('./room-manager');
 const auth = require('./auth');
 const Engine = require('./engine/quoridor-engine');
 const gameStore = require('./game-store');
+const ffmpeg = require('fluent-ffmpeg');
+const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
+const multer = require('multer');
+const fs = require('fs');
+const os = require('os');
+const pathModule = require('path');
+
+ffmpeg.setFfmpegPath(ffmpegPath);
+
+const upload = multer({ storage: multer.diskStorage({ destination: os.tmpdir() }), limits: { fileSize: 100 * 1024 * 1024 } }); // 100MB max
 
 const app = express();
 const server = http.createServer(app);
@@ -653,6 +663,51 @@ app.get('/api/games/:gameId', (req, res) => {
     const game = gameStore.loadGame(req.params.gameId);
     if (!game) return res.status(404).json({ success: false, error: 'Game not found' });
     res.json({ success: true, game });
+});
+
+// ==================== WebM → MP4 конвертация через ffmpeg ====================
+// Клиент загружает WebM, сервер делает stream-copy в MP4 (без перекодирования)
+app.post('/api/export/convert-mp4', upload.single('video'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ success: false, error: 'No video file uploaded.' });
+    }
+    const inputPath = req.file.path;
+    const outputPath = inputPath + '.mp4';
+
+    ffmpeg(inputPath)
+        .output(outputPath)
+        .outputOptions([
+            '-c:v libx264',
+            '-preset ultrafast',
+            '-crf 18',
+            '-c:a aac',
+            '-b:a 192k',
+            '-movflags +faststart'
+        ])
+        .on('stderr', (line) => { console.log('[ffmpeg] ' + line); })
+        .on('end', () => {
+            // Отправляем MP4 клиенту
+            res.setHeader('Content-Type', 'video/mp4');
+            res.setHeader('Content-Disposition', 'attachment; filename="wolfsheep-replay.mp4"');
+            res.sendFile(outputPath, (sendErr) => {
+                // Удаляем временные файлы после отправки
+                fs.unlink(inputPath, () => {});
+                fs.unlink(outputPath, () => {});
+                if (sendErr && !res.headersSent) {
+                    res.status(500).json({ success: false, error: 'Failed to send file.' });
+                }
+            });
+        })
+        .on('error', (err) => {
+            console.error('ffmpeg conversion error:', err.message);
+            // Удаляем временные файлы
+            fs.unlink(inputPath, () => {});
+            try { fs.unlink(outputPath, () => {}); } catch (e) {}
+            if (!res.headersSent) {
+                res.status(500).json({ success: false, error: 'Conversion failed: ' + err.message });
+            }
+        })
+        .run();
 });
 
 // ---- Custom 404 handler (MUST be last, after ALL routes) ----

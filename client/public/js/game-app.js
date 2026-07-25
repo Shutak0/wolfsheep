@@ -145,7 +145,7 @@
         var savedState=state;
         downloadVidBtn.style.display='none';recBtn.style.display='none';playAgainBtn.style.display='none';surrenderBtn.style.display='none';resetBtn.style.display='none';
         var randomPhrase=customPhrase||REPLAY_PHRASES[Math.floor(Math.random()*REPLAY_PHRASES.length)];
-        var vertW=600,vertH=1067,vertCanvas=document.createElement('canvas');
+        var vertW=600,vertH=1068,vertCanvas=document.createElement('canvas');
         vertCanvas.width=vertW;vertCanvas.height=vertH;
 
         function restoreUI(){
@@ -197,12 +197,32 @@
             rec.onstop=function(){
                 replayActive=false;state=savedState;render();
                 var blob=new Blob(chunks,{type:'video/webm'});
-                var url=URL.createObjectURL(blob);var a=document.createElement('a');
-                a.href=url;a.download='wolfsheep-replay.webm';
-                document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
-                recBtn.style.display='inline-block';playAgainBtn.style.display='inline-block';
-                resetBtn.style.display='inline-block';downloadVidBtn.style.display='inline-block';
-                setStatus('📥 Video downloaded!',true);
+                // Upload WebM to server for ffmpeg stream-copy to MP4
+                setStatus('🎬 Converting to MP4...',false);
+                var formData=new FormData();
+                formData.append('video',blob,'replay.webm');
+                fetch('/api/export/convert-mp4',{method:'POST',body:formData})
+                    .then(function(r){
+                        if(!r.ok)throw new Error('Conversion failed ('+r.status+')');
+                        return r.blob();
+                    })
+                    .then(function(mp4Blob){
+                        var url=URL.createObjectURL(mp4Blob);var a=document.createElement('a');
+                        a.href=url;a.download='wolfsheep-replay.mp4';
+                        document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+                        recBtn.style.display='inline-block';playAgainBtn.style.display='inline-block';
+                        resetBtn.style.display='inline-block';downloadVidBtn.style.display='inline-block';
+                        setStatus('📥 MP4 downloaded!',true);
+                    })
+                    .catch(function(e){
+                        // Fallback: download as WebM if conversion fails
+                        var url=URL.createObjectURL(blob);var a=document.createElement('a');
+                        a.href=url;a.download='wolfsheep-replay.webm';
+                        document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+                        recBtn.style.display='inline-block';playAgainBtn.style.display='inline-block';
+                        resetBtn.style.display='inline-block';downloadVidBtn.style.display='inline-block';
+                        setStatus('⚠ MP4 conversion failed — downloaded WebM',true);
+                    });
             };
             rec.start();setStatus('🎬 Recording WebM...',false);
             var fw=state.winner,fr=state.winReason||'target',mo=[];
@@ -218,42 +238,8 @@
             replayTimer=setTimeout(step,Math.max(500/speedMultiplier,50));
         }
 
-        setStatus('🎬 Exporting MP4...',false);
-        VideoExport.exportMP4({
-            canvas:canvas,
-            vertCanvas:vertCanvas,
-            moveRecord:moveRecord,
-            engine:Engine,
-            ui:UI,
-            tc:tc,
-            myIndex:myIndex,
-            finalWinner:state.winner,
-            finalReason:state.winReason||'target',
-            randomPhrase:randomPhrase,
-            customPhrase:customPhrase||null,
-            speedMultiplier:speedMultiplier||1,
-            onProgress:function(phase,detail){
-                if(phase==='render')setStatus('🎬 Rendering replay...',false);
-                else if(phase==='encode')setStatus('🎬 Encoding: ' + detail,false);
-                else if(phase==='audio')setStatus('🎬 Audio: ' + detail,false);
-                else if(phase==='error'){setStatus('❌ ' + detail, true);restoreUI();}
-            },
-            onDone:function(blob){
-                if(!blob){
-                    setStatus('⚠ MP4 export failed — trying WebM...',false);
-                    fallbackWebMExport();
-                    return;
-                }
-                state=savedState;render();
-                var url=URL.createObjectURL(blob);
-                var a=document.createElement('a');a.href=url;a.download='wolfsheep-replay.mp4';
-                document.body.appendChild(a);a.click();document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                setStatus('📥 MP4 downloaded!',true);
-                recBtn.style.display='inline-block';playAgainBtn.style.display='inline-block';
-                resetBtn.style.display='inline-block';downloadVidBtn.style.display='inline-block';
-            }
-        });
+        // Всегда экспортируем через WebM → серверный ffmpeg → MP4 (надёжнее WebCodecs)
+        fallbackWebMExport();
     }
 
     // ---- Replay ----

@@ -1,0 +1,104 @@
+{
+  "id": "c4766eea",
+  "createdAt": "2026-07-25T01:44:14.788Z",
+  "timeControl": "1+5",
+  "players": [
+    {
+      "name": "Player",
+      "userId": null,
+      "color": "red"
+    },
+    {
+      "name": "Player",
+      "userId": null,
+      "color": "green"
+    }
+  ],
+  "winner": 0,
+  "winReason": "target",
+  "winnerName": "Player",
+  "moves": [
+    {
+      "type": "move",
+      "player": 0,
+      "row": 7,
+      "col": 4
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "row": 1,
+      "col": 4
+    },
+    {
+      "type": "wall",
+      "player": 0,
+      "row": 0,
+      "col": 4,
+      "orient": "vertical"
+    },
+    {
+      "type": "wall",
+      "player": 1,
+      "row": 6,
+      "col": 2,
+      "orient": "horizontal"
+    },
+    {
+      "type": "wall",
+      "player": 0,
+      "row": 5,
+      "col": 3,
+      "orient": "horizontal"
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "row": 2,
+      "col": 4
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "row": 7,
+      "col": 5
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "row": 2,
+      "col": 5
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "row": 6,
+      "col": 5
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "row": 3,
+      "col": 5
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "row": 5,
+      "col": 5
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "row": 4,
+      "col": 5
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "row": 4,
+      "col": 5
+    }
+  ],
+  "totalMoves": 13
+}

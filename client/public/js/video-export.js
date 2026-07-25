@@ -384,6 +384,11 @@
 
         function finalizeMuxer() {
             if (!videoDone || !audioDone) return;
+            if (encodedVideoChunks.length === 0) {
+                opts.onProgress('error', 'Video encoding produced no data');
+                opts.onDone(null);
+                return;
+            }
             opts.onProgress('mux', 'Finalizing MP4...');
             for (var v = 0; v < encodedVideoChunks.length; v++) {
                 muxer.addVideoChunkRaw(
@@ -716,13 +721,14 @@
                     }
                 });
 
-                // Объединяем каналы если нужно
+                // Объединяем каналы если нужно (interleaved f32-planar = single Float32Array)
                 var channels = Math.min(numChannels, 2);
-                var bufData = [];
-                if (channels === 1) {
-                    bufData = [audioBuffer.getChannelData(0)];
-                } else {
-                    bufData = [audioBuffer.getChannelData(0), audioBuffer.getChannelData(1)];
+                var ch0 = audioBuffer.getChannelData(0);
+                var ch1 = channels > 1 ? audioBuffer.getChannelData(1) : ch0;
+                var planarData = new Float32Array(length * channels);
+                for (var s = 0; s < length; s++) {
+                    planarData[s * channels] = ch0[s];
+                    if (channels > 1) planarData[s * channels + 1] = ch1[s];
                 }
 
                 enc.configure({ codec: 'opus', sampleRate: sampleRate, numberOfChannels: channels, bitrate: 128000 });
@@ -734,7 +740,7 @@
                     numberOfFrames: length,
                     numberOfChannels: channels,
                     timestamp: 0,
-                    data: bufData
+                    data: planarData
                 });
 
                 enc.encode(audioData);
