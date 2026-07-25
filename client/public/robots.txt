@@ -4,13 +4,11 @@ Disallow: /api/
 Disallow: /socket.io/
 Crawl-delay: 5
 
-# Рекламный бот Google AdSense (КРИТИЧНО ДЛЯ МОДЕРАЦИИ)
 User-agent: Mediapartners-Google
 Allow: /
 Disallow: /api/
 Disallow: /socket.io/
 
-# Поисковый бот Google
 User-agent: Googlebot
 Allow: /
 Disallow: /api/
@@ -34,6 +32,5 @@ Allow: /
 User-agent: CCBot
 Allow: /
 
-# Host and Sitemaps
 Host: https://wolfsheep.fun
 Sitemap: https://wolfsheep.fun/sitemap.xml
