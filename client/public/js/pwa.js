@@ -111,8 +111,8 @@
     installBanner.innerHTML =
       '<div class="pwa-banner-inner">' +
         '<span class="pwa-banner-icon">🐺</span>' +
-        '<span class="pwa-banner-text">📱 Install WolfSheep app</span>' +
-        '<button class="pwa-banner-btn" id="pwa-install-yes">⚡ Install</button>' +
+        '<span class="pwa-banner-text">📱 Get WolfSheep on Google Play</span>' +
+        '<a href="https://play.google.com/store/apps/details?id=fun.wolfsheep.twa" target="_blank" rel="noopener" class="pwa-banner-btn" id="pwa-install-yes" style="text-decoration:none;">▶ Download</a>' +
         '<button class="pwa-banner-close" id="pwa-install-close" aria-label="Close">✕</button>' +
       '</div>';
 

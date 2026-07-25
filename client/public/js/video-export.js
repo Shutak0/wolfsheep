@@ -212,9 +212,9 @@
                 else baseDelay = 500;
             }
             var mult;
-            if (mi < 6) mult = 2.2;
-            else if (isMoveSeries) mult = 2.0;
-            else mult = 1.5;
+            if (isMoveSeries) mult = 5.0;
+            else if (mi < 4) mult = 2.0;
+            else mult = 1.0;
             return Math.round(baseDelay / mult);
         }
 
