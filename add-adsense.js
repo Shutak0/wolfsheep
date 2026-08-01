@@ -3,7 +3,7 @@ const path = require('path');
 
 const PUBLIC = path.join(__dirname, 'client', 'public');
 
-const ADSENSE_TAG = '\n    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4900795709684139" crossorigin="anonymous"></script>';
+const ADSENSE_TAG = '\n    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4900795709684139" data-npa="1" crossorigin="anonymous"></script>';
 
 const files = [
     'index.html', 'game.html', 'replays.html', 'players.html', 'profile.html',
