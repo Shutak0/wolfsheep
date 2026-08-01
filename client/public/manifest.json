@@ -1,7 +1,7 @@
 {
   "name": "WolfSheep — Free Online Strategy Board Game",
   "short_name": "WolfSheep",
-  "description": "Strategic duel on a 9×9 grid — chase your opponent or break through to the goal. Multiplayer, ELO rating, leaderboard. Free and no ads!",
+"description": "Strategic duel on a 9×9 grid — chase your opponent or break through to the goal. Multiplayer, ELO rating, leaderboard. Free to play!",
   "start_url": "/?utm_source=pwa",
   "scope": "/",
   "display": "standalone",

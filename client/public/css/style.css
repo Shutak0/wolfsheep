@@ -1293,3 +1293,45 @@ button, .mode-card, .tc-btn, .game-btn, .wall-mode-btn, .emote-btn {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* ========== COOKIE CONSENT BANNER ========== */
+#cookie-consent-banner {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999;
+  background: #0d0d1a; border-top: 2px solid #8a2be2;
+  box-shadow: 0 -4px 30px rgba(138, 43, 226, 0.3);
+  padding: 16px 20px; padding-bottom: calc(16px + var(--safe-bottom, 0px));
+  animation: ccSlideUp 0.5s ease;
+}
+@keyframes ccSlideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.cc-inner {
+  max-width: 900px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap;
+}
+.cc-text { flex: 1; min-width: 250px; }
+.cc-title { color: #c084fc; font-weight: 700; font-size: 16px; display: block; margin-bottom: 4px; }
+.cc-text p { color: #94a3b8; font-size: 13px; line-height: 1.5; margin: 0; }
+.cc-text a { color: #00ffff; text-decoration: underline; font-weight: 600; }
+.cc-buttons { display: flex; gap: 8px; flex-shrink: 0; }
+.cc-btn {
+  padding: 10px 24px; border-radius: 25px; border: 2px solid transparent;
+  font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit;
+  transition: all 0.2s; min-height: 44px; white-space: nowrap;
+}
+.cc-accept {
+  background: #8a2be2; color: #fff; border-color: #8a2be2;
+  box-shadow: 0 0 15px rgba(138, 43, 226, 0.4);
+}
+.cc-accept:hover { background: #9b30ff; box-shadow: 0 0 25px rgba(138, 43, 226, 0.6); }
+.cc-accept:active { transform: scale(0.96); }
+.cc-reject {
+  background: transparent; color: #94a3b8; border-color: #2a1a4a;
+}
+.cc-reject:hover { border-color: #ff3366; color: #ff3366; text-shadow: 0 0 10px #ff3366; }
+.cc-reject:active { transform: scale(0.96); }
+
+@media (max-width: 600px) {
+  .cc-inner { flex-direction: column; text-align: center; gap: 12px; }
+  .cc-buttons { width: 100%; justify-content: center; }
+  .cc-btn { flex: 1; }
+}
+
